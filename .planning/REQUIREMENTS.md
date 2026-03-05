@@ -25,24 +25,24 @@
 
 ### NEAT Algorithm
 
-- [ ] **NEAT-01**: NEAT population initialization with configurable population size
-- [ ] **NEAT-02**: Neural network forward pass computes outputs from memory map inputs
-- [ ] **NEAT-03**: Speciation groups genomes by structural compatibility distance
-- [ ] **NEAT-04**: Selection within species based on adjusted fitness
-- [ ] **NEAT-05**: Crossover produces offspring from two parent genomes
-- [ ] **NEAT-06**: Structural mutation adds new nodes and connections
-- [ ] **NEAT-07**: Weight mutation perturbs connection weights
-- [ ] **NEAT-08**: Innovation number tracking prevents structural duplication
-- [ ] **NEAT-09**: Stagnation detection removes species that stop improving
+- [x] **NEAT-01**: NEAT population initialization with configurable population size
+- [x] **NEAT-02**: Neural network forward pass computes outputs from memory map inputs
+- [x] **NEAT-03**: Speciation groups genomes by structural compatibility distance
+- [x] **NEAT-04**: Selection within species based on adjusted fitness
+- [x] **NEAT-05**: Crossover produces offspring from two parent genomes
+- [x] **NEAT-06**: Structural mutation adds new nodes and connections
+- [x] **NEAT-07**: Weight mutation perturbs connection weights
+- [x] **NEAT-08**: Innovation number tracking prevents structural duplication
+- [x] **NEAT-09**: Stagnation detection removes species that stop improving
 
 ### Fitness
 
-- [ ] **FIT-01**: Fitness rewards damage dealt to opponent
-- [ ] **FIT-02**: Fitness penalizes damage taken from opponent
-- [ ] **FIT-03**: Fitness gives large bonus for winning a round
-- [ ] **FIT-04**: Fitness gives large penalty for losing a round
-- [ ] **FIT-05**: Fitness penalizes excessive time without action (anti-stalling)
-- [ ] **FIT-06**: Fitness depends on bot's own actions, not opponent self-destruction
+- [x] **FIT-01**: Fitness rewards damage dealt to opponent
+- [x] **FIT-02**: Fitness penalizes damage taken from opponent
+- [x] **FIT-03**: Fitness gives large bonus for winning a round
+- [x] **FIT-04**: Fitness gives large penalty for losing a round
+- [x] **FIT-05**: Fitness penalizes excessive time without action (anti-stalling)
+- [x] **FIT-06**: Fitness depends on bot's own actions, not opponent self-destruction
 
 ### Training Loop
 
@@ -161,21 +161,21 @@
 | MEM-10 | Phase 1 | Complete |
 | CTRL-01 | Phase 1 | Complete |
 | CTRL-02 | Phase 1 | Complete |
-| NEAT-01 | Phase 2 | Pending |
-| NEAT-02 | Phase 2 | Pending |
-| NEAT-03 | Phase 2 | Pending |
-| NEAT-04 | Phase 2 | Pending |
-| NEAT-05 | Phase 2 | Pending |
-| NEAT-06 | Phase 2 | Pending |
-| NEAT-07 | Phase 2 | Pending |
-| NEAT-08 | Phase 2 | Pending |
-| NEAT-09 | Phase 2 | Pending |
-| FIT-01 | Phase 2 | Pending |
-| FIT-02 | Phase 2 | Pending |
-| FIT-03 | Phase 2 | Pending |
-| FIT-04 | Phase 2 | Pending |
-| FIT-05 | Phase 2 | Pending |
-| FIT-06 | Phase 2 | Pending |
+| NEAT-01 | Phase 2 | Complete |
+| NEAT-02 | Phase 2 | Complete |
+| NEAT-03 | Phase 2 | Complete |
+| NEAT-04 | Phase 2 | Complete |
+| NEAT-05 | Phase 2 | Complete |
+| NEAT-06 | Phase 2 | Complete |
+| NEAT-07 | Phase 2 | Complete |
+| NEAT-08 | Phase 2 | Complete |
+| NEAT-09 | Phase 2 | Complete |
+| FIT-01 | Phase 2 | Complete |
+| FIT-02 | Phase 2 | Complete |
+| FIT-03 | Phase 2 | Complete |
+| FIT-04 | Phase 2 | Complete |
+| FIT-05 | Phase 2 | Complete |
+| FIT-06 | Phase 2 | Complete |
 | LOOP-01 | Phase 2 | Pending |
 | LOOP-02 | Phase 2 | Pending |
 | LOOP-03 | Phase 2 | Pending |
