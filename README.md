@@ -6,7 +6,7 @@ Train a neural network to fight in Dragon Ball Z: Supersonic Warriors using neur
 
 Saiyan Trainer evolves a NEAT (NeuroEvolution of Augmenting Topologies) neural network that learns to play and win fights in Dragon Ball Z: Supersonic Warriors on Game Boy Advance. The model runs inside the BizHawk emulator via Lua scripting, reading game state directly from GBA memory addresses (character positions, health bars, attack states) and outputting controller button presses.
 
-The entire training lifecycle -- data collection, training, evaluation, model versioning, and retraining -- is orchestrated as a full MLOps pipeline using Tekton on Kubernetes. This is not just a game bot: it is a working demonstration that Tekton can orchestrate real ML workloads end-to-end.
+The entire training lifecycle (data collection, training, evaluation, model versioning, and retraining) is orchestrated as a full MLOps pipeline using Tekton on Kubernetes. This is not just a game bot: it is a working demonstration that Tekton can orchestrate real ML workloads end-to-end.
 
 ```
 +-------------------+     +-----------------------+     +----------------+
@@ -24,11 +24,11 @@ The entire training lifecycle -- data collection, training, evaluation, model ve
 
 ## Prerequisites
 
-- **Kubernetes cluster** (1.28+) -- local (minikube, kind) or cloud
+- **Kubernetes cluster** (1.28+), local (minikube, kind) or cloud
 - **kubectl** and **helm** installed and configured
 - **Docker** for building the BizHawk container image
-- **Dragon Ball Z: Supersonic Warriors (USA) GBA ROM** -- you must provide your own ROM file (not included for legal reasons)
-- **BizHawk 2.11** -- for local development only (not needed for K8s deployment)
+- **Dragon Ball Z: Supersonic Warriors (USA) GBA ROM**: you must provide your own ROM file (not included for legal reasons)
+- **BizHawk 2.11**: for local development only (not needed for K8s deployment)
 
 ## Quick Start
 
@@ -123,7 +123,7 @@ The Lua scripts handle everything: reading game memory, running the NEAT algorit
 
 | Module | Purpose |
 |--------|---------|
-| `lua/main.lua` | Entry point -- wires everything together |
+| `lua/main.lua` | Entry point, wires everything together |
 | `lua/neat/` | NEAT algorithm (population, species, genome, mutation) |
 | `lua/training/` | Training loop, fitness evaluation |
 | `lua/memory_reader.lua` | Reads game state from GBA memory addresses |
@@ -256,7 +256,7 @@ saiyan-trainer/
 
 ## Strategic Goal
 
-Beyond being a fun game bot project, Saiyan Trainer serves as a **discovery vehicle for identifying what Tekton needs to better support ML/DL workloads**. Pain points, workarounds, and custom tooling built here -- timeout configurations, long-running job patterns, model storage integration, distributed evaluation fan-out, PipelineRun chaining -- become the basis for a potential **Tekton ML toolkit or extension**.
+Beyond being a fun game bot project, Saiyan Trainer serves as a **discovery vehicle for identifying what Tekton needs to better support ML/DL workloads**. Pain points, workarounds, and custom tooling built here (timeout configurations, long-running job patterns, model storage integration, distributed evaluation fan-out, PipelineRun chaining) become the basis for a potential **Tekton ML toolkit or extension**.
 
 The goal is to package these learnings to help people rely more on Tekton for ML pipelines instead of reaching for Kubeflow or Argo Workflows.
 
@@ -267,15 +267,17 @@ Contributions are welcome. Key areas where help is needed:
 - Fighting game fitness function tuning (offense/defense balance)
 - Additional NEAT operators (crossover strategies, speciation tweaks)
 - Multi-character support (different fighters have different move sets)
-- Fight replay recording from containers (stretch goal -- see OBS-05 in planning)
+- Fight replay recording from containers (stretch goal, see OBS-05 in planning)
 
 ## Acknowledgments
 
-- [MarI/O by SethBling](https://www.youtube.com/watch?v=qv6UVOQ0F44) -- the original NEAT-in-emulator inspiration
-- [NEAT paper by Kenneth Stanley](http://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf) -- the algorithm behind it all
-- [BizHawk](https://github.com/TASEmulators/BizHawk) -- the TAS emulator community
-- [Tekton](https://tekton.dev) -- Kubernetes-native CI/CD and pipeline orchestration
+- [MarI/O by SethBling](https://www.youtube.com/watch?v=qv6UVOQ0F44): the original NEAT-in-emulator inspiration
+- [NEAT paper by Kenneth Stanley](http://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf): the algorithm behind it all
+- [BizHawk](https://github.com/TASEmulators/BizHawk): the TAS emulator community
+- [Tekton](https://tekton.dev): Kubernetes-native CI/CD and pipeline orchestration
 
 ## License
 
-This project is open source. ROM files are not included and must be provided by the user.
+MIT License. See [LICENSE](LICENSE) for details.
+
+ROM files are not included and must be provided by the user.

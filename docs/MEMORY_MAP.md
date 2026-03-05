@@ -10,11 +10,11 @@ The authoritative source for addresses in code is `lua/memory_map.lua`. This doc
 
 | Name | Address (System Bus) | Size | Type | Description | Verified | Notes |
 |------|---------------------|------|------|-------------|----------|-------|
-| `p1_health` | `0x03002700` | 2 | u16_le | P1 Health (expected range 0-100 or 0-1000) | No | Placeholder -- discover via RAM Search |
+| `p1_health` | `0x03002700` | 2 | u16_le | P1 Health (expected range 0-100 or 0-1000) | No | Placeholder, discover via RAM Search |
 | `p1_ki` | `0x0300274A` | 2 | u16_le | P1 Ki Energy | **Yes** | Seed from CodeBreaker `8300274A 6400` (100 = full) |
 | `p1_x` | `0x03002710` | 2 | s16_le | P1 X Position (signed, increases moving right) | No | Placeholder |
 | `p1_y` | `0x03002712` | 2 | s16_le | P1 Y Position (signed, changes during jumps/flight) | No | Placeholder |
-| `p1_state` | `0x03002720` | 1 | u8 | P1 Attack/Animation State (state machine byte) | No | Placeholder -- hardest to discover |
+| `p1_state` | `0x03002720` | 1 | u8 | P1 Attack/Animation State (state machine byte) | No | Placeholder, hardest to discover |
 | `p2_health` | `0x03002800` | 2 | u16_le | P2 Health | No | Placeholder |
 | `p2_ki` | `0x03002802` | 2 | u16_le | P2 Ki Energy | No | Placeholder |
 | `p2_x` | `0x03002810` | 2 | s16_le | P2 X Position | No | Placeholder |
@@ -44,16 +44,16 @@ Use BizHawk's built-in **RAM Search** tool (Tools > RAM Search). Always set the 
 1. The address `0x0300274A` is a known seed from cheat databases.
 2. Open RAM Watch, add address `0x0300274A`, set to 2-byte unsigned, System Bus.
 3. Start a fight and observe the value. Full Ki should read ~100 (0x0064).
-4. Use a special move that consumes Ki -- the value should decrease.
+4. Use a special move that consumes Ki; the value should decrease.
 5. If confirmed, the address in `memory_map.lua` is already correct.
 
 ### Finding Position (X and Y)
 
 1. Open RAM Search. Set Size = **2 Byte**, Type = **Signed** (positions can be negative).
-2. Move character **right** -- Search: **Greater Than** previous value.
-3. Move character **left** -- Search: **Less Than** previous value.
+2. Move character **right**, then search: **Greater Than** previous value.
+3. Move character **left**, then search: **Less Than** previous value.
 4. Repeat to narrow candidates for X position.
-5. For Y position: **jump or fly up** -- search for changing values. Land -- search again.
+5. For Y position: **jump or fly up** and search for changing values. Land and search again.
 6. DBZ:SW characters can fly, so Y values will change significantly.
 
 ### Finding Timer
@@ -69,9 +69,9 @@ Use BizHawk's built-in **RAM Search** tool (Tools > RAM Search). Always set the 
 This is the **hardest** address to discover.
 
 1. Open RAM Search. Set Size = **1 Byte**, Type = **Unsigned**.
-2. Stand idle -- Search: **Equal To** previous value (value stays the same while idle).
-3. Perform an attack -- Search: **Not Equal To** previous value (value changed).
-4. Return to idle -- Search: **Not Equal To** previous value again.
+2. Stand idle, then search: **Equal To** previous value (value stays the same while idle).
+3. Perform an attack, then search: **Not Equal To** previous value (value changed).
+4. Return to idle, then search: **Not Equal To** previous value again.
 5. Repeat across different attacks (punch, kick, special, block).
 6. The correct address will show distinct values for each animation state.
 
@@ -116,4 +116,4 @@ When you discover a real address using RAM Search:
 5. Update this document's Address Table with the new address and change Verified to **Yes**.
 6. Add any notes about value range, behavior, or quirks.
 
-Run `lua/memory_reader.lua` in BizHawk to verify -- verified addresses display in **green**, unverified in **yellow**.
+Run `lua/memory_reader.lua` in BizHawk to verify. Verified addresses display in **green**, unverified in **yellow**.
