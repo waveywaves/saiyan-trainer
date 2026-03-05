@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Emulation Foundation** - GBA memory map discovery, controller interface, save state setup, and local dev environment
 - [ ] **Phase 2: NEAT Training Engine** - Complete NEAT algorithm, fitness function, training loop, visualization, multi-opponent support, and combo analysis running locally in BizHawk
-- [ ] **Phase 3: Containerization** - Package BizHawk with Xvfb into a Docker image that runs NEAT training headlessly
+- [ ] **Phase 3: Containerization** - Package BizHawk with Xvfb into a Docker image that runs NEAT training headlessly, with noVNC web UI for live observation
 - [ ] **Phase 4: Tekton Pipeline and MLOps** - Full Tekton pipeline orchestration, distributed evaluation, model versioning, retraining, observability dashboards, and documentation
 
 ## Phase Details
@@ -53,17 +53,19 @@ Plans:
 - [ ] 02-03-PLAN.md -- Neural network visualization overlay, HUD, and species timeline
 
 ### Phase 3: Containerization
-**Goal**: BizHawk runs NEAT training headlessly inside a Docker container, producing genome checkpoints on the filesystem -- the bridge between local development and Kubernetes orchestration
+**Goal**: BizHawk runs NEAT training headlessly inside a Docker container, producing genome checkpoints on the filesystem. Container exposes BizHawk display via noVNC web UI so user can observe live training from a browser. The bridge between local development and Kubernetes orchestration.
 **Depends on**: Phase 2
-**Requirements**: CONT-01, CONT-02, CONT-03, CONT-04, CONT-05
+**Requirements**: CONT-01, CONT-02, CONT-03, CONT-04, CONT-05, CONT-06, CONT-07, CONT-08
 **Success Criteria** (what must be TRUE):
   1. Running the Docker container with a mounted ROM and save state directory produces genome checkpoint JSON files on the host filesystem after N generations of training
-  2. The container runs without any display -- Xvfb provides the virtual framebuffer and no X11 forwarding is needed
+  2. The container runs with Xvfb providing the virtual framebuffer -- no X11 forwarding needed
   3. Frame advance speed inside the container is validated as fast enough for practical training (documented benchmark vs local BizHawk)
-**Plans**: TBD
+  4. noVNC web UI at http://localhost:6080/vnc.html shows the live BizHawk display (game view + neural network overlay) during training
+  5. Setting ENABLE_VNC=false disables VNC/noVNC without rebuilding the container image
+**Plans**: 1 plan
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md -- Dockerfile, s6-overlay services, noVNC web UI, and speed validation
 
 ### Phase 4: Tekton Pipeline and MLOps
 **Goal**: The complete training lifecycle -- from triggering a PipelineRun to getting a versioned, evaluated genome stored in object storage with metrics visible in Grafana -- runs on Kubernetes with Tekton orchestration and full documentation
@@ -91,5 +93,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Emulation Foundation | 1/2 | In Progress|  |
 | 2. NEAT Training Engine | 0/3 | Planning complete | - |
-| 3. Containerization | 0/1 | Not started | - |
+| 3. Containerization | 0/1 | Planning complete | - |
 | 4. Tekton Pipeline and MLOps | 0/3 | Not started | - |
