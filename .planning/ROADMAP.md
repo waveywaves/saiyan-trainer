@@ -45,12 +45,12 @@ Plans:
   3. The neural network overlay on BizHawk's screen shows the evolved topology with active neurons and connection weights during gameplay
   4. Combo analysis output identifies the bot's most frequent button patterns and reports whether it learned actual fighting strategies vs random button mashing
   5. Training can be configured to use different CPU difficulty levels and opponent characters across generations
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md -- NEAT core algorithm, game inputs, and multi-component fitness function
+- [ ] 02-02-PLAN.md -- Training loop, checkpoint save/load, combo analysis, and multi-opponent support
+- [ ] 02-03-PLAN.md -- Neural network visualization overlay, HUD, and species timeline
 
 ### Phase 3: Containerization
 **Goal**: BizHawk runs NEAT training headlessly inside a Docker container, producing genome checkpoints on the filesystem -- the bridge between local development and Kubernetes orchestration
@@ -90,6 +90,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Emulation Foundation | 1/2 | In Progress|  |
-| 2. NEAT Training Engine | 0/3 | Not started | - |
+| 2. NEAT Training Engine | 0/3 | Planning complete | - |
 | 3. Containerization | 0/1 | Not started | - |
 | 4. Tekton Pipeline and MLOps | 0/3 | Not started | - |
