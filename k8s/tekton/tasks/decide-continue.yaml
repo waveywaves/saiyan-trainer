@@ -1,0 +1,61 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: decide-continue
+spec:
+  description: >-
+    Check whether the training fitness threshold has been met. If not,
+    send an HTTP POST to the Tekton EventListener to trigger a new
+    PipelineRun that resumes from the latest genome checkpoint.
+    This Task is used in the pipeline's finally block.
+  params:
+    - name: win-rate
+      type: string
+      description: "Current best fitness score from this training run"
+    - name: fitness-threshold
+      type: string
+      description: "Target fitness threshold for training completion"
+    - name: run-id
+      type: string
+      description: "Current run identifier"
+    - name: latest-genome-path
+      type: string
+      description: "S3 path to the latest stored genome checkpoint"
+  steps:
+    - name: trigger-next
+      image: curlimages/curl:latest
+      script: |
+        #!/bin/sh
+        set -euo pipefail
+
+        WIN_RATE="$(params.win-rate)"
+        THRESHOLD="$(params.fitness-threshold)"
+        RUN_ID="$(params.run-id)"
+        GENOME_PATH="$(params.latest-genome-path)"
+
+        echo "Fitness check:"
+        echo "  Current best fitness: ${WIN_RATE}"
+        echo "  Threshold:            ${THRESHOLD}"
+
+        if [ "${WIN_RATE}" -lt "${THRESHOLD}" ]; then
+          echo ""
+          echo "Threshold NOT met. Triggering continuation PipelineRun ..."
+
+          # POST to the EventListener service to create a new PipelineRun.
+          # The EventListener service name follows the pattern: el-{name}
+          curl -s -X POST \
+            http://el-training-continuation.default:8080 \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"run-id\": \"${RUN_ID}\",
+              \"resume-from\": \"${GENOME_PATH}\"
+            }"
+
+          echo ""
+          echo "Continuation PipelineRun triggered successfully."
+          echo "New run will resume from: ${GENOME_PATH}"
+        else
+          echo ""
+          echo "Fitness threshold MET. Training complete!"
+          echo "Final best fitness: ${WIN_RATE}"
+        fi

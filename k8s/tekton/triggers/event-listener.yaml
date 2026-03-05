@@ -1,0 +1,12 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: training-continuation
+spec:
+  serviceAccountName: tekton-triggers-sa
+  triggers:
+    - name: continue-training
+      bindings:
+        - ref: training-continuation-binding
+      template:
+        ref: training-continuation-template

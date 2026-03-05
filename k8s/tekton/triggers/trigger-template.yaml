@@ -1,0 +1,39 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: training-continuation-template
+spec:
+  params:
+    - name: run-id
+      description: "Training run identifier to continue"
+    - name: resume-from
+      description: "S3 path to genome checkpoint to resume from"
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: saiyan-training-
+        labels:
+          app: saiyan-trainer
+          trigger: continuation
+      spec:
+        pipelineRef:
+          name: saiyan-training-pipeline
+        params:
+          - name: run-id
+            value: $(tt.params.run-id)
+          - name: resume-from
+            value: $(tt.params.resume-from)
+        workspaces:
+          - name: shared-workspace
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 5Gi
+        # CRITICAL: disable pipeline timeout to prevent silent kills
+        # on long-running training. Tekton defaults to 1 hour.
+        timeouts:
+          pipeline: "0"

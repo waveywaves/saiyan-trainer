@@ -1,0 +1,10 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: training-continuation-binding
+spec:
+  params:
+    - name: run-id
+      value: $(body.run-id)
+    - name: resume-from
+      value: $(body.resume-from)

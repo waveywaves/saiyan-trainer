@@ -1,0 +1,44 @@
+# ServiceAccount for Tekton Triggers to create PipelineRuns
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tekton-triggers-sa
+  namespace: default
+---
+# ClusterRole with minimum permissions for PipelineRun creation
+# and read access to Triggers resources
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tekton-triggers-role
+rules:
+  # Required: create PipelineRuns from TriggerTemplate
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelineruns"]
+    verbs: ["create", "get", "list"]
+  # Required: resolve pipelineRef in TriggerTemplate
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelines"]
+    verbs: ["get", "list"]
+  # Required: Triggers controller needs to read its own resources
+  - apiGroups: ["triggers.tekton.dev"]
+    resources: ["eventlisteners", "triggertemplates", "triggerbindings"]
+    verbs: ["get", "list"]
+  # Required: EventListener creates a Kubernetes Service
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+---
+# Bind the ClusterRole to the ServiceAccount
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tekton-triggers-binding
+subjects:
+  - kind: ServiceAccount
+    name: tekton-triggers-sa
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: tekton-triggers-role
+  apiGroup: rbac.authorization.k8s.io
