@@ -1,0 +1,111 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: aggregate-fitness
+spec:
+  description: >-
+    Collect fitness scores from all parallel genome evaluations (Matrix fan-out)
+    and determine the best genome. Computes best-genome-id, best-fitness, and
+    avg-fitness across the population.
+  params:
+    - name: all-fitness-scores
+      type: array
+      description: "Array of fitness scores from Matrix fan-out results"
+    - name: all-genome-ids
+      type: array
+      description: "Array of genome IDs from Matrix fan-out results"
+  results:
+    - name: best-genome-id
+      description: "Genome ID with the highest fitness score"
+    - name: best-fitness
+      description: "Highest fitness score across all evaluated genomes"
+    - name: avg-fitness
+      description: "Average fitness score across all evaluated genomes"
+  workspaces:
+    - name: workspace
+  steps:
+    - name: aggregate
+      image: alpine:latest
+      args:
+        - --fitness-scores
+        - "$(params.all-fitness-scores[*])"
+        - --genome-ids
+        - "$(params.all-genome-ids[*])"
+      script: |
+        #!/bin/sh
+        set -euo pipefail
+
+        # Parse arguments -- fitness scores and genome IDs are passed as
+        # space-separated values via the args array
+        SCORES=""
+        IDS=""
+        MODE=""
+        for arg in "$@"; do
+          case "$arg" in
+            --fitness-scores) MODE="scores" ;;
+            --genome-ids)     MODE="ids" ;;
+            *)
+              if [ "$MODE" = "scores" ]; then
+                SCORES="${SCORES} ${arg}"
+              elif [ "$MODE" = "ids" ]; then
+                IDS="${IDS} ${arg}"
+              fi
+              ;;
+          esac
+        done
+
+        # Convert to arrays
+        set -- $SCORES
+        SCORE_ARRAY="$@"
+        SCORE_COUNT=$#
+
+        set -- $IDS
+        ID_ARRAY="$@"
+
+        echo "Aggregating fitness from ${SCORE_COUNT} genome evaluations ..."
+
+        # Find best score and compute average
+        BEST_SCORE=0
+        BEST_ID=""
+        TOTAL=0
+        COUNT=0
+
+        # Reset to iterate both arrays together
+        set -- $SCORES
+        SCORE_LIST="$@"
+        set -- $IDS
+        ID_LIST="$@"
+
+        # Use index-based iteration
+        i=1
+        for score in $SCORE_LIST; do
+          genome_id=$(echo "$ID_LIST" | cut -d' ' -f$i)
+          TOTAL=$((TOTAL + score))
+          COUNT=$((COUNT + 1))
+
+          if [ "$score" -gt "$BEST_SCORE" ]; then
+            BEST_SCORE=$score
+            BEST_ID=$genome_id
+          fi
+
+          echo "  Genome ${genome_id}: fitness=${score}"
+          i=$((i + 1))
+        done
+
+        # Compute average (integer division)
+        if [ "$COUNT" -gt 0 ]; then
+          AVG=$((TOTAL / COUNT))
+        else
+          AVG=0
+        fi
+
+        echo ""
+        echo "Results:"
+        echo "  Best genome: ${BEST_ID} (fitness: ${BEST_SCORE})"
+        echo "  Average fitness: ${AVG}"
+        echo "  Total evaluated: ${COUNT}"
+
+        # Write results
+        echo "${BEST_ID}" | tee "$(results.best-genome-id.path)"
+        echo "${BEST_SCORE}" | tee "$(results.best-fitness.path)"
+        echo "${AVG}" | tee "$(results.avg-fitness.path)"

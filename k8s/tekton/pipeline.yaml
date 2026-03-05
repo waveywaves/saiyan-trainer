@@ -6,7 +6,8 @@ spec:
   description: >-
     Core Saiyan Trainer pipeline. Runs the full training lifecycle:
     setup (optional checkpoint resume) -> train N generations ->
-    evaluate champion -> store versioned genome to SeaweedFS.
+    distributed evaluation via Matrix fan-out -> aggregate fitness ->
+    store versioned genome to SeaweedFS -> decide whether to continue.
   params:
     - name: run-id
       type: string
@@ -58,26 +59,120 @@ spec:
         - name: generations
           value: $(params.generations-per-batch)
 
+    # ================================================================
+    # DISTRIBUTED EVALUATION (Matrix fan-out)
+    #
+    # The distributed evaluation fan-out is optional. For single-pod
+    # evaluation, uncomment the evaluate-champion block below and
+    # remove the get-genome-list, distributed-eval, and
+    # aggregate-results blocks. Update store-results to reference
+    # evaluate-champion results instead of aggregate-results.
+    # ================================================================
+
     # ----------------------------------------------------------------
-    # 3. Evaluate: run automated fights with champion genome
+    # 3a. Get genome list: read trained population and output genome IDs
+    #     as an array result for Matrix fan-out
     # ----------------------------------------------------------------
-    - name: evaluate-champion
-      taskRef:
-        name: evaluate-champion
+    - name: get-genome-list
       runAfter:
         - run-training
       workspaces:
         - name: workspace
           workspace: shared-workspace
+      taskSpec:
+        workspaces:
+          - name: workspace
+        results:
+          - name: genome-ids
+            type: array
+            description: "Array of genome IDs to evaluate in parallel"
+        steps:
+          - name: list-genomes
+            image: alpine:latest
+            script: |
+              #!/bin/sh
+              set -euo pipefail
+              WS="$(workspaces.workspace.path)"
+
+              # Read genome IDs from the population directory
+              # The training step writes genomes as individual files:
+              # population/<genome-id>.json
+              GENOME_IDS="["
+              FIRST=true
+              for genome_file in "${WS}"/population/*.json; do
+                if [ -f "$genome_file" ]; then
+                  ID=$(basename "$genome_file" .json)
+                  if [ "$FIRST" = true ]; then
+                    GENOME_IDS="${GENOME_IDS}\"${ID}\""
+                    FIRST=false
+                  else
+                    GENOME_IDS="${GENOME_IDS},\"${ID}\""
+                  fi
+                fi
+              done
+              GENOME_IDS="${GENOME_IDS}]"
+
+              echo "Found genomes: ${GENOME_IDS}"
+              echo "${GENOME_IDS}" | tee "$(results.genome-ids.path)"
+
+    # ----------------------------------------------------------------
+    # 3b. Distributed eval: fan out genome evaluation across pods
+    #     Each genome-id gets its own pod via Tekton Matrix.
+    #     Default Matrix max is 256 combinations; start small (5-10).
+    # ----------------------------------------------------------------
+    - name: distributed-eval
+      taskRef:
+        name: evaluate-genome
+      matrix:
+        params:
+          - name: genome-id
+            value: $(tasks.get-genome-list.results.genome-ids[*])
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+
+    # ----------------------------------------------------------------
+    # 3c. Aggregate: collect fitness from all parallel evaluations
+    #     Uses [*] notation to gather results from Matrix TaskRuns
+    # ----------------------------------------------------------------
+    - name: aggregate-results
+      taskRef:
+        name: aggregate-fitness
+      runAfter:
+        - distributed-eval
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+      params:
+        - name: all-fitness-scores
+          value: $(tasks.distributed-eval.results.fitness-score[*])
+        - name: all-genome-ids
+          value: $(tasks.distributed-eval.results.genome-id[*])
+
+    # ----------------------------------------------------------------
+    # SINGLE-POD EVALUATION (alternative to Matrix fan-out)
+    # Uncomment this block and remove the distributed evaluation blocks
+    # above if running on a resource-constrained cluster.
+    # ----------------------------------------------------------------
+    # - name: evaluate-champion
+    #   taskRef:
+    #     name: evaluate-champion
+    #   runAfter:
+    #     - run-training
+    #   workspaces:
+    #     - name: workspace
+    #       workspace: shared-workspace
 
     # ----------------------------------------------------------------
     # 4. Store: upload genome + metadata to SeaweedFS
+    #    Reads from aggregate-results (distributed) instead of
+    #    evaluate-champion (single-pod)
     # ----------------------------------------------------------------
     - name: store-results
       taskRef:
         name: store-results
       runAfter:
-        - evaluate-champion
+        - aggregate-results
       workspaces:
         - name: workspace
           workspace: shared-workspace
@@ -87,8 +182,29 @@ spec:
         - name: generation
           value: $(tasks.run-training.results.final-generation)
         - name: fitness
-          value: $(tasks.evaluate-champion.results.best-fitness)
+          value: $(tasks.aggregate-results.results.best-fitness)
         - name: win-rate
-          value: $(tasks.evaluate-champion.results.win-rate)
+          value: $(tasks.aggregate-results.results.avg-fitness)
 
-  # finally: added by 04-02 (PipelineRun chaining)
+  # ------------------------------------------------------------------
+  # Finally: decide whether to continue training
+  # Runs regardless of task success/failure. Uses task results (not
+  # workspace files) for the values it needs.
+  # ------------------------------------------------------------------
+  finally:
+    - name: decide-continue
+      taskRef:
+        name: decide-continue
+      when:
+        - input: $(tasks.store-results.status)
+          operator: in
+          values: ["Succeeded"]
+      params:
+        - name: win-rate
+          value: $(tasks.aggregate-results.results.best-fitness)
+        - name: fitness-threshold
+          value: $(params.fitness-threshold)
+        - name: run-id
+          value: $(params.run-id)
+        - name: latest-genome-path
+          value: $(tasks.store-results.results.genome-s3-path)

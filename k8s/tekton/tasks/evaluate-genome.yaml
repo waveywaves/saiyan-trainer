@@ -1,0 +1,60 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: evaluate-genome
+spec:
+  description: >-
+    Evaluate a single genome in its own pod. This Task is the fan-out unit
+    for Tekton Matrix -- each genome-id gets its own TaskRun with its own pod.
+    The workspace is shared; each genome writes results to a unique subdirectory
+    (results/<genome-id>/) to avoid conflicts during parallel execution.
+  params:
+    - name: genome-id
+      type: string
+      description: "Unique identifier for the genome to evaluate"
+  results:
+    - name: fitness-score
+      description: "Fitness score for this genome"
+    - name: genome-id
+      description: "Echoes back the genome-id for result correlation"
+  workspaces:
+    - name: workspace
+  steps:
+    - name: evaluate
+      image: saiyan-trainer/bizhawk:latest
+      script: |
+        #!/bin/bash
+        set -euo pipefail
+
+        GENOME_ID="$(params.genome-id)"
+        WS="$(workspaces.workspace.path)"
+
+        # Start virtual framebuffer for headless BizHawk
+        export DISPLAY=:99
+        Xvfb :99 -screen 0 1024x768x24 &
+        XVFB_PID=$!
+        sleep 2
+
+        # Create unique results directory for this genome
+        mkdir -p "${WS}/results/${GENOME_ID}"
+
+        echo "Evaluating genome ${GENOME_ID} ..."
+
+        # Run BizHawk evaluation for this single genome
+        /opt/bizhawk/EmuHawkMono.sh --chromeless \
+          --lua="${WS}/lua/evaluate_single.lua" \
+          --load-state="${WS}/savestates/fight-start.state" \
+          -- "${GENOME_ID}" \
+          "${WS}/roms/rom.gba"
+
+        # Read fitness from output file written by the Lua script
+        cat "${WS}/results/${GENOME_ID}/fitness.txt" \
+          | tee "$(results.fitness-score.path)"
+
+        # Echo back the genome-id for correlation in aggregation
+        echo "${GENOME_ID}" | tee "$(results.genome-id.path)"
+
+        echo "Genome ${GENOME_ID} evaluation complete."
+
+        # Clean up Xvfb
+        kill $XVFB_PID 2>/dev/null || true
