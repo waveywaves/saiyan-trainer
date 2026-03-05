@@ -43,6 +43,7 @@ A working, public demonstration that Tekton can orchestrate real ML workloads en
 - **NEAT Precedent:** MarI/O by SethBling demonstrated NEAT in Lua on BizHawk for Super Mario World. This project adapts that approach for a fighting game, which has different challenges (opponent AI, health management, combo timing)
 - **ROM location:** `roms/Dragon Ball Z - Supersonic Warriors (USA).gba` (gitignored)
 - **Fighting game challenges vs platformers:** Inputs are reactive (opponent-dependent), state space includes two characters, fitness must account for both offense and defense
+- **Strategic goal:** Beyond being a demo, this project is a discovery vehicle for identifying what Tekton needs to better support ML/DL workloads. Pain points, workarounds, and custom tooling built here (timeout configs, long-running job patterns, model storage integration, distributed evaluation fan-out, PipelineRun chaining) become the basis for a potential Tekton ML toolkit or extension — packaging these learnings to help people rely more on Tekton for ML pipelines instead of Kubeflow/Argo
 
 ## Constraints
 

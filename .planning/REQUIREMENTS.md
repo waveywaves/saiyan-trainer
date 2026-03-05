@@ -1,7 +1,7 @@
 # Requirements: Saiyan Trainer
 
 **Defined:** 2026-03-06
-**Core Value:** A working, public demonstration that Tekton can orchestrate real ML workloads end-to-end — using a neuroevolution fighting game bot as a fun, visual example.
+**Core Value:** A working, public demonstration that Tekton can orchestrate real ML workloads end-to-end -- using a neuroevolution fighting game bot as a fun, visual example.
 
 ## v1 Requirements
 
@@ -146,81 +146,81 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MEM-01 | — | Pending |
-| MEM-02 | — | Pending |
-| MEM-03 | — | Pending |
-| MEM-04 | — | Pending |
-| MEM-05 | — | Pending |
-| MEM-06 | — | Pending |
-| MEM-07 | — | Pending |
-| MEM-08 | — | Pending |
-| MEM-09 | — | Pending |
-| MEM-10 | — | Pending |
-| CTRL-01 | — | Pending |
-| CTRL-02 | — | Pending |
-| NEAT-01 | — | Pending |
-| NEAT-02 | — | Pending |
-| NEAT-03 | — | Pending |
-| NEAT-04 | — | Pending |
-| NEAT-05 | — | Pending |
-| NEAT-06 | — | Pending |
-| NEAT-07 | — | Pending |
-| NEAT-08 | — | Pending |
-| NEAT-09 | — | Pending |
-| FIT-01 | — | Pending |
-| FIT-02 | — | Pending |
-| FIT-03 | — | Pending |
-| FIT-04 | — | Pending |
-| FIT-05 | — | Pending |
-| FIT-06 | — | Pending |
-| LOOP-01 | — | Pending |
-| LOOP-02 | — | Pending |
-| LOOP-03 | — | Pending |
-| LOOP-04 | — | Pending |
-| LOOP-05 | — | Pending |
-| LOOP-06 | — | Pending |
-| VIS-01 | — | Pending |
-| VIS-02 | — | Pending |
-| VIS-03 | — | Pending |
-| OPP-01 | — | Pending |
-| OPP-02 | — | Pending |
-| COMBO-01 | — | Pending |
-| COMBO-02 | — | Pending |
-| COMBO-03 | — | Pending |
-| CONT-01 | — | Pending |
-| CONT-02 | — | Pending |
-| CONT-03 | — | Pending |
-| CONT-04 | — | Pending |
-| CONT-05 | — | Pending |
-| TKN-01 | — | Pending |
-| TKN-02 | — | Pending |
-| TKN-03 | — | Pending |
-| TKN-04 | — | Pending |
-| TKN-05 | — | Pending |
-| TKN-06 | — | Pending |
-| TKN-07 | — | Pending |
-| RET-01 | — | Pending |
-| RET-02 | — | Pending |
-| RET-03 | — | Pending |
-| RET-04 | — | Pending |
-| DIST-01 | — | Pending |
-| DIST-02 | — | Pending |
-| DIST-03 | — | Pending |
-| OBS-01 | — | Pending |
-| OBS-02 | — | Pending |
-| OBS-03 | — | Pending |
-| OBS-04 | — | Pending |
-| OBS-05 | — | Pending |
-| OBS-06 | — | Pending |
-| DX-01 | — | Pending |
-| DX-02 | — | Pending |
-| DX-03 | — | Pending |
+| MEM-01 | Phase 1 | Pending |
+| MEM-02 | Phase 1 | Pending |
+| MEM-03 | Phase 1 | Pending |
+| MEM-04 | Phase 1 | Pending |
+| MEM-05 | Phase 1 | Pending |
+| MEM-06 | Phase 1 | Pending |
+| MEM-07 | Phase 1 | Pending |
+| MEM-08 | Phase 1 | Pending |
+| MEM-09 | Phase 1 | Pending |
+| MEM-10 | Phase 1 | Pending |
+| CTRL-01 | Phase 1 | Pending |
+| CTRL-02 | Phase 1 | Pending |
+| NEAT-01 | Phase 2 | Pending |
+| NEAT-02 | Phase 2 | Pending |
+| NEAT-03 | Phase 2 | Pending |
+| NEAT-04 | Phase 2 | Pending |
+| NEAT-05 | Phase 2 | Pending |
+| NEAT-06 | Phase 2 | Pending |
+| NEAT-07 | Phase 2 | Pending |
+| NEAT-08 | Phase 2 | Pending |
+| NEAT-09 | Phase 2 | Pending |
+| FIT-01 | Phase 2 | Pending |
+| FIT-02 | Phase 2 | Pending |
+| FIT-03 | Phase 2 | Pending |
+| FIT-04 | Phase 2 | Pending |
+| FIT-05 | Phase 2 | Pending |
+| FIT-06 | Phase 2 | Pending |
+| LOOP-01 | Phase 2 | Pending |
+| LOOP-02 | Phase 2 | Pending |
+| LOOP-03 | Phase 2 | Pending |
+| LOOP-04 | Phase 2 | Pending |
+| LOOP-05 | Phase 2 | Pending |
+| LOOP-06 | Phase 1 | Pending |
+| VIS-01 | Phase 2 | Pending |
+| VIS-02 | Phase 2 | Pending |
+| VIS-03 | Phase 2 | Pending |
+| OPP-01 | Phase 2 | Pending |
+| OPP-02 | Phase 2 | Pending |
+| COMBO-01 | Phase 2 | Pending |
+| COMBO-02 | Phase 2 | Pending |
+| COMBO-03 | Phase 2 | Pending |
+| CONT-01 | Phase 3 | Pending |
+| CONT-02 | Phase 3 | Pending |
+| CONT-03 | Phase 3 | Pending |
+| CONT-04 | Phase 3 | Pending |
+| CONT-05 | Phase 3 | Pending |
+| TKN-01 | Phase 4 | Pending |
+| TKN-02 | Phase 4 | Pending |
+| TKN-03 | Phase 4 | Pending |
+| TKN-04 | Phase 4 | Pending |
+| TKN-05 | Phase 4 | Pending |
+| TKN-06 | Phase 4 | Pending |
+| TKN-07 | Phase 4 | Pending |
+| RET-01 | Phase 4 | Pending |
+| RET-02 | Phase 4 | Pending |
+| RET-03 | Phase 4 | Pending |
+| RET-04 | Phase 4 | Pending |
+| DIST-01 | Phase 4 | Pending |
+| DIST-02 | Phase 4 | Pending |
+| DIST-03 | Phase 4 | Pending |
+| OBS-01 | Phase 4 | Pending |
+| OBS-02 | Phase 4 | Pending |
+| OBS-03 | Phase 4 | Pending |
+| OBS-04 | Phase 4 | Pending |
+| OBS-05 | Phase 4 | Pending |
+| OBS-06 | Phase 4 | Pending |
+| DX-01 | Phase 4 | Pending |
+| DX-02 | Phase 1 | Pending |
+| DX-03 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 63 total
-- Mapped to phases: 0
-- Unmapped: 63 ⚠️
+- v1 requirements: 69 total
+- Mapped to phases: 69
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-06*
-*Last updated: 2026-03-06 after initial definition*
+*Last updated: 2026-03-06 after roadmap phase mapping*
