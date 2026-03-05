@@ -1,0 +1,57 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: run-training
+spec:
+  description: >-
+    Run BizHawk NEAT training inside the container for the specified
+    number of generations. Produces champion genome and population
+    checkpoint files in the shared workspace.
+  params:
+    - name: generations
+      type: string
+      default: "50"
+      description: "Number of generations to train per batch"
+  results:
+    - name: final-generation
+      description: "The generation number reached at end of training"
+    - name: best-fitness
+      description: "Fitness score of the best genome after training"
+  workspaces:
+    - name: workspace
+  steps:
+    - name: train
+      # NOTE: This image is built in Phase 3 (containerization).
+      # If the Phase 3 container uses s6-overlay as ENTRYPOINT,
+      # you may need to override the entrypoint here. Adjust as
+      # needed based on Phase 3 container design.
+      image: saiyan-trainer/bizhawk:latest
+      script: |
+        #!/bin/bash
+        set -euo pipefail
+
+        # Start virtual framebuffer (the Phase 3 container has Xvfb
+        # installed, but since Tekton runs task steps directly rather
+        # than through s6-overlay, we start Xvfb manually here).
+        export DISPLAY=:99
+        Xvfb :99 -screen 0 1024x768x24 &
+        XVFB_PID=$!
+        sleep 2
+
+        echo "Starting NEAT training for $(params.generations) generations ..."
+
+        # Run BizHawk with the training Lua script
+        /opt/bizhawk/EmuHawkMono.sh --chromeless \
+          --lua="$(workspaces.workspace.path)/lua/train.lua" \
+          --load-state="$(workspaces.workspace.path)/savestates/fight-start.state" \
+          "$(workspaces.workspace.path)/roms/rom.gba"
+
+        # Extract results from training output files
+        echo "Training complete. Extracting results ..."
+        cat "$(workspaces.workspace.path)/output/final-generation.txt" \
+          | tee "$(results.final-generation.path)"
+        cat "$(workspaces.workspace.path)/output/best-fitness.txt" \
+          | tee "$(results.best-fitness.path)"
+
+        # Clean up Xvfb
+        kill $XVFB_PID 2>/dev/null || true

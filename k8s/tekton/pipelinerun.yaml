@@ -1,0 +1,32 @@
+# Manual PipelineRun trigger template.
+# Change the name and run-id for each new run.
+# Use `kubectl create -f` (not apply) to create a new run each time.
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: saiyan-training-run-001
+spec:
+  pipelineRef:
+    name: saiyan-training-pipeline
+  params:
+    - name: run-id
+      value: "run-001"
+    - name: generations-per-batch
+      value: "50"
+    - name: resume-from
+      value: ""
+    - name: fitness-threshold
+      value: "5000"
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi
+  # CRITICAL: disable pipeline timeout to prevent silent kills
+  # on long-running training. Tekton defaults to 1 hour.
+  timeouts:
+    pipeline: "0"

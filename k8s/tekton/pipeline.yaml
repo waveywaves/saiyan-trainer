@@ -1,0 +1,94 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: saiyan-training-pipeline
+spec:
+  description: >-
+    Core Saiyan Trainer pipeline. Runs the full training lifecycle:
+    setup (optional checkpoint resume) -> train N generations ->
+    evaluate champion -> store versioned genome to SeaweedFS.
+  params:
+    - name: run-id
+      type: string
+      description: "Unique identifier for this training run"
+    - name: generations-per-batch
+      type: string
+      default: "50"
+      description: "Number of generations to train per batch"
+    - name: resume-from
+      type: string
+      default: ""
+      description: "S3 path to genome checkpoint to resume from (empty for fresh start)"
+    - name: fitness-threshold
+      type: string
+      default: "5000"
+      description: "Target fitness score for training completion"
+  workspaces:
+    - name: shared-workspace
+  tasks:
+    # ----------------------------------------------------------------
+    # 1. Setup: prepare workspace, optionally pull checkpoint
+    # ----------------------------------------------------------------
+    - name: setup-generation
+      taskRef:
+        name: setup-generation
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+      params:
+        - name: run-id
+          value: $(params.run-id)
+        - name: resume-from
+          value: $(params.resume-from)
+
+    # ----------------------------------------------------------------
+    # 2. Train: run BizHawk NEAT for N generations
+    #    timeout "0" -- CRITICAL: prevents silent kills on long training
+    # ----------------------------------------------------------------
+    - name: run-training
+      taskRef:
+        name: run-training
+      runAfter:
+        - setup-generation
+      timeout: "0"
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+      params:
+        - name: generations
+          value: $(params.generations-per-batch)
+
+    # ----------------------------------------------------------------
+    # 3. Evaluate: run automated fights with champion genome
+    # ----------------------------------------------------------------
+    - name: evaluate-champion
+      taskRef:
+        name: evaluate-champion
+      runAfter:
+        - run-training
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+
+    # ----------------------------------------------------------------
+    # 4. Store: upload genome + metadata to SeaweedFS
+    # ----------------------------------------------------------------
+    - name: store-results
+      taskRef:
+        name: store-results
+      runAfter:
+        - evaluate-champion
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+      params:
+        - name: run-id
+          value: $(params.run-id)
+        - name: generation
+          value: $(tasks.run-training.results.final-generation)
+        - name: fitness
+          value: $(tasks.evaluate-champion.results.best-fitness)
+        - name: win-rate
+          value: $(tasks.evaluate-champion.results.win-rate)
+
+  # finally: added by 04-02 (PipelineRun chaining)

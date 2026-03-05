@@ -1,0 +1,83 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: store-results
+spec:
+  description: >-
+    Upload genome artifacts (champion, population, metadata) to SeaweedFS
+    with full version tagging. Genomes are stored at a path convention of
+    genomes/{run-id}/gen-{NNNN}/ for easy retrieval by version.
+  params:
+    - name: run-id
+      type: string
+      description: "Unique identifier for this training run"
+    - name: generation
+      type: string
+      description: "Generation number of the genome"
+    - name: fitness
+      type: string
+      description: "Fitness score of the champion genome"
+    - name: win-rate
+      type: string
+      description: "Win rate of the champion genome"
+  results:
+    - name: genome-s3-path
+      description: "S3 path to stored champion genome"
+  workspaces:
+    - name: workspace
+  steps:
+    - name: tag-and-upload
+      image: minio/mc:latest
+      script: |
+        #!/bin/bash
+        set -euo pipefail
+
+        # Configure mc alias for SeaweedFS S3 endpoint
+        mc alias set swfs http://seaweedfs-s3:8333 "$ACCESS_KEY" "$SECRET_KEY" --api S3v4
+
+        RUN_ID="$(params.run-id)"
+        GEN="$(params.generation)"
+        FITNESS="$(params.fitness)"
+        WIN_RATE="$(params.win-rate)"
+        DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+        # Zero-pad generation number to 4 digits
+        S3_PATH="genomes/${RUN_ID}/gen-$(printf '%04d' "$GEN")"
+        WS="$(workspaces.workspace.path)"
+
+        # Create metadata sidecar with full version tagging
+        cat > "${WS}/metadata.json" <<METADATA
+        {
+          "run_id": "${RUN_ID}",
+          "generation": ${GEN},
+          "fitness": ${FITNESS},
+          "win_rate": ${WIN_RATE},
+          "date": "${DATE}",
+          "opponent": "cpu-normal"
+        }
+        METADATA
+
+        # Ensure the bucket exists
+        mc mb --ignore-existing "swfs/saiyan-trainer"
+
+        # Upload genome artifacts
+        echo "Uploading genome artifacts to ${S3_PATH} ..."
+        mc cp "${WS}/champion.json"   "swfs/saiyan-trainer/${S3_PATH}/champion.json"
+        mc cp "${WS}/metadata.json"   "swfs/saiyan-trainer/${S3_PATH}/metadata.json"
+        mc cp "${WS}/population.json" "swfs/saiyan-trainer/${S3_PATH}/population.json"
+
+        # Write the champion S3 path to results
+        echo "saiyan-trainer/${S3_PATH}/champion.json" | tee "$(results.genome-s3-path.path)"
+
+        echo "Genome artifacts stored successfully at ${S3_PATH}"
+      env:
+        - name: ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: seaweedfs-creds
+              key: access-key
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: seaweedfs-creds
+              key: secret-key

@@ -1,0 +1,56 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: setup-generation
+spec:
+  description: >-
+    Prepare the workspace for training. If resume-from is provided,
+    pull the genome checkpoint from SeaweedFS so training can continue
+    from a previous run.
+  params:
+    - name: run-id
+      type: string
+      description: "Unique identifier for this training run"
+    - name: resume-from
+      type: string
+      default: ""
+      description: "S3 path to genome checkpoint to resume from (empty for fresh start)"
+  results:
+    - name: population-initialized
+      description: "'true' if population was loaded from checkpoint, 'false' otherwise"
+  workspaces:
+    - name: workspace
+  steps:
+    - name: fetch-checkpoint
+      image: minio/mc:latest
+      script: |
+        #!/bin/bash
+        set -euo pipefail
+
+        # Configure mc alias for SeaweedFS S3 endpoint
+        mc alias set swfs http://seaweedfs-s3:8333 "$ACCESS_KEY" "$SECRET_KEY" --api S3v4
+
+        RESUME="$(params.resume-from)"
+        CHECKPOINT_DIR="$(workspaces.workspace.path)/checkpoint"
+        mkdir -p "$CHECKPOINT_DIR"
+
+        if [ -n "$RESUME" ]; then
+          echo "Resuming from checkpoint: $RESUME"
+          mc cp "swfs/$RESUME" "$CHECKPOINT_DIR/"
+          echo "true" | tee "$(results.population-initialized.path)"
+          echo "Checkpoint fetched successfully."
+        else
+          echo "Fresh start -- no checkpoint to resume from."
+          echo "false" | tee "$(results.population-initialized.path)"
+        fi
+      env:
+        - name: ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: seaweedfs-creds
+              key: access-key
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: seaweedfs-creds
+              key: secret-key

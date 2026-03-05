@@ -1,0 +1,45 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: evaluate-champion
+spec:
+  description: >-
+    Load the best genome from the workspace and run automated evaluation
+    fights against the CPU. Reports fitness score and win rate.
+  results:
+    - name: best-fitness
+      description: "Fitness score of the champion genome"
+    - name: win-rate
+      description: "Win rate percentage against CPU opponent"
+  workspaces:
+    - name: workspace
+  steps:
+    - name: evaluate
+      image: saiyan-trainer/bizhawk:latest
+      script: |
+        #!/bin/bash
+        set -euo pipefail
+
+        # Start virtual framebuffer
+        export DISPLAY=:99
+        Xvfb :99 -screen 0 1024x768x24 &
+        XVFB_PID=$!
+        sleep 2
+
+        echo "Evaluating champion genome ..."
+
+        # Run BizHawk with the evaluation Lua script
+        /opt/bizhawk/EmuHawkMono.sh --chromeless \
+          --lua="$(workspaces.workspace.path)/lua/evaluate.lua" \
+          --load-state="$(workspaces.workspace.path)/savestates/fight-start.state" \
+          "$(workspaces.workspace.path)/roms/rom.gba"
+
+        # Extract evaluation results
+        echo "Evaluation complete. Extracting results ..."
+        cat "$(workspaces.workspace.path)/output/best-fitness.txt" \
+          | tee "$(results.best-fitness.path)"
+        cat "$(workspaces.workspace.path)/output/win-rate.txt" \
+          | tee "$(results.win-rate.path)"
+
+        # Clean up Xvfb
+        kill $XVFB_PID 2>/dev/null || true
