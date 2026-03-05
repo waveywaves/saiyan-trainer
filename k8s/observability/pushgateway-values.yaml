@@ -1,0 +1,18 @@
+# Helm values for prometheus-community/prometheus-pushgateway
+# Install: helm install pushgateway prometheus-community/prometheus-pushgateway -f pushgateway-values.yaml
+#
+# Pushgateway receives batch job metrics from NEAT training pods via curl.
+# Training pods push metrics (generation, fitness, species count) after each batch.
+# Prometheus scrapes the Pushgateway to collect these metrics.
+#
+# IMPORTANT: Pushgateway never forgets metrics. Always include run_id in the
+# grouping key so old runs can be distinguished from current ones.
+
+serviceMonitor:
+  enabled: true
+  namespace: default
+
+# Keep persistence disabled -- Pushgateway is a transient metrics cache.
+# If the pod restarts, training pods will re-push current metrics.
+persistentVolume:
+  enabled: false

@@ -1,0 +1,20 @@
+# Additional scrape config for Prometheus to scrape Pushgateway.
+#
+# honor_labels: true preserves the run_id and job labels pushed by training pods,
+# preventing Prometheus from overwriting them with the Pushgateway target's labels.
+#
+# Apply via helm upgrade:
+#   helm upgrade monitoring prometheus-community/kube-prometheus-stack \
+#     --set-json 'prometheus.prometheusSpec.additionalScrapeConfigs=[{"job_name":"pushgateway","honor_labels":true,"static_configs":[{"targets":["pushgateway-prometheus-pushgateway.default.svc:9091"]}]}]'
+#
+# Or reference this file in a values override:
+#   prometheus:
+#     prometheusSpec:
+#       additionalScrapeConfigs:
+#         - job_name: "pushgateway"
+#           ...
+
+- job_name: "pushgateway"
+  honor_labels: true
+  static_configs:
+    - targets: ["pushgateway-prometheus-pushgateway.default.svc:9091"]

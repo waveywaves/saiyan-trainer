@@ -6,12 +6,16 @@ spec:
   description: >-
     Run BizHawk NEAT training inside the container for the specified
     number of generations. Produces champion genome and population
-    checkpoint files in the shared workspace.
+    checkpoint files in the shared workspace. After training, pushes
+    metrics to Prometheus Pushgateway for observability.
   params:
     - name: generations
       type: string
       default: "50"
       description: "Number of generations to train per batch"
+    - name: run-id
+      type: string
+      description: "Unique identifier for this training run (used as Pushgateway grouping key)"
   results:
     - name: final-generation
       description: "The generation number reached at end of training"
@@ -55,3 +59,55 @@ spec:
 
         # Clean up Xvfb
         kill $XVFB_PID 2>/dev/null || true
+
+    # TODO (OBS-05 / stretch goal): Fight replay recording
+    # BizHawk supports AVI recording via Lua API (client.aviwrite).
+    # The training Lua script could call client.aviwrite() for the
+    # best genome's evaluation fight. The resulting AVI file would
+    # be uploaded to SeaweedFS by the store-results task.
+    # This is a stretch goal because:
+    #   1. Xvfb rendering in containers may not produce viewable AVI files
+    #   2. AVI file sizes could be large for storage
+    #   3. An alternative is to store replay save states and render locally
+    # See RESEARCH.md open question about container AVI recording reliability.
+
+    - name: push-metrics
+      image: curlimages/curl:latest
+      script: |
+        #!/bin/sh
+        set -eu
+
+        RUN_ID="$(params.run-id)"
+        WS="$(workspaces.workspace.path)"
+
+        # Read training output files
+        GENERATION=$(cat "${WS}/output/final-generation.txt" 2>/dev/null || echo "0")
+        MAX_FITNESS=$(cat "${WS}/output/best-fitness.txt" 2>/dev/null || echo "0")
+        AVG_FITNESS=$(cat "${WS}/output/avg-fitness.txt" 2>/dev/null || echo "0")
+        SPECIES_COUNT=$(cat "${WS}/output/species-count.txt" 2>/dev/null || echo "0")
+
+        echo "Pushing metrics to Pushgateway for run_id=${RUN_ID} ..."
+        echo "  generation=${GENERATION}, max_fitness=${MAX_FITNESS}"
+        echo "  avg_fitness=${AVG_FITNESS}, species_count=${SPECIES_COUNT}"
+
+        # Push to Prometheus Pushgateway.
+        # The grouping key includes run_id so old runs can be distinguished.
+        # NOTE: Pushgateway never forgets metrics -- run_id ensures stale
+        # metrics from previous runs do not pollute current dashboards.
+        cat <<EOF | curl --fail --data-binary @- \
+          "http://pushgateway-prometheus-pushgateway.default.svc:9091/metrics/job/neat-training/run_id/${RUN_ID}"
+        # HELP neat_generation Current NEAT generation number
+        # TYPE neat_generation gauge
+        neat_generation ${GENERATION}
+        # HELP neat_fitness_max Highest fitness in current generation
+        # TYPE neat_fitness_max gauge
+        neat_fitness_max ${MAX_FITNESS}
+        # HELP neat_fitness_avg Average fitness across population
+        # TYPE neat_fitness_avg gauge
+        neat_fitness_avg ${AVG_FITNESS}
+        # HELP neat_species_count Number of active species
+        # TYPE neat_species_count gauge
+        neat_species_count ${SPECIES_COUNT}
+        EOF
+
+        echo "Metrics pushed successfully."

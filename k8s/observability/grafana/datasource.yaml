@@ -1,0 +1,19 @@
+# Grafana Prometheus datasource provisioning via ConfigMap.
+# The kube-prometheus-stack Helm chart typically auto-configures this,
+# but this ConfigMap ensures the datasource exists if installed separately.
+# The grafana_datasource: "1" label triggers the k8s-sidecar to load it.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource-prometheus
+  labels:
+    grafana_datasource: "1"
+data:
+  prometheus.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://monitoring-kube-prometheus-prometheus.default.svc:9090
+        access: proxy
+        isDefault: true

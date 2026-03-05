@@ -58,6 +58,8 @@ spec:
       params:
         - name: generations
           value: $(params.generations-per-batch)
+        - name: run-id
+          value: $(params.run-id)
 
     # ================================================================
     # DISTRIBUTED EVALUATION (Matrix fan-out)

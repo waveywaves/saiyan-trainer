@@ -78,6 +78,35 @@ echo "==> Applying workspace PVC ..."
 kubectl apply -f "$SCRIPT_DIR/../storage/workspace-pvc.yaml"
 
 # ------------------------------------------------------------------
+# 8. Prometheus + Grafana (kube-prometheus-stack)
+# ------------------------------------------------------------------
+echo ""
+echo "==> Installing kube-prometheus-stack (Prometheus + Grafana) ..."
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts 2>/dev/null || true
+helm repo update
+helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+  --wait --timeout 300s
+
+# ------------------------------------------------------------------
+# 9. Prometheus Pushgateway
+# ------------------------------------------------------------------
+echo ""
+echo "==> Installing Prometheus Pushgateway ..."
+helm upgrade --install pushgateway prometheus-community/prometheus-pushgateway \
+  -f "$SCRIPT_DIR/../observability/pushgateway-values.yaml" \
+  --wait --timeout 120s
+
+# ------------------------------------------------------------------
+# 10. Grafana datasource and dashboards
+# ------------------------------------------------------------------
+echo ""
+echo "==> Applying Grafana Prometheus datasource ..."
+kubectl apply -f "$SCRIPT_DIR/../observability/grafana/datasource.yaml"
+
+echo "==> Applying Grafana dashboard ConfigMaps ..."
+kubectl apply -f "$SCRIPT_DIR/../observability/grafana/dashboard-configmaps.yaml"
+
+# ------------------------------------------------------------------
 # Summary
 # ------------------------------------------------------------------
 echo ""
@@ -91,6 +120,9 @@ echo "  - Tekton Dashboard"
 echo "  - Tekton Triggers"
 echo "  - SeaweedFS (S3-compatible storage)"
 echo "  - Workspace PVC (5Gi)"
+echo "  - Prometheus + Grafana (kube-prometheus-stack)"
+echo "  - Prometheus Pushgateway"
+echo "  - Grafana dashboards (fitness, species, evaluation)"
 echo ""
 echo "Feature flags:"
 echo "  - keep-pod-on-cancel: true"
@@ -101,6 +133,15 @@ echo "  1. Apply Tekton tasks:   kubectl apply -f k8s/tekton/tasks/"
 echo "  2. Apply pipeline:       kubectl apply -f k8s/tekton/pipeline.yaml"
 echo "  3. Trigger a run:        kubectl create -f k8s/tekton/pipelinerun.yaml"
 echo ""
-echo "Tekton Dashboard (port-forward):"
+echo "Tekton Dashboard:"
 echo "  kubectl port-forward -n tekton-pipelines svc/tekton-dashboard 9097:9097"
 echo "  Open: http://localhost:9097"
+echo ""
+echo "Grafana Dashboard:"
+echo "  kubectl port-forward svc/monitoring-grafana 3000:80"
+echo "  Open: http://localhost:3000"
+echo "  Default credentials: admin / prom-operator"
+echo ""
+echo "Prometheus:"
+echo "  kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090"
+echo "  Open: http://localhost:9090"
