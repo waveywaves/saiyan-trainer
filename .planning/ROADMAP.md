@@ -77,12 +77,12 @@ Plans:
   3. A new PipelineRun can resume training from a previously stored genome checkpoint, continuing evolution from where the last run left off
   4. Grafana dashboards show fitness curves over generations, species count and population diversity, and evaluation win rates from completed pipeline runs
   5. Multiple genomes evaluate in parallel across separate pods using Tekton's fan-out pattern, with results aggregated back into the population
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
-- [ ] 04-03: TBD
+- [ ] 04-01-PLAN.md -- Core Tekton Pipeline, Task definitions, K8s infrastructure, and manual PipelineRun trigger
+- [ ] 04-02-PLAN.md -- Distributed evaluation via Matrix fan-out and PipelineRun chaining via Tekton Triggers
+- [ ] 04-03-PLAN.md -- Observability stack (Pushgateway, Grafana dashboards, Tekton Dashboard) and README documentation
 
 ## Progress
 
@@ -94,4 +94,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Emulation Foundation | 1/2 | In Progress|  |
 | 2. NEAT Training Engine | 1/3 | In Progress | - |
 | 3. Containerization | 0/1 | Planning complete | - |
-| 4. Tekton Pipeline and MLOps | 0/3 | Not started | - |
+| 4. Tekton Pipeline and MLOps | 0/3 | Planning complete | - |
