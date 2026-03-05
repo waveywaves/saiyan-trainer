@@ -1,0 +1,79 @@
+-- savestate_helper.lua
+-- Save state management for deterministic NEAT training evaluations.
+-- Provides fight-start reset so every genome evaluation begins from
+-- an identical game state.
+--
+-- Usage:
+--   local ss = dofile("lua/savestate_helper.lua")
+--   -- First time: navigate to VS Mode fight start, then call:
+--   ss.createFightStartState()
+--   -- Before each evaluation:
+--   ss.resetFight()
+
+local SaveStateHelper = {}
+
+-- Directory where save state files are stored.
+local SAVE_STATE_DIR = "savestates/"
+
+-- File path for the fight-start save state.
+-- This state should capture the exact frame where a fight begins:
+-- both characters at full health, timer started, player has control.
+local FIGHT_START_FILE = SAVE_STATE_DIR .. "fight_start.State"
+
+--- Check whether the fight-start save state file exists.
+-- @return boolean  true if the file exists and can be opened.
+function SaveStateHelper.hasFightStartState()
+    local f = io.open(FIGHT_START_FILE, "r")
+    if f then
+        f:close()
+        return true
+    end
+    return false
+end
+
+--- Reset the fight by loading the fight-start save state.
+-- Call this before each genome evaluation to ensure deterministic starting conditions.
+-- Emulator state (RAM, registers, VRAM) is fully restored; Lua script variables
+-- are NOT affected by save state loads.
+--
+-- @return boolean  true if the state loaded successfully.
+-- @return string|nil  Error message if the state file is missing.
+function SaveStateHelper.resetFight()
+    if not SaveStateHelper.hasFightStartState() then
+        local msg = "Fight start save state not found at: " .. FIGHT_START_FILE
+        console.log(msg)
+        return false, msg
+    end
+    savestate.load(FIGHT_START_FILE, true)  -- true = suppress OSD message
+    console.log("Fight reset from save state")
+    return true
+end
+
+--- Create the fight-start save state at the current emulator frame.
+-- Instructions:
+--   1. Launch ROM in BizHawk
+--   2. Navigate to: Main Menu -> VS Mode -> Select Characters -> Start Fight
+--   3. Wait for the fight countdown to finish and control is given to the player
+--   4. Call this function (e.g., via Lua console or a trigger script)
+--
+-- The saved state captures the entire emulator state at that frame.
+function SaveStateHelper.createFightStartState()
+    savestate.save(FIGHT_START_FILE, true)  -- true = suppress OSD message
+    console.log("Fight start save state created at: " .. FIGHT_START_FILE)
+end
+
+--- Get the path to the fight-start save state file.
+-- @return string  File path.
+function SaveStateHelper.getFightStartFile()
+    return FIGHT_START_FILE
+end
+
+-- Register a callback that logs whenever any save state is loaded.
+-- Helps with debugging training loop state management.
+if event and event.onloadstate then
+    event.onloadstate(function()
+        console.log("Save state loaded -- script variables preserved, emulator state reset")
+    end)
+end
+
+return SaveStateHelper

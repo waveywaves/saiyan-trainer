@@ -1,4 +1,10 @@
-# ROMs - users must provide their own
+# ROM files - users must provide their own copy
+# Place ROM at: roms/Dragon Ball Z - Supersonic Warriors (USA).gba
+# The ROM is NOT included in this repository for legal reasons
 roms/*.gba
 roms/*.zip
 roms/*.rar
+
+# Save states - binary, machine-specific, should not be committed
+savestates/*.State
+savestates/*.state
