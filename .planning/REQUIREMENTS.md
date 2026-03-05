@@ -7,16 +7,16 @@
 
 ### Memory & Emulation
 
-- [ ] **MEM-01**: Lua script reads player 1 health from GBA memory map in real-time
-- [ ] **MEM-02**: Lua script reads player 2 health from GBA memory map in real-time
-- [ ] **MEM-03**: Lua script reads player 1 position (x, y) from GBA memory map
-- [ ] **MEM-04**: Lua script reads player 2 position (x, y) from GBA memory map
-- [ ] **MEM-05**: Lua script reads player 1 ki/energy level from GBA memory map
-- [ ] **MEM-06**: Lua script reads player 2 ki/energy level from GBA memory map
-- [ ] **MEM-07**: Lua script reads current attack/animation state for both players
-- [ ] **MEM-08**: Lua script reads round state (in-progress, round-over, match-over)
-- [ ] **MEM-09**: Lua script reads match timer value
-- [ ] **MEM-10**: All memory addresses documented in a memory map reference file
+- [x] **MEM-01**: Lua script reads player 1 health from GBA memory map in real-time
+- [x] **MEM-02**: Lua script reads player 2 health from GBA memory map in real-time
+- [x] **MEM-03**: Lua script reads player 1 position (x, y) from GBA memory map
+- [x] **MEM-04**: Lua script reads player 2 position (x, y) from GBA memory map
+- [x] **MEM-05**: Lua script reads player 1 ki/energy level from GBA memory map
+- [x] **MEM-06**: Lua script reads player 2 ki/energy level from GBA memory map
+- [x] **MEM-07**: Lua script reads current attack/animation state for both players
+- [x] **MEM-08**: Lua script reads round state (in-progress, round-over, match-over)
+- [x] **MEM-09**: Lua script reads match timer value
+- [x] **MEM-10**: All memory addresses documented in a memory map reference file
 
 ### Controller
 
@@ -149,16 +149,16 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MEM-01 | Phase 1 | Pending |
-| MEM-02 | Phase 1 | Pending |
-| MEM-03 | Phase 1 | Pending |
-| MEM-04 | Phase 1 | Pending |
-| MEM-05 | Phase 1 | Pending |
-| MEM-06 | Phase 1 | Pending |
-| MEM-07 | Phase 1 | Pending |
-| MEM-08 | Phase 1 | Pending |
-| MEM-09 | Phase 1 | Pending |
-| MEM-10 | Phase 1 | Pending |
+| MEM-01 | Phase 1 | Complete |
+| MEM-02 | Phase 1 | Complete |
+| MEM-03 | Phase 1 | Complete |
+| MEM-04 | Phase 1 | Complete |
+| MEM-05 | Phase 1 | Complete |
+| MEM-06 | Phase 1 | Complete |
+| MEM-07 | Phase 1 | Complete |
+| MEM-08 | Phase 1 | Complete |
+| MEM-09 | Phase 1 | Complete |
+| MEM-10 | Phase 1 | Complete |
 | CTRL-01 | Phase 1 | Complete |
 | CTRL-02 | Phase 1 | Complete |
 | NEAT-01 | Phase 2 | Pending |

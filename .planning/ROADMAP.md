@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Memory map config, diagnostic reader, and reference documentation
+- [x] 01-01-PLAN.md -- Memory map config, diagnostic reader, and reference documentation
 - [ ] 01-02-PLAN.md -- Controller interface, save state management, and project setup
 
 ### Phase 2: NEAT Training Engine
