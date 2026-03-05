@@ -20,8 +20,8 @@
 
 ### Controller
 
-- [ ] **CTRL-01**: Lua script translates NEAT output neurons to GBA button presses each frame
-- [ ] **CTRL-02**: Controller supports simultaneous button combinations (e.g., Down+B for special moves)
+- [x] **CTRL-01**: Lua script translates NEAT output neurons to GBA button presses each frame
+- [x] **CTRL-02**: Controller supports simultaneous button combinations (e.g., Down+B for special moves)
 
 ### NEAT Algorithm
 
@@ -51,7 +51,7 @@
 - [ ] **LOOP-03**: Genome serialization saves full population state to JSON
 - [ ] **LOOP-04**: Training can resume from a saved JSON checkpoint
 - [ ] **LOOP-05**: Best genome of each generation is preserved (elitism)
-- [ ] **LOOP-06**: Training runs locally in BizHawk without Kubernetes
+- [x] **LOOP-06**: Training runs locally in BizHawk without Kubernetes
 
 ### Visualization
 
@@ -77,6 +77,9 @@
 - [ ] **CONT-03**: Container reads ROM and save states from mounted volumes
 - [ ] **CONT-04**: Container writes genome checkpoints to filesystem
 - [ ] **CONT-05**: Frame advance speed in container is validated as acceptable for training
+- [ ] **CONT-06**: Container exposes BizHawk display via noVNC web UI accessible from a browser
+- [ ] **CONT-07**: User can observe live training (game view + neural network overlay) through the web UI
+- [ ] **CONT-08**: Visual access can be toggled via environment variable without rebuilding the container
 
 ### Tekton Pipeline
 
@@ -113,8 +116,8 @@
 ### Developer Experience
 
 - [ ] **DX-01**: README documents project setup, ROM sourcing, and local development
-- [ ] **DX-02**: NEAT training runs locally in BizHawk without Kubernetes
-- [ ] **DX-03**: ROM is gitignored with clear instructions for users to provide their own
+- [x] **DX-02**: NEAT training runs locally in BizHawk without Kubernetes
+- [x] **DX-03**: ROM is gitignored with clear instructions for users to provide their own
 
 ## v2 Requirements
 
@@ -156,8 +159,8 @@
 | MEM-08 | Phase 1 | Pending |
 | MEM-09 | Phase 1 | Pending |
 | MEM-10 | Phase 1 | Pending |
-| CTRL-01 | Phase 1 | Pending |
-| CTRL-02 | Phase 1 | Pending |
+| CTRL-01 | Phase 1 | Complete |
+| CTRL-02 | Phase 1 | Complete |
 | NEAT-01 | Phase 2 | Pending |
 | NEAT-02 | Phase 2 | Pending |
 | NEAT-03 | Phase 2 | Pending |
@@ -178,7 +181,7 @@
 | LOOP-03 | Phase 2 | Pending |
 | LOOP-04 | Phase 2 | Pending |
 | LOOP-05 | Phase 2 | Pending |
-| LOOP-06 | Phase 1 | Pending |
+| LOOP-06 | Phase 1 | Complete |
 | VIS-01 | Phase 2 | Pending |
 | VIS-02 | Phase 2 | Pending |
 | VIS-03 | Phase 2 | Pending |
@@ -192,6 +195,9 @@
 | CONT-03 | Phase 3 | Pending |
 | CONT-04 | Phase 3 | Pending |
 | CONT-05 | Phase 3 | Pending |
+| CONT-06 | Phase 3 | Pending |
+| CONT-07 | Phase 3 | Pending |
+| CONT-08 | Phase 3 | Pending |
 | TKN-01 | Phase 4 | Pending |
 | TKN-02 | Phase 4 | Pending |
 | TKN-03 | Phase 4 | Pending |
@@ -213,12 +219,12 @@
 | OBS-05 | Phase 4 | Pending |
 | OBS-06 | Phase 4 | Pending |
 | DX-01 | Phase 4 | Pending |
-| DX-02 | Phase 1 | Pending |
-| DX-03 | Phase 1 | Pending |
+| DX-02 | Phase 1 | Complete |
+| DX-03 | Phase 1 | Complete |
 
 **Coverage:**
-- v1 requirements: 69 total
-- Mapped to phases: 69
+- v1 requirements: 72 total
+- Mapped to phases: 72
 - Unmapped: 0
 
 ---
