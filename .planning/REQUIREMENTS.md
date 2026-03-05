@@ -72,14 +72,14 @@
 
 ### Containerization
 
-- [ ] **CONT-01**: Docker image packages BizHawk with Xvfb for headless operation
-- [ ] **CONT-02**: Container runs NEAT training script without display
-- [ ] **CONT-03**: Container reads ROM and save states from mounted volumes
-- [ ] **CONT-04**: Container writes genome checkpoints to filesystem
-- [ ] **CONT-05**: Frame advance speed in container is validated as acceptable for training
-- [ ] **CONT-06**: Container exposes BizHawk display via noVNC web UI accessible from a browser
-- [ ] **CONT-07**: User can observe live training (game view + neural network overlay) through the web UI
-- [ ] **CONT-08**: Visual access can be toggled via environment variable without rebuilding the container
+- [x] **CONT-01**: Docker image packages BizHawk with Xvfb for headless operation
+- [x] **CONT-02**: Container runs NEAT training script without display
+- [x] **CONT-03**: Container reads ROM and save states from mounted volumes
+- [x] **CONT-04**: Container writes genome checkpoints to filesystem
+- [x] **CONT-05**: Frame advance speed in container is validated as acceptable for training
+- [x] **CONT-06**: Container exposes BizHawk display via noVNC web UI accessible from a browser
+- [x] **CONT-07**: User can observe live training (game view + neural network overlay) through the web UI
+- [x] **CONT-08**: Visual access can be toggled via environment variable without rebuilding the container
 
 ### Tekton Pipeline
 
@@ -190,14 +190,14 @@
 | COMBO-01 | Phase 2 | Pending |
 | COMBO-02 | Phase 2 | Pending |
 | COMBO-03 | Phase 2 | Pending |
-| CONT-01 | Phase 3 | Pending |
-| CONT-02 | Phase 3 | Pending |
-| CONT-03 | Phase 3 | Pending |
-| CONT-04 | Phase 3 | Pending |
-| CONT-05 | Phase 3 | Pending |
-| CONT-06 | Phase 3 | Pending |
-| CONT-07 | Phase 3 | Pending |
-| CONT-08 | Phase 3 | Pending |
+| CONT-01 | Phase 3 | Complete |
+| CONT-02 | Phase 3 | Complete |
+| CONT-03 | Phase 3 | Complete |
+| CONT-04 | Phase 3 | Complete |
+| CONT-05 | Phase 3 | Complete |
+| CONT-06 | Phase 3 | Complete |
+| CONT-07 | Phase 3 | Complete |
+| CONT-08 | Phase 3 | Complete |
 | TKN-01 | Phase 4 | Pending |
 | TKN-02 | Phase 4 | Pending |
 | TKN-03 | Phase 4 | Pending |
