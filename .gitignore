@@ -1,0 +1,4 @@
+# ROMs - users must provide their own
+roms/*.gba
+roms/*.zip
+roms/*.rar
