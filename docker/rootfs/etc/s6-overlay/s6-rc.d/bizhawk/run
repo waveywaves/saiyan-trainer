@@ -1,0 +1,7 @@
+#!/bin/bash
+export DISPLAY=:99
+exec /opt/bizhawk/EmuHawkMono.sh \
+    --chromeless \
+    --lua="${LUA_SCRIPT:-/data/lua/main.lua}" \
+    --load-state="${SAVE_STATE:-/data/savestates/fight-start.state}" \
+    "${ROM_PATH:-/data/roms/rom.gba}"

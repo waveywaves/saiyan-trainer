@@ -1,0 +1,31 @@
+# docker-compose.yml - Local testing for Saiyan Trainer BizHawk container
+#
+# Usage:
+#   cd docker/
+#   docker compose up --build
+#
+# Then open http://localhost:6080/vnc.html to see BizHawk display.
+#
+# Before running, place your files:
+#   ../roms/rom.gba              - GBA ROM file
+#   ../savestates/fight-start.state - Save state for fight start
+#   ../lua/main.lua              - NEAT training Lua script
+
+services:
+  bizhawk:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    shm_size: 256m
+    environment:
+      - ENABLE_VNC=true
+      - LUA_SCRIPT=/data/lua/main.lua
+      - SAVE_STATE=/data/savestates/fight-start.state
+      - ROM_PATH=/data/roms/rom.gba
+    ports:
+      - "6080:6080"
+    volumes:
+      - ../roms:/data/roms:ro
+      - ../savestates:/data/savestates:ro
+      - ../lua:/data/lua:ro
+      - ../output:/data/output

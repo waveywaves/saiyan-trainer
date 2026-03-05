@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ "${ENABLE_VNC}" != "true" ]; then
+    echo "VNC disabled (ENABLE_VNC=${ENABLE_VNC})"
+    exec sleep infinity
+fi
+exec x11vnc -display :99 -forever -shared -rfbport ${VNC_PORT} -nopw -noxdamage

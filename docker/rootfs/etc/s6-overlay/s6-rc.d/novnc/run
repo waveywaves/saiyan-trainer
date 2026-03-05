@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ "${ENABLE_VNC}" != "true" ]; then
+    echo "noVNC disabled (ENABLE_VNC=${ENABLE_VNC})"
+    exec sleep infinity
+fi
+exec /usr/share/novnc/utils/novnc_proxy \
+    --vnc localhost:${VNC_PORT} \
+    --listen ${NOVNC_PORT}
