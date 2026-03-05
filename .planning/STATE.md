@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-03-05T21:30:54Z"
+status: unknown
+last_updated: "2026-03-05T21:35:17.817Z"
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** A working, public demonstration that Tekton can orchestrate real ML workloads end-to-end -- using a neuroevolution fighting game bot as a fun, visual example.
-**Current focus:** Phase 3: Containerization
+**Current focus:** Phase 4: Tekton Pipeline and MLOps
 
 ## Current Position
 
-Phase: 3 of 4 (Containerization)
-Plan: 1 of 1 in current phase
-Status: Completed 03-01-PLAN.md (awaiting human verification checkpoint)
-Last activity: 2026-03-06 -- Completed 03-01-PLAN.md
+Phase: 4 of 4 (Tekton Pipeline and MLOps)
+Plan: 2 of 3 in current phase
+Status: Executing Phase 4
+Last activity: 2026-03-06 -- Completed 04-01-PLAN.md
 
-Progress: [██████████] 100% (Phase 3 Plan 1 complete)
+Progress: [████████░░] 78% (Phase 4 Plan 1 complete)
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [██████████] 100% (Phase 3 Plan 1 complete)
 | Phase 02 P01 | ~5m | 2 tasks | 12 files |
 | Phase 02 P03 | 2m 37s | 2 tasks | 3 files |
 | Phase 03 P01 | 2m | 1 task | 24 files |
+| Phase 04 P01 | 2m 32s | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,10 @@ Recent decisions affecting current work:
 - [Phase 03]: s6-overlay v3 over supervisord for container-native process management
 - [Phase 03]: ENABLE_VNC defaults to true per user requirement for always-on web observation
 - [Phase 03]: Bash shebangs for all s6 run scripts to support env var expansion
+- [Phase 04]: Tekton v1.9.0 LTS with v1 API for all pipeline resources
+- [Phase 04]: SeaweedFS over MinIO for S3-compatible storage (Apache 2.0)
+- [Phase 04]: Genome path convention genomes/{run-id}/gen-{NNNN}/ for version retrieval
+- [Phase 04]: volumeClaimTemplate (ephemeral) + SeaweedFS (persistent) for genome storage
 
 ### Pending Todos
 
@@ -83,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 03-01-PLAN.md (Docker containerization with BizHawk, Xvfb, noVNC)
+Stopped at: Completed 04-01-PLAN.md (Core Tekton Pipeline with training, evaluation, and storage tasks)
 Resume file: None

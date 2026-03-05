@@ -80,7 +80,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Core Tekton Pipeline, Task definitions, K8s infrastructure, and manual PipelineRun trigger
+- [x] 04-01-PLAN.md -- Core Tekton Pipeline, Task definitions, K8s infrastructure, and manual PipelineRun trigger
 - [ ] 04-02-PLAN.md -- Distributed evaluation via Matrix fan-out and PipelineRun chaining via Tekton Triggers
 - [ ] 04-03-PLAN.md -- Observability stack (Pushgateway, Grafana dashboards, Tekton Dashboard) and README documentation
 
@@ -94,4 +94,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Emulation Foundation | 1/2 | In Progress|  |
 | 2. NEAT Training Engine | 2/3 | In Progress|  |
 | 3. Containerization | 1/1 | Complete | 2026-03-06 |
-| 4. Tekton Pipeline and MLOps | 0/3 | Planning complete | - |
+| 4. Tekton Pipeline and MLOps | 1/3 | In Progress | - |
