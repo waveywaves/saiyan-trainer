@@ -1,0 +1,12 @@
+# Tekton feature-flags ConfigMap patch
+# - keep-pod-on-cancel: prevents log loss on cancelled training runs
+# - coschedule: workspaces -- enables Affinity Assistant so tasks
+#   sharing a ReadWriteOnce PVC land on the same node
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: feature-flags
+  namespace: tekton-pipelines
+data:
+  keep-pod-on-cancel: "true"
+  coschedule: "workspaces"

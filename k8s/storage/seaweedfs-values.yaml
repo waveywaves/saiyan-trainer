@@ -1,0 +1,10 @@
+# SeaweedFS Helm values -- single-node development deployment
+# For production, increase replicas and add resource limits.
+master:
+  replicas: 1
+
+volume:
+  replicas: 1
+
+s3:
+  enabled: true
