@@ -29,12 +29,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A fight-start save state exists that reliably loads to an identical game state every time, providing a deterministic starting point for evaluations
   4. A memory map reference file documents every discovered address with its domain, data type, and meaning
   5. NEAT training can be started locally in BizHawk without any Kubernetes dependency, and ROM is gitignored with clear instructions for users to provide their own copy
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md -- Memory map config, diagnostic reader, and reference documentation
+- [ ] 01-02-PLAN.md -- Controller interface, save state management, and project setup
 
 ### Phase 2: NEAT Training Engine
 **Goal**: A working neuroevolution system that visibly learns to fight in DBZ Supersonic Warriors -- populations evolve, fitness improves over generations, and the bot develops observable fighting behavior beyond button mashing
@@ -90,7 +89,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Emulation Foundation | 0/3 | Not started | - |
+| 1. Emulation Foundation | 0/2 | Planning complete | - |
 | 2. NEAT Training Engine | 0/3 | Not started | - |
 | 3. Containerization | 0/1 | Not started | - |
 | 4. Tekton Pipeline and MLOps | 0/3 | Not started | - |
