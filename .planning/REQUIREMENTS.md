@@ -106,16 +106,16 @@
 
 ### Observability
 
-- [ ] **OBS-01**: Prometheus Pushgateway receives training metrics from batch jobs
-- [ ] **OBS-02**: Grafana dashboard shows fitness curves over generations
-- [ ] **OBS-03**: Grafana dashboard shows species count and population diversity
-- [ ] **OBS-04**: Grafana dashboard shows evaluation win rates
-- [ ] **OBS-05**: BizHawk can record fight replays of best genome as video
-- [ ] **OBS-06**: Tekton Dashboard installed and shows pipeline runs
+- [x] **OBS-01**: Prometheus Pushgateway receives training metrics from batch jobs
+- [x] **OBS-02**: Grafana dashboard shows fitness curves over generations
+- [x] **OBS-03**: Grafana dashboard shows species count and population diversity
+- [x] **OBS-04**: Grafana dashboard shows evaluation win rates
+- [x] **OBS-05**: BizHawk can record fight replays of best genome as video
+- [x] **OBS-06**: Tekton Dashboard installed and shows pipeline runs
 
 ### Developer Experience
 
-- [ ] **DX-01**: README documents project setup, ROM sourcing, and local development
+- [x] **DX-01**: README documents project setup, ROM sourcing, and local development
 - [x] **DX-02**: NEAT training runs locally in BizHawk without Kubernetes
 - [x] **DX-03**: ROM is gitignored with clear instructions for users to provide their own
 
@@ -212,13 +212,13 @@
 | DIST-01 | Phase 4 | Pending |
 | DIST-02 | Phase 4 | Pending |
 | DIST-03 | Phase 4 | Pending |
-| OBS-01 | Phase 4 | Pending |
-| OBS-02 | Phase 4 | Pending |
-| OBS-03 | Phase 4 | Pending |
-| OBS-04 | Phase 4 | Pending |
-| OBS-05 | Phase 4 | Pending |
-| OBS-06 | Phase 4 | Pending |
-| DX-01 | Phase 4 | Pending |
+| OBS-01 | Phase 4 | Complete |
+| OBS-02 | Phase 4 | Complete |
+| OBS-03 | Phase 4 | Complete |
+| OBS-04 | Phase 4 | Complete |
+| OBS-05 | Phase 4 | Complete |
+| OBS-06 | Phase 4 | Complete |
+| DX-01 | Phase 4 | Complete |
 | DX-02 | Phase 1 | Complete |
 | DX-03 | Phase 1 | Complete |
 
