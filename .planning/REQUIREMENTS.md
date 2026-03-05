@@ -55,9 +55,9 @@
 
 ### Visualization
 
-- [ ] **VIS-01**: Neural network overlay displays evolved topology on BizHawk screen during gameplay
-- [ ] **VIS-02**: Overlay shows which neurons are active and connection weights
-- [ ] **VIS-03**: Species timeline graph shows species emergence, growth, and extinction over generations
+- [x] **VIS-01**: Neural network overlay displays evolved topology on BizHawk screen during gameplay
+- [x] **VIS-02**: Overlay shows which neurons are active and connection weights
+- [x] **VIS-03**: Species timeline graph shows species emergence, growth, and extinction over generations
 
 ### Multi-Opponent
 
@@ -182,9 +182,9 @@
 | LOOP-04 | Phase 2 | Pending |
 | LOOP-05 | Phase 2 | Pending |
 | LOOP-06 | Phase 1 | Complete |
-| VIS-01 | Phase 2 | Pending |
-| VIS-02 | Phase 2 | Pending |
-| VIS-03 | Phase 2 | Pending |
+| VIS-01 | Phase 2 | Complete |
+| VIS-02 | Phase 2 | Complete |
+| VIS-03 | Phase 2 | Complete |
 | OPP-01 | Phase 2 | Pending |
 | OPP-02 | Phase 2 | Pending |
 | COMBO-01 | Phase 2 | Pending |

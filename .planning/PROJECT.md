@@ -58,6 +58,7 @@ A working, public demonstration that Tekton can orchestrate real ML workloads en
 |----------|-----------|---------|
 | NEAT over Deep RL | Fits Lua/emulator constraints, proven with MarI/O, evolves topology | — Pending |
 | BizHawk over mGBA | Better Lua scripting support, memory access, frame advance, TAS community | — Pending |
+| Headless + required web UI | Training runs headless but MUST expose BizHawk display via noVNC web UI — user needs to be able to see live training from a browser at any time | — Pending |
 | Memory map over pixels | Structured data is more efficient, no vision model needed | — Pending |
 | Kubernetes over OpenShift | Broader audience for open-source demo | — Pending |
 | MarI/O-style Lua NEAT | Proven approach, adapt for fighting game domain | — Pending |
