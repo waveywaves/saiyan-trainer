@@ -92,5 +92,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 04-01-PLAN.md (Core Tekton Pipeline with training, evaluation, and storage tasks)
-Resume file: None
+Stopped at: Pivoting from BizHawk to mGBA. BizHawk+Mono incompatible with Apple Silicon. Dockerfile and Lua scripts need porting.
+Resume file: .planning/phases/03/.continue-here.md

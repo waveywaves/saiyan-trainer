@@ -17,7 +17,22 @@ FROM debian:bookworm-slim
 ARG S6_OVERLAY_VERSION=3.1.6.2
 ARG BIZHAWK_VERSION=2.11
 
-# Install system dependencies
+# Install base tools needed for Mono repo setup
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates gnupg dirmngr \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add Mono project's official APT repository (stable-buster works on bookworm)
+# Debian's own mono-complete 6.8 has broken libnunit packages
+RUN gpg --homedir /tmp --no-default-keyring \
+        --keyring gnupg-ring:/usr/share/keyrings/mono-official-archive-keyring.gpg \
+        --keyserver hkp://keyserver.ubuntu.com:80 \
+        --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF \
+    && chmod a+r /usr/share/keyrings/mono-official-archive-keyring.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/mono-official-archive-keyring.gpg] https://download.mono-project.com/repo/debian stable-buster main" \
+        > /etc/apt/sources.list.d/mono-official-stable.list
+
+# Install system dependencies (mono-complete from Mono project repo)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     mono-complete \
     xvfb \
@@ -26,9 +41,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libopenal-dev \
     lua5.4 liblua5.4-dev \
     lsb-release \
-    mesa-utils libgtk2.0-0 libsdl2-2.0-0 \
+    mesa-utils libgl1-mesa-dri libegl1-mesa libgles2 libgtk2.0-0 libsdl2-2.0-0 \
     wget unzip git python3 xz-utils \
-    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Install s6-overlay for multi-process supervision

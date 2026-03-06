@@ -1,6 +1,14 @@
-#!/bin/bash
+#!/command/with-contenv bash
 export DISPLAY=:99
-exec /opt/bizhawk/EmuHawkMono.sh \
+cd /opt/bizhawk
+export LD_LIBRARY_PATH="/opt/bizhawk/dll:/opt/bizhawk:/usr/lib/x86_64-linux-gnu"
+export MONO_CRASH_NOFILE=1
+export MONO_WINFORMS_XIM_STYLE=disabled
+# Force Mesa software rendering (llvmpipe) for headless OpenGL
+export LIBGL_ALWAYS_SOFTWARE=1
+export MESA_GL_VERSION_OVERRIDE=3.3
+export GALLIUM_DRIVER=llvmpipe
+exec mono --interpreter EmuHawk.exe \
     --chromeless \
     --lua="${LUA_SCRIPT:-/data/lua/main.lua}" \
     --load-state="${SAVE_STATE:-/data/savestates/fight-start.state}" \

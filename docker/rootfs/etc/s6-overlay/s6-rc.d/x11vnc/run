@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/command/with-contenv bash
 if [ "${ENABLE_VNC}" != "true" ]; then
     echo "VNC disabled (ENABLE_VNC=${ENABLE_VNC})"
     exec sleep infinity
