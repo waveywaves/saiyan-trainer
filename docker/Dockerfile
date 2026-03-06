@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsdl2-dev \
     qtbase5-dev qtmultimedia5-dev libqt5opengl5-dev \
     liblua5.4-dev \
-    libzip-dev libpng-dev zlib1g-dev \
+    libpng-dev zlib1g-dev \
     libsqlite3-dev libelf-dev \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
@@ -36,7 +36,7 @@ RUN git clone --depth 1 --branch ${MGBA_VERSION} \
         -DBUILD_QT=ON \
         -DBUILD_SDL=OFF \
         -DUSE_SQLITE3=ON \
-        -DUSE_LIBZIP=ON \
+        -DUSE_LIBZIP=OFF \
         -DUSE_PNG=ON \
         -DUSE_LUA=ON \
     && make -j$(nproc) \
@@ -53,7 +53,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsdl2-2.0-0 \
     libqt5widgets5 libqt5multimedia5 libqt5opengl5 libqt5gui5 \
     liblua5.4-0 \
-    libzip4 libpng16-16 zlib1g \
+    libpng16-16 zlib1g \
     libsqlite3-0 libelf1 \
     xvfb \
     x11vnc \
