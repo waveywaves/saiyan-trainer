@@ -2,13 +2,13 @@
 -- Converts game state from GBA memory into the NEAT input vector.
 -- Reads game state via memory_map.lua and normalizes values.
 --
--- Usage (BizHawk):
+-- Usage (mGBA):
 --   local inputs = dofile("lua/game/inputs.lua")
 --   local vec = inputs.getGameInputs()
 
 local Inputs = {}
 
--- Constants for normalization (best guesses, may need tuning after Phase 1 RAM discovery)
+-- Constants for normalization (best guesses, may need tuning after RAM discovery)
 local MAX_HEALTH = 1000
 local MAX_KI = 100
 local SCREEN_WIDTH = 240
@@ -31,7 +31,7 @@ local INPUT_LABELS = {
 -- Appends a bias value of 1.0 as the 11th element.
 -- @return table  Array of 11 numbers (10 game state + 1 bias).
 function Inputs.getGameInputs()
-    -- Load memory map module (BizHawk dofile)
+    -- Load memory map module
     local mm = dofile("lua/memory_map.lua")
     local state = mm.readAll()
 

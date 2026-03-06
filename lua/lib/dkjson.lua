@@ -1,6 +1,6 @@
 -- dkjson.lua - Minimal JSON encoder/decoder for Lua 5.1+
 -- Based on dkjson by David Kolf (http://dkolf.de/dkjson-lua/)
--- This is a simplified, MIT-licensed reimplementation for BizHawk compatibility.
+-- This is a simplified, MIT-licensed reimplementation for emulator Lua compatibility.
 -- Supports: strings, numbers, booleans, null (nil), arrays, objects, nested structures.
 --
 -- Usage:

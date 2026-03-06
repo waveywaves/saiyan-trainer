@@ -21,7 +21,7 @@ spec:
     - name: workspace
   steps:
     - name: evaluate
-      image: saiyan-trainer/bizhawk:latest
+      image: saiyan-trainer/mgba:latest
       script: |
         #!/bin/bash
         set -euo pipefail
@@ -29,22 +29,24 @@ spec:
         GENOME_ID="$(params.genome-id)"
         WS="$(workspaces.workspace.path)"
 
-        # Start virtual framebuffer for headless BizHawk
+        # Start virtual framebuffer for headless mGBA
         export DISPLAY=:99
         Xvfb :99 -screen 0 1024x768x24 &
         XVFB_PID=$!
         sleep 2
+
+        # Force software rendering for headless OpenGL
+        export LIBGL_ALWAYS_SOFTWARE=1
+        export GALLIUM_DRIVER=llvmpipe
 
         # Create unique results directory for this genome
         mkdir -p "${WS}/results/${GENOME_ID}"
 
         echo "Evaluating genome ${GENOME_ID} ..."
 
-        # Run BizHawk evaluation for this single genome
-        /opt/bizhawk/EmuHawkMono.sh --chromeless \
-          --lua="${WS}/lua/evaluate_single.lua" \
-          --load-state="${WS}/savestates/fight-start.state" \
-          -- "${GENOME_ID}" \
+        # Run mGBA evaluation for this single genome
+        GENOME_ID="${GENOME_ID}" mgba-qt --script \
+          -s "${WS}/lua/evaluate_single.lua" \
           "${WS}/roms/rom.gba"
 
         # Read fitness from output file written by the Lua script

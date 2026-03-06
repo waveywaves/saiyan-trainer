@@ -41,39 +41,31 @@ end
 function SaveStateHelper.resetFight()
     if not SaveStateHelper.hasFightStartState() then
         local msg = "Fight start save state not found at: " .. FIGHT_START_FILE
-        console.log(msg)
+        console:log(msg)
         return false, msg
     end
-    savestate.load(FIGHT_START_FILE, true)  -- true = suppress OSD message
-    console.log("Fight reset from save state")
+    emu:loadStateFile(FIGHT_START_FILE)
+    console:log("Fight reset from save state")
     return true
 end
 
 --- Create the fight-start save state at the current emulator frame.
 -- Instructions:
---   1. Launch ROM in BizHawk
+--   1. Launch ROM in mGBA
 --   2. Navigate to: Main Menu -> VS Mode -> Select Characters -> Start Fight
 --   3. Wait for the fight countdown to finish and control is given to the player
 --   4. Call this function (e.g., via Lua console or a trigger script)
 --
 -- The saved state captures the entire emulator state at that frame.
 function SaveStateHelper.createFightStartState()
-    savestate.save(FIGHT_START_FILE, true)  -- true = suppress OSD message
-    console.log("Fight start save state created at: " .. FIGHT_START_FILE)
+    emu:saveStateFile(FIGHT_START_FILE)
+    console:log("Fight start save state created at: " .. FIGHT_START_FILE)
 end
 
 --- Get the path to the fight-start save state file.
 -- @return string  File path.
 function SaveStateHelper.getFightStartFile()
     return FIGHT_START_FILE
-end
-
--- Register a callback that logs whenever any save state is loaded.
--- Helps with debugging training loop state management.
-if event and event.onloadstate then
-    event.onloadstate(function()
-        console.log("Save state loaded -- script variables preserved, emulator state reset")
-    end)
 end
 
 return SaveStateHelper

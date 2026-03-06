@@ -5,21 +5,15 @@
 --   * This file is the ONLY place where memory addresses are defined.
 --     No other Lua file should contain hardcoded addresses.
 --   * All addresses below are PLACEHOLDERS in the 0x03000000 (IWRAM / System Bus)
---     range.  Replace them with real addresses discovered via BizHawk RAM Search.
---   * All reads use the "System Bus" domain, which matches cheat-code databases
---     and avoids the IWRAM base-offset confusion (Pitfall 1 in research).
+--     range.  Replace them with real addresses discovered via RAM Search.
+--   * mGBA reads use direct GBA memory addresses (no domain parameter needed).
 --   * The `verified` field tracks which addresses have been confirmed against
---     the running game.  Set to true after you verify each one in BizHawk.
+--     the running game.  Set to true after you verify each one.
 --   * Refer to docs/MEMORY_MAP.md for discovery instructions and notes.
 --
--- Usage (BizHawk):
+-- Usage (mGBA):
 --   local mm = dofile("lua/memory_map.lua")
 --   local hp = mm.read(mm.p1_health)
-
----------------------------------------------------------------------------
--- Domain -- always "System Bus" for GBA to match cheat DB conventions
----------------------------------------------------------------------------
-local DOMAIN = "System Bus"
 
 ---------------------------------------------------------------------------
 -- Memory Map Table
@@ -30,28 +24,28 @@ local MemoryMap = {
     p1_health = {
         addr     = 0x03002700,
         size     = 2,
-        type     = "u16_le",
+        type     = "u16",
         desc     = "P1 Health (expected range 0-100 or 0-1000)",
         verified = false,
     },
     p1_ki = {
         addr     = 0x0300274A,
         size     = 2,
-        type     = "u16_le",
+        type     = "u16",
         desc     = "P1 Ki Energy (known seed from CodeBreaker 8300274A)",
         verified = true,  -- cheat-code seed
     },
     p1_x = {
         addr     = 0x03002710,
         size     = 2,
-        type     = "s16_le",
+        type     = "s16",
         desc     = "P1 X Position (signed, increases moving right)",
         verified = false,
     },
     p1_y = {
         addr     = 0x03002712,
         size     = 2,
-        type     = "s16_le",
+        type     = "s16",
         desc     = "P1 Y Position (signed, changes during jumps/flight)",
         verified = false,
     },
@@ -67,28 +61,28 @@ local MemoryMap = {
     p2_health = {
         addr     = 0x03002800,
         size     = 2,
-        type     = "u16_le",
+        type     = "u16",
         desc     = "P2 Health",
         verified = false,
     },
     p2_ki = {
         addr     = 0x03002802,
         size     = 2,
-        type     = "u16_le",
+        type     = "u16",
         desc     = "P2 Ki Energy",
         verified = false,
     },
     p2_x = {
         addr     = 0x03002810,
         size     = 2,
-        type     = "s16_le",
+        type     = "s16",
         desc     = "P2 X Position",
         verified = false,
     },
     p2_y = {
         addr     = 0x03002812,
         size     = 2,
-        type     = "s16_le",
+        type     = "s16",
         desc     = "P2 Y Position",
         verified = false,
     },
@@ -111,37 +105,39 @@ local MemoryMap = {
     timer = {
         addr     = 0x03002830,
         size     = 2,
-        type     = "u16_le",
+        type     = "u16",
         desc     = "Match timer countdown value",
         verified = false,
     },
 }
 
 ---------------------------------------------------------------------------
--- Read helpers
+-- Read helpers (mGBA API)
 ---------------------------------------------------------------------------
 
---- Read a single memory entry using the correct BizHawk API call.
--- Dispatches to memory.read_u8 / read_u16_le / read_s16_le / read_u32_le
--- based on `entry.type`.  Always uses the System Bus domain.
+--- Read a single memory entry using the mGBA emu API.
+-- Dispatches to emu:read8 / emu:read16 / emu:read32 based on entry.type.
+-- For signed types (s16), reads unsigned then converts via two's complement.
 -- @param entry table  A MemoryMap entry with .addr and .type fields.
 -- @return number  The value at the given address.
 function MemoryMap.read(entry)
     if entry.type == "u8" then
-        return memory.read_u8(entry.addr, DOMAIN)
-    elseif entry.type == "u16_le" then
-        return memory.read_u16_le(entry.addr, DOMAIN)
-    elseif entry.type == "s16_le" then
-        return memory.read_s16_le(entry.addr, DOMAIN)
-    elseif entry.type == "u32_le" then
-        return memory.read_u32_le(entry.addr, DOMAIN)
+        return emu:read8(entry.addr)
+    elseif entry.type == "u16" then
+        return emu:read16(entry.addr)
+    elseif entry.type == "s16" then
+        local val = emu:read16(entry.addr)
+        if val >= 0x8000 then val = val - 0x10000 end
+        return val
+    elseif entry.type == "u32" then
+        return emu:read32(entry.addr)
     else
         error("MemoryMap.read: unknown type '" .. tostring(entry.type) .. "'")
     end
 end
 
 --- Read all memory map entries and return a {name = value} table.
--- Skips non-table entries (functions, the DOMAIN string, etc.).
+-- Skips non-table entries (functions, etc.).
 -- @return table  Keys are entry names, values are read integers.
 function MemoryMap.readAll()
     local state = {}

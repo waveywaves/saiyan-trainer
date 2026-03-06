@@ -1,15 +1,15 @@
 -- main.lua
 -- Saiyan Trainer - NEAT Fighting Game AI
--- Entry point script loaded by BizHawk.
+-- Entry point script loaded by mGBA.
 --
 -- Usage:
---   BizHawk: EmuHawk --lua=lua/main.lua rom.gba
---   Or: Load this script from BizHawk's Lua Console (Tools > Lua Console > Script > Open)
+--   mGBA: mgba-sdl -s lua/main.lua rom.gba
+--   Or: Load this script from mGBA's scripting window (Tools > Scripting)
 
 print("========================================")
 print("  Saiyan Trainer - NEAT Fighting Game AI")
 print("  Neuroevolution for DBZ: Supersonic Warriors")
-print("  v0.1.0 - 2026-03-06")
+print("  v0.2.0 - mGBA Edition")
 print("========================================")
 print("")
 
@@ -21,18 +21,18 @@ if not SaveState.hasFightStartState() then
     print("ERROR: Fight start save state not found!")
     print("")
     print("Before training can begin, you need to create a save state:")
-    print("  1. Launch the ROM in BizHawk")
+    print("  1. Launch the ROM in mGBA")
     print("  2. Go to VS Mode and select your characters")
     print("  3. Start a fight and wait for the countdown to finish")
     print("  4. When the player has control, save state to:")
     print("     " .. SaveState.getFightStartFile())
-    print("  5. Or run in Lua console: dofile('lua/savestate_helper.lua').createFightStartState()")
+    print("  5. Or run in scripting window: dofile('lua/savestate_helper.lua').createFightStartState()")
     print("")
     print("Waiting for save state file...")
 
     -- Wait loop: check every 60 frames (1 second) for the save state
     while not SaveState.hasFightStartState() do
-        emu.frameadvance()
+        emu:runFrame()
     end
 
     print("Save state detected! Starting training...")

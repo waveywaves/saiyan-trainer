@@ -15,7 +15,7 @@ spec:
     - name: workspace
   steps:
     - name: evaluate
-      image: saiyan-trainer/bizhawk:latest
+      image: saiyan-trainer/mgba:latest
       script: |
         #!/bin/bash
         set -euo pipefail
@@ -26,12 +26,15 @@ spec:
         XVFB_PID=$!
         sleep 2
 
+        # Force software rendering for headless OpenGL
+        export LIBGL_ALWAYS_SOFTWARE=1
+        export GALLIUM_DRIVER=llvmpipe
+
         echo "Evaluating champion genome ..."
 
-        # Run BizHawk with the evaluation Lua script
-        /opt/bizhawk/EmuHawkMono.sh --chromeless \
-          --lua="$(workspaces.workspace.path)/lua/evaluate.lua" \
-          --load-state="$(workspaces.workspace.path)/savestates/fight-start.state" \
+        # Run mGBA with the evaluation Lua script
+        mgba-qt --script \
+          -s "$(workspaces.workspace.path)/lua/evaluate.lua" \
           "$(workspaces.workspace.path)/roms/rom.gba"
 
         # Extract evaluation results

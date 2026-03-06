@@ -43,7 +43,7 @@ spec:
           value: $(params.resume-from)
 
     # ----------------------------------------------------------------
-    # 2. Train: run BizHawk NEAT for N generations
+    # 2. Train: run mGBA NEAT for N generations
     #    timeout "0" -- CRITICAL: prevents silent kills on long training
     # ----------------------------------------------------------------
     - name: run-training

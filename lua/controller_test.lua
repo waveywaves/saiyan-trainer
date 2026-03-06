@@ -1,99 +1,123 @@
 -- controller_test.lua
--- BizHawk Lua script that demonstrates controller input by executing a
+-- mGBA Lua script that demonstrates controller input by executing a
 -- predetermined sequence of moves, proving that button presses (including
 -- simultaneous combos) work correctly in DBZ: Supersonic Warriors.
 --
--- Run standalone in BizHawk:
---   EmuHawk --lua=lua/controller_test.lua "roms/Dragon Ball Z - Supersonic Warriors (USA).gba"
+-- Run standalone in mGBA:
+--   mgba-sdl -s lua/controller_test.lua rom.gba
 --
--- This script does NOT use outputsToController (that is for NEAT).
--- It directly uses joypad.set with button tables to prove hardware-level
--- input works. Tests CTRL-02 (simultaneous combos) explicitly.
+-- This script directly uses emu:setKeys() with bitmasks to prove
+-- hardware-level input works. Tests CTRL-02 (simultaneous combos) explicitly.
 
 local controller = dofile("lua/controller.lua")
 local ss = dofile("lua/savestate_helper.lua")
 
--- Each move defines: name, buttons to press, frames to hold, frames to pause after.
+-- mGBA key bitmask constants
+local KEY = {
+    A     = 0x01,
+    B     = 0x02,
+    Right = 0x10,
+    Left  = 0x20,
+    Up    = 0x40,
+    Down  = 0x80,
+    R     = 0x100,
+    L     = 0x200,
+}
+
+-- Each move defines: name, bitmask of buttons to press, frames to hold, frames to pause after.
 local MoveSequence = {
     {
         name = "Idle",
-        buttons = {},
+        bitmask = 0,
+        buttons_desc = "(none)",
         frames = 30,
         pause_after = 10,
     },
     {
         name = "Punch",
-        buttons = {A = true},
+        bitmask = KEY.A,
+        buttons_desc = "A",
         frames = 5,
         pause_after = 10,
     },
     {
         name = "Kick",
-        buttons = {B = true},
+        bitmask = KEY.B,
+        buttons_desc = "B",
         frames = 5,
         pause_after = 10,
     },
     {
         name = "Move Right",
-        buttons = {Right = true},
+        bitmask = KEY.Right,
+        buttons_desc = "Right",
         frames = 30,
         pause_after = 10,
     },
     {
         name = "Move Left",
-        buttons = {Left = true},
+        bitmask = KEY.Left,
+        buttons_desc = "Left",
         frames = 30,
         pause_after = 10,
     },
     {
         name = "Jump",
-        buttons = {Up = true},
+        bitmask = KEY.Up,
+        buttons_desc = "Up",
         frames = 10,
         pause_after = 10,
     },
     {
         name = "Crouch",
-        buttons = {Down = true},
+        bitmask = KEY.Down,
+        buttons_desc = "Down",
         frames = 10,
         pause_after = 10,
     },
     -- SIMULTANEOUS COMBO: Down + B (special move)
     {
         name = "Special Move (Down+B)",
-        buttons = {Down = true, B = true},
+        bitmask = KEY.Down | KEY.B,
+        buttons_desc = "Down, B",
         frames = 10,
         pause_after = 15,
     },
     -- SIMULTANEOUS COMBO: A + B (strong attack)
     {
         name = "Strong Attack (A+B)",
-        buttons = {A = true, B = true},
+        bitmask = KEY.A | KEY.B,
+        buttons_desc = "A, B",
         frames = 5,
         pause_after = 10,
     },
     -- SIMULTANEOUS COMBO: Right + A (dash attack)
     {
         name = "Dash Attack (Right+A)",
-        buttons = {Right = true, A = true},
+        bitmask = KEY.Right | KEY.A,
+        buttons_desc = "Right, A",
         frames = 10,
         pause_after = 10,
     },
     {
         name = "Block (L shoulder)",
-        buttons = {L = true},
+        bitmask = KEY.L,
+        buttons_desc = "L",
         frames = 20,
         pause_after = 10,
     },
     {
         name = "Ki Blast (R shoulder)",
-        buttons = {R = true},
+        bitmask = KEY.R,
+        buttons_desc = "R",
         frames = 10,
         pause_after = 10,
     },
     -- SIMULTANEOUS COMBO: Down + Right + B (3-button combo)
     {
         name = "Full Combo (Down+Right+B)",
-        buttons = {Down = true, Right = true, B = true},
+        bitmask = KEY.Down | KEY.Right | KEY.B,
+        buttons_desc = "Down, Right, B",
         frames = 10,
         pause_after = 15,
     },
@@ -104,79 +128,57 @@ local function countMoveTypes(moves)
     local single = 0
     local combo = 0
     for _, move in ipairs(moves) do
-        local buttonCount = 0
-        for _ in pairs(move.buttons) do
-            buttonCount = buttonCount + 1
+        -- Count bits set in bitmask
+        local bitmask = move.bitmask
+        local bits = 0
+        while bitmask > 0 do
+            bits = bits + (bitmask & 1)
+            bitmask = bitmask >> 1
         end
-        if buttonCount > 1 then
+        if bits > 1 then
             combo = combo + 1
-        elseif buttonCount == 1 then
+        elseif bits == 1 then
             single = single + 1
         end
-        -- buttonCount == 0 is idle, not counted as either
     end
     return single, combo
 end
 
--- Format button table as readable string (e.g., "A, Down, B").
-local function formatButtons(buttons)
-    local names = {}
-    for name, pressed in pairs(buttons) do
-        if pressed then
-            names[#names + 1] = name
-        end
-    end
-    if #names == 0 then
-        return "(none)"
-    end
-    table.sort(names)
-    return table.concat(names, ", ")
-end
-
 -- === Main Execution ===
 
-console.log("=== Saiyan Trainer Controller Test ===")
-console.log("Executing " .. #MoveSequence .. " test moves...")
+console:log("=== Saiyan Trainer Controller Test ===")
+console:log("Executing " .. #MoveSequence .. " test moves...")
 
 -- Optionally reset fight if save state exists.
 if ss.hasFightStartState() then
-    console.log("Fight start save state found -- resetting fight")
+    console:log("Fight start save state found -- resetting fight")
     ss.resetFight()
 else
-    console.log("No fight start save state -- running with current emulator state")
+    console:log("No fight start save state -- running with current emulator state")
 end
 
 -- Execute each move in sequence.
 for moveIndex, move in ipairs(MoveSequence) do
-    local buttonStr = formatButtons(move.buttons)
-    console.log(string.format("Move %d/%d: %s [%s] for %d frames",
-        moveIndex, #MoveSequence, move.name, buttonStr, move.frames))
+    console:log(string.format("Move %d/%d: %s [%s] for %d frames",
+        moveIndex, #MoveSequence, move.name, move.buttons_desc, move.frames))
 
     -- Hold buttons for the specified number of frames.
     for frame = 1, move.frames do
-        -- Display current move on screen overlay.
-        gui.text(10, 10, string.format("Move %d/%d: %s", moveIndex, #MoveSequence, move.name))
-        gui.text(10, 30, "Buttons: " .. buttonStr)
-        gui.text(10, 50, string.format("Frame: %d/%d", frame, move.frames))
-
-        joypad.set(move.buttons)
-        emu.frameadvance()
+        emu:setKeys(move.bitmask)
+        emu:runFrame()
     end
 
     -- Release all buttons for pause_after frames (neutral input between moves).
     for frame = 1, move.pause_after do
-        gui.text(10, 10, string.format("Pause after: %s", move.name))
-        gui.text(10, 30, string.format("Frame: %d/%d", frame, move.pause_after))
-
-        joypad.set({})
-        emu.frameadvance()
+        emu:setKeys(0)
+        emu:runFrame()
     end
 end
 
 -- Summary
 local singleCount, comboCount = countMoveTypes(MoveSequence)
-console.log("=== Controller Test Complete ===")
-console.log(string.format("All %d moves executed.", #MoveSequence))
-console.log(string.format("Single-button moves: %d", singleCount))
-console.log(string.format("Multi-button combos: %d", comboCount))
-console.log("Controller input system verified.")
+console:log("=== Controller Test Complete ===")
+console:log(string.format("All %d moves executed.", #MoveSequence))
+console:log(string.format("Single-button moves: %d", singleCount))
+console:log(string.format("Multi-button combos: %d", comboCount))
+console:log("Controller input system verified.")

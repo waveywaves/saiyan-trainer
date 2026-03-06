@@ -1,7 +1,7 @@
 -- utils.lua
 -- Shared utility functions for Saiyan Trainer Lua scripts.
 --
--- Usage (BizHawk):
+-- Usage:
 --   local utils = dofile("lua/utils.lua")
 
 local utils = {}

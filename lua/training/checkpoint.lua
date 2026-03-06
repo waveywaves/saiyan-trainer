@@ -13,10 +13,12 @@ local Checkpoint = {}
 local json = dofile("lua/lib/dkjson.lua")
 local Innovation = dofile("lua/neat/innovation.lua")
 
--- Stub console.log for non-BizHawk environments
+-- Log helper compatible with mGBA and standalone Lua
 local function log(msg)
-    if console and console.log then
-        console.log(msg)
+    if console and type(console) == "userdata" then
+        console:log(msg)
+    elseif console and console.log then
+        console:log(msg)
     else
         print(msg)
     end

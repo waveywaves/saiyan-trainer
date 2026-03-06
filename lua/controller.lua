@@ -1,5 +1,5 @@
 -- controller.lua
--- Translates NEAT neural network outputs to GBA button presses for BizHawk.
+-- Translates NEAT neural network outputs to GBA button presses for mGBA.
 -- Supports simultaneous button combinations for fighting game combos.
 --
 -- Usage:
@@ -23,13 +23,27 @@ local ButtonNames = {
     "Right",  -- D-pad right (move right)
 }
 
+-- mGBA C.GBA_KEY constants mapping (button name -> bitmask value)
+-- These map to the GBA key register bits.
+local KEY_MAP = {
+    A     = 0x01,
+    B     = 0x02,
+    Select= 0x04,
+    Start = 0x08,
+    Right = 0x10,
+    Left  = 0x20,
+    Up    = 0x40,
+    Down  = 0x80,
+    R     = 0x100,
+    L     = 0x200,
+}
+
 -- Number of output neurons the NEAT network needs (one per button).
 local NUM_OUTPUTS = #ButtonNames
 
 --- Convert NEAT output array to a controller button table.
 -- Each output neuron corresponds to one button. Positive values mean pressed.
--- Naturally supports simultaneous combos: if multiple outputs are positive,
--- multiple buttons are pressed on the same frame.
+-- Returns a boolean table for logging/analysis compatibility.
 --
 -- @param outputs  Array of numbers (length == NUM_OUTPUTS), from NEAT output neurons.
 -- @return table   Button names mapped to true/false (e.g., {A=true, B=false, ...}).
@@ -45,19 +59,33 @@ function Controller.outputsToController(outputs)
     return controller
 end
 
+--- Convert a boolean button table to an mGBA key bitmask.
+-- @param buttons table  Button names mapped to true/false.
+-- @return integer  Bitmask for emu:setKeys().
+function Controller.buttonsToBitmask(buttons)
+    local mask = 0
+    for name, pressed in pairs(buttons) do
+        if pressed and KEY_MAP[name] then
+            mask = mask | KEY_MAP[name]
+        end
+    end
+    return mask
+end
+
 --- Apply NEAT outputs directly to the emulator joypad.
--- Convenience wrapper: converts outputs then calls joypad.set().
+-- Converts outputs to button table, then to bitmask, then calls emu:setKeys().
 --
 -- @param outputs  Array of numbers (length == NUM_OUTPUTS).
 function Controller.applyController(outputs)
-    local controller = Controller.outputsToController(outputs)
-    joypad.set(controller)
+    local buttons = Controller.outputsToController(outputs)
+    local mask = Controller.buttonsToBitmask(buttons)
+    emu:setKeys(mask)
 end
 
 --- Release all buttons (neutral input).
 -- Used between evaluations to ensure no buttons are held.
 function Controller.clearController()
-    joypad.set({})
+    emu:setKeys(0)
 end
 
 --- Get the ordered list of button names.

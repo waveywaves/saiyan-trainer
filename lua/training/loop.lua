@@ -1,6 +1,6 @@
 -- loop.lua
 -- Main training loop that drives NEAT evolution across generations.
--- Evaluates each genome by playing fights in BizHawk, computes fitness,
+-- Evaluates each genome by playing fights in mGBA, computes fitness,
 -- saves checkpoints, logs combos, and supports multi-opponent rotation.
 --
 -- Usage:
@@ -36,7 +36,7 @@ local MemoryMap = dofile("lua/memory_map.lua")
 -- Stub console.log for safety
 local function log(msg)
     if console and console.log then
-        console.log(msg)
+        console:log(msg)
     end
     print(msg)
 end
@@ -101,7 +101,7 @@ function TrainingLoop.evaluateGenome(genome, pool)
     -- Step 1: Load save state (reset fight)
     local saveFile = getCurrentSaveStateFile()
     if saveFile then
-        savestate.load(saveFile, true)
+        emu:loadStateFile(saveFile)
     else
         SaveState.resetFight()
     end
@@ -127,7 +127,7 @@ function TrainingLoop.evaluateGenome(genome, pool)
         -- 6b: Forward pass through neural network
         local outputs = Network.evaluateNetwork(genome.network, inputs, Config)
 
-        -- 6c: Apply outputs to controller (all buttons in ONE joypad.set call)
+        -- 6c: Apply outputs to controller (all buttons in ONE setKeys call)
         Controller.applyController(outputs)
 
         -- 6d: Record buttons in combo logger
@@ -213,7 +213,7 @@ function TrainingLoop.evaluateGenome(genome, pool)
         end
 
         -- 6h-6i: Continue to next frame
-        emu.frameadvance()
+        emu:runFrame()
     end
 end
 

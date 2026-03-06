@@ -1,0 +1,9 @@
+#!/command/with-contenv bash
+export DISPLAY=:99
+# Force Mesa software rendering (llvmpipe) for headless OpenGL
+export LIBGL_ALWAYS_SOFTWARE=1
+export MESA_GL_VERSION_OVERRIDE=3.3
+export GALLIUM_DRIVER=llvmpipe
+exec mgba-qt \
+    --script "${LUA_SCRIPT:-/data/lua/main.lua}" \
+    "${ROM_PATH:-/data/roms/rom.gba}"

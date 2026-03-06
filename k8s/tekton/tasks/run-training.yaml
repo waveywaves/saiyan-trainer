@@ -4,7 +4,7 @@ metadata:
   name: run-training
 spec:
   description: >-
-    Run BizHawk NEAT training inside the container for the specified
+    Run mGBA NEAT training inside the container for the specified
     number of generations. Produces champion genome and population
     checkpoint files in the shared workspace. After training, pushes
     metrics to Prometheus Pushgateway for observability.
@@ -25,29 +25,28 @@ spec:
     - name: workspace
   steps:
     - name: train
-      # NOTE: This image is built in Phase 3 (containerization).
-      # If the Phase 3 container uses s6-overlay as ENTRYPOINT,
-      # you may need to override the entrypoint here. Adjust as
-      # needed based on Phase 3 container design.
-      image: saiyan-trainer/bizhawk:latest
+      image: saiyan-trainer/mgba:latest
       script: |
         #!/bin/bash
         set -euo pipefail
 
-        # Start virtual framebuffer (the Phase 3 container has Xvfb
-        # installed, but since Tekton runs task steps directly rather
-        # than through s6-overlay, we start Xvfb manually here).
+        # Start virtual framebuffer (the container has Xvfb installed,
+        # but since Tekton runs task steps directly rather than through
+        # s6-overlay, we start Xvfb manually here).
         export DISPLAY=:99
         Xvfb :99 -screen 0 1024x768x24 &
         XVFB_PID=$!
         sleep 2
 
+        # Force software rendering for headless OpenGL
+        export LIBGL_ALWAYS_SOFTWARE=1
+        export GALLIUM_DRIVER=llvmpipe
+
         echo "Starting NEAT training for $(params.generations) generations ..."
 
-        # Run BizHawk with the training Lua script
-        /opt/bizhawk/EmuHawkMono.sh --chromeless \
-          --lua="$(workspaces.workspace.path)/lua/train.lua" \
-          --load-state="$(workspaces.workspace.path)/savestates/fight-start.state" \
+        # Run mGBA with the training Lua script
+        mgba-qt --script \
+          -s "$(workspaces.workspace.path)/lua/train.lua" \
           "$(workspaces.workspace.path)/roms/rom.gba"
 
         # Extract results from training output files
@@ -61,7 +60,7 @@ spec:
         kill $XVFB_PID 2>/dev/null || true
 
     # TODO (OBS-05 / stretch goal): Fight replay recording
-    # BizHawk supports AVI recording via Lua API (client.aviwrite).
+    # mGBA supports save state recording for replay.
     # The training Lua script could call client.aviwrite() for the
     # best genome's evaluation fight. The resulting AVI file would
     # be uploaded to SeaweedFS by the store-results task.
