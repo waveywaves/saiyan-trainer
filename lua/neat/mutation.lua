@@ -99,7 +99,7 @@ function Mutation.linkMutate(genome, config, innovation, forceBias)
     newGene.into = neuron1
     newGene.out = neuron2
     newGene.weight = math.random() * 4 - 2
-    newGene.innovation = innovation.newInnovation()
+    newGene.innovation = innovation.getOrCreate(neuron1, neuron2)
     newGene.enabled = true
 
     genome.genes[#genome.genes + 1] = newGene
@@ -144,7 +144,7 @@ function Mutation.nodeMutate(genome, config, innovation)
     gene1.out = newNeuronId
     gene1.weight = 1.0
     gene1.enabled = true
-    gene1.innovation = innovation.newInnovation()
+    gene1.innovation = innovation.getOrCreate(gene.into, newNeuronId)
     genome.genes[#genome.genes + 1] = gene1
 
     -- Gene 2: new neuron -> original target, original weight
@@ -153,7 +153,7 @@ function Mutation.nodeMutate(genome, config, innovation)
     gene2.out = gene.out
     gene2.weight = gene.weight
     gene2.enabled = true
-    gene2.innovation = innovation.newInnovation()
+    gene2.innovation = innovation.getOrCreate(newNeuronId, gene.out)
     genome.genes[#genome.genes + 1] = gene2
 end
 

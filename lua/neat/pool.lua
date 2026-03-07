@@ -132,6 +132,10 @@ end
 -- @param config     table  The NEAT config table.
 -- @param innovation table  The innovation tracker.
 function Pool.newGeneration(pool, config, innovation)
+    -- Reset per-generation innovation tracking so identical structural
+    -- mutations within this generation receive the same innovation number
+    innovation.resetGeneration()
+
     -- Cull bottom half of each species
     SpeciesMod.cullSpecies(pool, false)
 
