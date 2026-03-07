@@ -476,37 +476,7 @@ def get_training_pods():
     except Exception:
         pass
 
-    # Also check for standalone mGBA containers (Docker, not K8s)
-    try:
-        result = subprocess.run(
-            ["docker", "ps", "--filter", "ancestor=saiyan-trainer/mgba:latest",
-             "--format", "{{.Names}}\t{{.Status}}\t{{.Ports}}"],
-            capture_output=True, text=True, timeout=5
-        )
-        if result.returncode == 0:
-            for line in result.stdout.strip().split("\n"):
-                if not line:
-                    continue
-                parts = line.split("\t")
-                name = parts[0]
-                status = parts[1] if len(parts) > 1 else ""
-                ports = parts[2] if len(parts) > 2 else ""
-                # Extract VNC port from port mapping
-                vnc_port = None
-                if "6080" in ports:
-                    for mapping in ports.split(","):
-                        mapping = mapping.strip()
-                        if "6080" in mapping and "->" in mapping:
-                            vnc_port = int(mapping.split(":")[1].split("->")[0])
-                pods.append({
-                    "name": name,
-                    "phase": "Running" if "Up" in status else status,
-                    "taskrun": "",
-                    "source": "docker",
-                    "vncPort": vnc_port,
-                })
-    except Exception:
-        pass
+    # Only Tekton TaskRun pods — no local Docker containers
 
     return pods
 
