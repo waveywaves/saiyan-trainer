@@ -92,8 +92,14 @@ function Pool.breedChild(species, pool, config, innovation)
     local child
 
     if math.random() < config.CrossoverChance and #species.genomes >= 2 then
-        local g1 = species.genomes[math.random(#species.genomes)]
-        local g2 = species.genomes[math.random(#species.genomes)]
+        local idx1 = math.random(#species.genomes)
+        local idx2 = math.random(#species.genomes)
+        -- Re-pick g2 if same as g1 (species has >= 2 genomes so this terminates)
+        while idx2 == idx1 do
+            idx2 = math.random(#species.genomes)
+        end
+        local g1 = species.genomes[idx1]
+        local g2 = species.genomes[idx2]
         child = CrossoverMod.crossover(g1, g2, config)
     else
         local g = species.genomes[math.random(#species.genomes)]

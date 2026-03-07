@@ -183,8 +183,21 @@ function MemoryMap.read(entry)
     end
 end
 
+--- Read only the 4 addresses used by training (p1_health, p2_health, p1_ki_int, p1_power_level).
+-- More efficient than readAll() which reads every address including unverified ones.
+-- @return table  Keys are entry names, values are read integers.
+function MemoryMap.readTraining()
+    return {
+        p1_health      = MemoryMap.read(MemoryMap.p1_health),
+        p2_health      = MemoryMap.read(MemoryMap.p2_health),
+        p1_ki_int      = MemoryMap.read(MemoryMap.p1_ki_int),
+        p1_power_level = MemoryMap.read(MemoryMap.p1_power_level),
+    }
+end
+
 --- Read all memory map entries and return a {name = value} table.
 -- Skips non-table entries (functions, etc.).
+-- Useful for debugging; prefer readTraining() for the hot path.
 -- @return table  Keys are entry names, values are read integers.
 function MemoryMap.readAll()
     local state = {}

@@ -35,6 +35,14 @@ local Crossover = dofile("lua/neat/crossover.lua")
 local Mutation = dofile("lua/neat/mutation.lua")
 local MemoryMap = dofile("lua/memory_map.lua")
 
+-- Safe mkdir: validate path contains only safe characters to prevent shell injection.
+local function safeMkdir(dir)
+    if dir:match("[^%w/%.%-%_]") then
+        error("safeMkdir: path contains unsafe characters: " .. dir)
+    end
+    os.execute("mkdir -p '" .. dir .. "'")
+end
+
 -- Wire up module dependencies
 Pool.setDependencies(Genome, Species, Crossover, Mutation, Network)
 Mutation.setDependencies(Network, Genome)
@@ -109,7 +117,7 @@ end
 --- INIT: create or load population.
 function TrainingLoop:tick_init()
     local cpDir = self.outputDir .. "/checkpoints"
-    os.execute("mkdir -p " .. cpDir)
+    safeMkdir(cpDir)
 
     -- Try to load existing checkpoint
     if self.checkpointFile then
