@@ -110,9 +110,12 @@ spec:
               #!/bin/bash
               set -euo pipefail
 
-              # Start Xvfb for headless rendering
-              Xvfb :99 -screen 0 640x480x24 -ac &
-              sleep 2
+              # Start Xvfb + x11vnc + noVNC for live observation
+              Xvfb :99 -screen 0 1024x768x24 -ac &
+              sleep 1
+              x11vnc -display :99 -forever -shared -rfbport 5900 -nopw -noxdamage &
+              /usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 &
+              sleep 1
 
               # Run mGBA with the batch training script
               mgba-qt \
