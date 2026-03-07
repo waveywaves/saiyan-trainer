@@ -719,6 +719,10 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
   <div class="page" id="page-live">
     <div class="page-header">
       <h2>Live Training</h2>
+      <div style="display:flex;gap:8px;">
+        <button onclick="setVncMode('single')" id="btn-single" style="padding:6px 12px;border:1px solid var(--accent);background:var(--accent);color:#000;border-radius:4px;cursor:pointer;font-size:11px;">SINGLE</button>
+        <button onclick="setVncMode('grid')" id="btn-grid" style="padding:6px 12px;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:4px;cursor:pointer;font-size:11px;">GRID VIEW</button>
+      </div>
     </div>
 
     <div id="live-pod-selector" class="pod-card-grid"></div>
@@ -737,6 +741,7 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
       <div class="vnc-frame-wrap" id="vnc-frame-wrap" style="display:none;">
         <iframe id="vnc-frame" src="" allow="autoplay"></iframe>
       </div>
+      <div id="vnc-grid" style="display:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:10px;"></div>
     </div>
   </div>
 
@@ -1010,6 +1015,16 @@ async function poll() {
 /* ---- Pod Management (VNC) ---- */
 let currentPodUrl = null;
 let currentPodName = null;
+let vncMode = 'single';
+
+function setVncMode(mode) {
+  vncMode = mode;
+  document.getElementById('btn-single').style.background = mode === 'single' ? 'var(--accent)' : 'transparent';
+  document.getElementById('btn-single').style.color = mode === 'single' ? '#000' : 'var(--accent)';
+  document.getElementById('btn-grid').style.background = mode === 'grid' ? 'var(--accent)' : 'transparent';
+  document.getElementById('btn-grid').style.color = mode === 'grid' ? '#000' : 'var(--accent)';
+  renderPodCards(lastPods);
+}
 
 function selectPod(name, source, url) {
   currentPodUrl = url;
@@ -1018,9 +1033,41 @@ function selectPod(name, source, url) {
   document.getElementById('vnc-toolbar').style.display = 'flex';
   document.getElementById('vnc-empty').style.display = 'none';
   document.getElementById('vnc-frame-wrap').style.display = 'block';
+  document.getElementById('vnc-grid').style.display = 'none';
   document.getElementById('vnc-frame').src = url;
-  // Re-render pod cards to highlight selection
+  vncMode = 'single';
+  document.getElementById('btn-single').style.background = 'var(--accent)';
+  document.getElementById('btn-single').style.color = '#000';
+  document.getElementById('btn-grid').style.background = 'transparent';
+  document.getElementById('btn-grid').style.color = 'var(--accent)';
   renderPodCards(lastPods);
+}
+
+function renderGridView(pods) {
+  const grid = document.getElementById('vnc-grid');
+  while (grid.firstChild) grid.removeChild(grid.firstChild);
+  const runningPods = pods.filter(p => p.phase === 'Running' && p.vncUrl);
+  if (runningPods.length === 0) return;
+
+  document.getElementById('vnc-empty').style.display = 'none';
+  document.getElementById('vnc-frame-wrap').style.display = 'none';
+  document.getElementById('vnc-toolbar').style.display = 'none';
+  grid.style.display = 'grid';
+
+  runningPods.forEach(pod => {
+    const cell = document.createElement('div');
+    cell.style.cssText = 'background:var(--card-bg);border-radius:8px;overflow:hidden;border:1px solid var(--border);';
+    const label = document.createElement('div');
+    label.style.cssText = 'padding:8px 12px;font-size:11px;color:var(--accent);font-family:monospace;border-bottom:1px solid var(--border);';
+    label.textContent = pod.taskrun || pod.name;
+    const iframe = document.createElement('iframe');
+    iframe.src = pod.vncUrl;
+    iframe.style.cssText = 'width:100%;height:300px;border:none;';
+    iframe.allow = 'autoplay';
+    cell.appendChild(label);
+    cell.appendChild(iframe);
+    grid.appendChild(cell);
+  });
 }
 
 let lastPods = [];
@@ -1033,8 +1080,15 @@ function renderPodCards(pods) {
   if (runningPods.length === 0) {
     document.getElementById('vnc-empty').style.display = 'flex';
     document.getElementById('vnc-frame-wrap').style.display = 'none';
+    document.getElementById('vnc-grid').style.display = 'none';
     document.getElementById('vnc-toolbar').style.display = 'none';
     return;
+  }
+
+  // Grid mode: show all VNC streams at once
+  if (vncMode === 'grid') {
+    renderGridView(pods);
+    // Still render pod cards but don't auto-select
   }
 
   runningPods.forEach(pod => {
