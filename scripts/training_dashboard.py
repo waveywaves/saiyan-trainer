@@ -128,6 +128,30 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
   .chart-container h3 { font-size: 14px; color: #ff6b00; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
   .chart-container canvas { max-height: 250px; }
   .full-width { grid-column: 1 / -1; }
+  .view-toggle {
+    display: flex; gap: 10px; padding: 15px 30px; background: #0d0d25;
+  }
+  .view-toggle button {
+    padding: 8px 20px; border: 1px solid #ff6b00; background: transparent;
+    color: #ff6b00; border-radius: 4px; cursor: pointer; font-size: 13px;
+    text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;
+  }
+  .view-toggle button.active { background: #ff6b00; color: #000; }
+  .view-toggle button:hover { background: rgba(255,107,0,0.2); }
+  .vnc-panel {
+    padding: 0 30px 20px; display: none;
+  }
+  .vnc-panel.visible { display: block; }
+  .vnc-panel iframe {
+    width: 100%; height: 500px; border: 2px solid #252550;
+    border-radius: 8px; background: #000;
+  }
+  .vnc-panel .vnc-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0;
+  }
+  .vnc-panel .vnc-header h3 { font-size: 14px; color: #ff6b00; text-transform: uppercase; letter-spacing: 1px; }
+  .vnc-panel .vnc-url { font-size: 12px; color: #666; font-family: monospace; }
   .hp-table { padding: 20px 30px; }
   .hp-table table { width: 100%; border-collapse: collapse; background: #1a1a3e; border-radius: 8px; overflow: hidden; }
   .hp-table th { background: #252550; padding: 10px 15px; text-align: left; font-size: 12px; color: #888; text-transform: uppercase; }
@@ -148,6 +172,21 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
   </div>
 </div>
 
+<div class="view-toggle">
+  <button class="active" id="btn-charts" onclick="showView('charts')">Charts</button>
+  <button id="btn-game" onclick="showView('game')">Live Game</button>
+  <button id="btn-split" onclick="showView('split')">Split View</button>
+</div>
+
+<div class="vnc-panel" id="vnc-panel">
+  <div class="vnc-header">
+    <h3>Live Training - noVNC</h3>
+    <span class="vnc-url">localhost:6080/vnc.html</span>
+  </div>
+  <iframe id="vnc-frame" src="" allow="autoplay"></iframe>
+</div>
+
+<div id="charts-section">
 <div class="stats-bar" id="stats-bar">
   <div class="stat-card"><div class="label">Generation</div><div class="value" id="stat-gen">-</div></div>
   <div class="stat-card"><div class="label">Best Fitness</div><div class="value" id="stat-fitness">-</div></div>
@@ -181,7 +220,37 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
   </table>
 </div>
 
+</div><!-- end charts-section -->
+
 <script>
+function showView(view) {
+  const chartsSection = document.getElementById('charts-section');
+  const vncPanel = document.getElementById('vnc-panel');
+  const vncFrame = document.getElementById('vnc-frame');
+  const btnCharts = document.getElementById('btn-charts');
+  const btnGame = document.getElementById('btn-game');
+  const btnSplit = document.getElementById('btn-split');
+
+  btnCharts.className = ''; btnGame.className = ''; btnSplit.className = '';
+
+  if (view === 'charts') {
+    chartsSection.style.display = 'block';
+    vncPanel.className = 'vnc-panel';
+    vncFrame.src = '';
+    btnCharts.className = 'active';
+  } else if (view === 'game') {
+    chartsSection.style.display = 'none';
+    vncPanel.className = 'vnc-panel visible';
+    if (!vncFrame.src || vncFrame.src === '') vncFrame.src = 'http://localhost:6080/vnc.html?autoconnect=true&resize=scale';
+    btnGame.className = 'active';
+  } else if (view === 'split') {
+    chartsSection.style.display = 'block';
+    vncPanel.className = 'vnc-panel visible';
+    if (!vncFrame.src || vncFrame.src === '') vncFrame.src = 'http://localhost:6080/vnc.html?autoconnect=true&resize=scale';
+    btnSplit.className = 'active';
+  }
+}
+
 const chartDefaults = {
   responsive: true,
   maintainAspectRatio: false,
