@@ -218,10 +218,10 @@ function TrainingLoop:tick_evaluating()
     local endP2HP = currentP2HP
     local roundResult = Fitness.IN_PROGRESS
 
-    if endP1HP <= 0 and endP2HP > 0 then
+    if endP2HP <= 0 and endP1HP > 0 then
+        roundResult = Fitness.KO     -- KO! Bot killed the opponent
+    elseif endP1HP <= 0 and endP2HP > 0 then
         roundResult = Fitness.LOSE
-    elseif endP2HP <= 0 and endP1HP > 0 then
-        roundResult = Fitness.WIN
     elseif endP1HP <= 0 and endP2HP <= 0 then
         roundResult = Fitness.DRAW
     end
@@ -233,7 +233,7 @@ function TrainingLoop:tick_evaluating()
 
     -- Timed out: determine result from final HP comparison
     if roundResult == Fitness.IN_PROGRESS then
-        if endP1HP > endP2HP then roundResult = Fitness.WIN
+        if endP1HP > endP2HP then roundResult = Fitness.WIN  -- timeout win (not a KO)
         elseif endP2HP > endP1HP then roundResult = Fitness.LOSE
         else roundResult = Fitness.DRAW end
     end
@@ -245,6 +245,7 @@ function TrainingLoop:tick_evaluating()
         startP2HP = self.startP2HP, endP2HP = endP2HP,
         roundResult = roundResult,
         frameCount = self.frameCount,
+        timeoutConstant = Config.TimeoutConstant,
         lastDamageFrame = self.lastDamageFrame,
     })
 

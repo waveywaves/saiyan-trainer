@@ -42,7 +42,7 @@ function Crossover.crossover(g1, g2, config)
     -- Build child genes
     for _, gene1 in ipairs(g1.genes) do
         local gene2 = innovations2[gene1.innovation]
-        if gene2 and math.random() == 1 and gene2.enabled then
+        if gene2 and math.random(2) == 1 and gene2.enabled then
             -- Matching gene: randomly pick from either parent
             child.genes[#child.genes + 1] = GenomeMod.copyGene(gene2)
         else

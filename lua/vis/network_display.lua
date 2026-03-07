@@ -414,8 +414,10 @@ function NetworkDisplay.displayGenome(genome, pool)
                     local sourceActive = math.abs(c1.value) > 0.01
                     local color = connectionColor(gene.weight, sourceActive)
                     p:setStrokeColor(color)
-                    -- Thicker lines for stronger weights
-                    local thickness = math.abs(gene.weight) > 1.0 and 2 or 1
+                    -- Continuous scaling: 1px at threshold, 5px at weight=2.0
+                    local mag = math.abs(gene.weight)
+                    local t = (mag - CONNECTION_WEIGHT_THRESHOLD) / (2.0 - CONNECTION_WEIGHT_THRESHOLD)
+                    local thickness = math.floor(1 + math.min(1, math.max(0, t)) * 4 + 0.5)
                     p:setStrokeWidth(thickness)
                     p:drawLine(c1.x, c1.y, c2.x, c2.y)
                 end
