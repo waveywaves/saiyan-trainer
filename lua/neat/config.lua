@@ -15,7 +15,7 @@ local Config = {}
 
 -- Population
 Config.Population = 50          -- was 30 (too small for speciation); 50 balances speed/diversity
-Config.Inputs = 9               -- 8 game state + 1 bias
+Config.Inputs = 5               -- 4 game state (P1HP, P2HP, P1Ki, P1Pwr) + 1 bias
 Config.Outputs = 8              -- from Controller.getNumOutputs()
 Config.MaxNodes = 1000000
 
