@@ -720,8 +720,8 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
     <div class="page-header">
       <h2>Live Training</h2>
       <div style="display:flex;gap:8px;">
-        <button onclick="setVncMode('single')" id="btn-single" style="padding:6px 12px;border:1px solid var(--accent);background:var(--accent);color:#000;border-radius:4px;cursor:pointer;font-size:11px;">SINGLE</button>
-        <button onclick="setVncMode('grid')" id="btn-grid" style="padding:6px 12px;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:4px;cursor:pointer;font-size:11px;">GRID VIEW</button>
+        <button onclick="setVncMode('single')" id="btn-single" style="padding:6px 12px;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:4px;cursor:pointer;font-size:11px;">SINGLE</button>
+        <button onclick="setVncMode('grid')" id="btn-grid" style="padding:6px 12px;border:1px solid var(--accent);background:var(--accent);color:#000;border-radius:4px;cursor:pointer;font-size:11px;">GRID VIEW</button>
       </div>
     </div>
 
@@ -1015,7 +1015,7 @@ async function poll() {
 /* ---- Pod Management (VNC) ---- */
 let currentPodUrl = null;
 let currentPodName = null;
-let vncMode = 'single';
+let vncMode = 'grid';
 
 function setVncMode(mode) {
   vncMode = mode;
@@ -1053,16 +1053,20 @@ function renderGridView(pods) {
   document.getElementById('vnc-frame-wrap').style.display = 'none';
   document.getElementById('vnc-toolbar').style.display = 'none';
   grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
 
   runningPods.forEach(pod => {
     const cell = document.createElement('div');
     cell.style.cssText = 'background:var(--card-bg);border-radius:8px;overflow:hidden;border:1px solid var(--border);';
     const label = document.createElement('div');
-    label.style.cssText = 'padding:8px 12px;font-size:11px;color:var(--accent);font-family:monospace;border-bottom:1px solid var(--border);';
+    label.style.cssText = 'padding:6px 12px;font-size:11px;color:var(--accent);font-family:monospace;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;';
     label.textContent = pod.taskrun || pod.name;
+    const statusDot = document.createElement('span');
+    statusDot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:#00ff88;display:inline-block;';
+    label.appendChild(statusDot);
     const iframe = document.createElement('iframe');
     iframe.src = pod.vncUrl;
-    iframe.style.cssText = 'width:100%;height:300px;border:none;';
+    iframe.style.cssText = 'width:100%;height:350px;border:none;';
     iframe.allow = 'autoplay';
     cell.appendChild(label);
     cell.appendChild(iframe);
