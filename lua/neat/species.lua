@@ -14,7 +14,7 @@ local Species = {}
 function Species.newSpecies()
     return {
         genomes = {},
-        topFitness = 0,
+        topFitness = -math.huge,
         staleness = 0,
         averageFitness = 0,
     }
@@ -201,11 +201,20 @@ function Species.removeWeakSpecies(pool)
         if totalAvgFitness > 0 then
             breed = math.floor(species.averageFitness / totalAvgFitness * #pool.species)
         end
-        -- MarI/O pattern: use population size, not species count
-        -- But species count is the MarI/O approach for offspring share threshold
         if breed >= 1 then
             survived[#survived + 1] = species
         end
+    end
+
+    -- Safety: if all species were removed, keep the best one
+    if #survived == 0 and #pool.species > 0 then
+        local best = pool.species[1]
+        for _, species in ipairs(pool.species) do
+            if species.averageFitness > best.averageFitness then
+                best = species
+            end
+        end
+        survived[#survived + 1] = best
     end
 
     pool.species = survived

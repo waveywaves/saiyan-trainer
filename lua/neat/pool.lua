@@ -36,7 +36,7 @@ function Pool.newPool(config, innovation)
     local pool = {
         species = {},
         generation = 0,
-        maxFitness = 0,
+        maxFitness = -math.huge,
     }
 
     for _ = 1, config.Population do

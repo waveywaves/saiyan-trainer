@@ -61,7 +61,7 @@ end
 function Genome.copyGenome(genome)
     local copy = {
         genes = {},
-        fitness = genome.fitness,
+        fitness = 0,
         maxneuron = genome.maxneuron,
         globalRank = genome.globalRank,
         mutationRates = {},
