@@ -58,6 +58,14 @@ log("  Batch: " .. BATCH_NUMBER)
 log("  Generations per batch: " .. GENERATIONS_PER_BATCH)
 log("========================================")
 
+-- Set up console buffer HUD (same as main.lua)
+local hud = console:createBuffer("Saiyan HUD")
+hud:setSize(50, 14)
+
+local MemoryMap = dofile("lua/memory_map.lua")
+local Config = dofile("lua/neat/config.lua")
+local NetworkDisplay = dofile("lua/vis/network_display.lua")
+
 -- Reuse the training loop state machine (same one main.lua uses)
 local Trainer = dofile("lua/training/loop.lua")
 
@@ -94,9 +102,49 @@ local function writeMetrics()
     end
 end
 
+-- HUD + overlay update
+local hud_counter = 0
+local draw_counter = 0
+
+local function updateHUD()
+    hud_counter = hud_counter + 1
+    if hud_counter % 15 ~= 0 then return end
+    hud:clear()
+    hud:moveCursor(0, 0)
+    local pool = trainer.pool
+    if not pool then
+        hud:print("  SAIYAN TRAINER - Initializing...\n")
+        return
+    end
+    hud:print("========== SAIYAN TRAINER ==========\n")
+    hud:print(string.format(" Batch: %d  Gen: %d\n", BATCH_NUMBER, pool.generation))
+    hud:print(string.format(" Best: %.1f  Species: %d\n", pool.maxFitness, #pool.species))
+    hud:print(string.format(" State: %s\n", trainer.state))
+    if trainer.state == "evaluating" then
+        local p1hp = MemoryMap.read(MemoryMap.p1_health)
+        local p2hp = MemoryMap.read(MemoryMap.p2_health)
+        hud:print(string.format(" Frame: %d/%d\n", trainer.frameCount, Config.TimeoutConstant))
+        hud:print(string.format(" P1 HP: %d  P2 HP: %d\n", p1hp, p2hp))
+    end
+    hud:print("====================================\n")
+end
+
 -- Frame callback drives the state machine (one step per frame)
 callbacks:add("frame", function()
     trainer:tick()
+    updateHUD()
+
+    -- Draw network overlay every 5 frames
+    draw_counter = draw_counter + 1
+    if draw_counter % 5 == 0 and trainer.state == "evaluating" and trainer.pool then
+        local sp = trainer.pool.species[trainer.speciesIdx]
+        if sp then
+            local genome = sp.genomes[trainer.genomeIdx]
+            if genome then
+                NetworkDisplay.displayGenome(genome, trainer.pool)
+            end
+        end
+    end
 
     -- Track starting generation
     if startGen == nil and trainer.pool then
