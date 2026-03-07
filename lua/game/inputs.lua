@@ -8,6 +8,9 @@
 
 local Inputs = {}
 
+-- Load memory map once at module level (not per-frame)
+local mm = dofile("lua/memory_map.lua")
+
 -- Constants for normalization (based on old VBA code + address analysis)
 local MAX_HEALTH = 255     -- u8 health byte (0-255)
 local MAX_KI = 25600       -- CodeBreaker sets 0x6400 = 25600 for 100%
@@ -29,7 +32,6 @@ local INPUT_LABELS = {
 -- Appends a bias value of 1.0 as the last element.
 -- @return table  Array of 9 numbers (8 game state + 1 bias).
 function Inputs.getGameInputs()
-    local mm = dofile("lua/memory_map.lua")
     local state = mm.readAll()
 
     local inputs = {}

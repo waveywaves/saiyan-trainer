@@ -11,7 +11,17 @@ local Checkpoint = {}
 
 -- Load dependencies
 local json = dofile("lua/lib/dkjson.lua")
-local Innovation = dofile("lua/neat/innovation.lua")
+
+-- Innovation module is injected via setInnovation() to avoid
+-- the dual-instance bug (dofile creates separate module copies).
+local Innovation = nil
+
+--- Set the shared Innovation module instance.
+-- MUST be called before save/load to ensure the same counter is used.
+-- @param innovationModule table  The Innovation module from the training loop.
+function Checkpoint.setInnovation(innovationModule)
+    Innovation = innovationModule
+end
 
 -- Log helper compatible with mGBA and standalone Lua
 local function log(msg)

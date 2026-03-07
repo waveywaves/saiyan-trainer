@@ -1,15 +1,23 @@
 -- loop.lua
--- Main training loop that drives NEAT evolution across generations.
--- Evaluates each genome by playing fights in mGBA, computes fitness,
--- saves checkpoints, logs combos, and supports multi-opponent rotation.
+-- State-machine training loop driven by mGBA frame callbacks.
+-- Each tick() call processes one frame of work.
+--
+-- States:
+--   waiting    -> Poll for fight_start save state
+--   init       -> Create or load NEAT population
+--   eval_setup -> Load save state and prepare genome evaluation
+--   evaluating -> Per-frame genome evaluation (read inputs, forward pass, apply controller)
+--   gen_done   -> Log stats, save checkpoint, breed next generation
+--   complete   -> All generations finished
 --
 -- Usage:
---   local TrainingLoop = dofile("lua/training/loop.lua")
---   TrainingLoop.runTraining({generations = 100, resume = true})
+--   local Trainer = dofile("lua/training/loop.lua")
+--   local t = Trainer.new({generations = 100, resume = true, outputDir = "output"}, logFn)
+--   callbacks:add("frame", function() t:tick() end)
 
 local TrainingLoop = {}
 
--- Load all dependencies via dofile
+-- Load all dependencies
 local Config = dofile("lua/neat/config.lua")
 local Pool = dofile("lua/neat/pool.lua")
 local Network = dofile("lua/neat/network.lua")
@@ -21,239 +29,250 @@ local SaveState = dofile("lua/savestate_helper.lua")
 local Checkpoint = dofile("lua/training/checkpoint.lua")
 local ComboLogger = dofile("lua/training/combo_logger.lua")
 
--- Load NEAT sub-modules needed by Pool
 local Genome = dofile("lua/neat/genome.lua")
 local Species = dofile("lua/neat/species.lua")
 local Crossover = dofile("lua/neat/crossover.lua")
 local Mutation = dofile("lua/neat/mutation.lua")
+local MemoryMap = dofile("lua/memory_map.lua")
 
 -- Wire up module dependencies
 Pool.setDependencies(Genome, Species, Crossover, Mutation, Network)
 Mutation.setDependencies(Network, Genome)
 Crossover.setDependencies(Genome)
+Checkpoint.setInnovation(Innovation)
 
--- Memory map for direct health reads during evaluation
-local MemoryMap = dofile("lua/memory_map.lua")
+--- Create a new trainer instance.
+-- @param options table  {generations, resume, checkpointFile, outputDir}
+-- @param logFn   function  Logging function (receives string).
+-- @return table  Trainer instance with tick() method.
+function TrainingLoop.new(options, logFn)
+    options = options or {}
+    local self = {
+        -- Configuration
+        maxGenerations = options.generations or 100,
+        resumeEnabled = options.resume ~= false,
+        checkpointFile = options.checkpointFile,
+        outputDir = options.outputDir or "output",
 
--- Stub console.log for safety
-local function log(msg)
-    if console and console.log then
-        console:log(msg)
-    end
-    print(msg)
+        -- State machine
+        state = "waiting",
+
+        -- Population
+        pool = nil,
+        speciesIdx = 1,
+        genomeIdx = 1,
+        startGen = 0,
+
+        -- Per-evaluation tracking
+        frameCount = 0,
+        lastDamageFrame = 0,
+        startP1HP = 0,
+        startP2HP = 0,
+        prevP2HP = 0,
+        comboLogger = nil,
+
+        -- Waiting state counter
+        waitFrames = 0,
+
+        -- Logging
+        log = logFn or function(msg) print(msg) end,
+    }
+    setmetatable(self, { __index = TrainingLoop })
+    return self
 end
 
---- Multi-opponent configuration state
-local opponentConfig = nil
-local currentOpponentIndex = 1
+--- Advance the trainer by one frame.
+function TrainingLoop:tick()
+    local handler = self["tick_" .. self.state]
+    if handler then
+        handler(self)
+    end
+end
 
---- Set the opponent rotation configuration.
--- @param opponents table  Array of {file=string, desc=string} save state entries.
-function TrainingLoop.setOpponentConfig(opponents)
-    opponentConfig = opponents
-    currentOpponentIndex = 1
-    if opponents and #opponents > 0 then
-        log("Multi-opponent configured with " .. #opponents .. " opponents:")
-        for i, opp in ipairs(opponents) do
-            log("  " .. i .. ". " .. opp.desc .. " (" .. opp.file .. ")")
+--- WAITING: poll for fight_start save state.
+function TrainingLoop:tick_waiting()
+    self.waitFrames = self.waitFrames + 1
+    if self.waitFrames == 1 then
+        if not SaveState.hasFightStartState() then
+            self.log("Waiting for fight start save state...")
+            self.log("Save to: " .. SaveState.getFightStartFile())
         end
     end
-end
+    if self.waitFrames % 60 ~= 0 then return end
 
---- Rotate to the appropriate opponent for the current generation.
--- Uses rotation formula: index = floor(generation / rotationInterval) % numOpponents + 1
--- @param generation      number  Current generation number.
--- @param rotationInterval number  Rotate every N generations.
-local function rotateOpponent(generation, rotationInterval)
-    if not opponentConfig or #opponentConfig == 0 then
-        return
-    end
-    local newIndex = (math.floor(generation / rotationInterval) % #opponentConfig) + 1
-    if newIndex ~= currentOpponentIndex then
-        currentOpponentIndex = newIndex
-        log(string.format("Rotating opponent to: %s (%s)",
-            opponentConfig[newIndex].desc,
-            opponentConfig[newIndex].file))
+    if SaveState.hasFightStartState() then
+        self.log("Save state detected!")
+        self.state = "init"
     end
 end
 
---- Get the current save state file for fight reset.
--- If multi-opponent is configured, returns the current opponent's file.
--- Otherwise returns nil (SaveState uses its default).
--- @return string|nil  Path to save state file, or nil for default.
-local function getCurrentSaveStateFile()
-    if opponentConfig and #opponentConfig > 0 then
-        return opponentConfig[currentOpponentIndex].file
+--- INIT: create or load population.
+function TrainingLoop:tick_init()
+    local cpDir = self.outputDir .. "/checkpoints"
+    os.execute("mkdir -p " .. cpDir)
+
+    -- Try to load existing checkpoint
+    if self.checkpointFile then
+        self.log("Resuming from: " .. self.checkpointFile)
+        self.pool = Checkpoint.loadCheckpoint(self.checkpointFile)
+    elseif self.resumeEnabled then
+        local latest = Checkpoint.getLatestCheckpoint(cpDir)
+        if latest then
+            self.log("Auto-resuming from: " .. latest)
+            self.pool = Checkpoint.loadCheckpoint(latest)
+        else
+            local path = cpDir .. "/latest.json"
+            local f = io.open(path, "r")
+            if f then
+                f:close()
+                self.log("Auto-resuming from: " .. path)
+                self.pool = Checkpoint.loadCheckpoint(path)
+            end
+        end
     end
-    return nil
+
+    if not self.pool then
+        self.log("Creating new population...")
+        self.pool = Pool.newPool(Config, Innovation)
+    end
+
+    self.startGen = self.pool.generation
+
+    self.log("=== Training Configuration ===")
+    self.log(string.format("  Population: %d", Config.Population))
+    self.log(string.format("  Inputs: %d, Outputs: %d", Config.Inputs, Config.Outputs))
+    self.log(string.format("  Target: %s generations",
+        self.maxGenerations == 0 and "infinite" or tostring(self.maxGenerations)))
+    self.log(string.format("  Starting at generation: %d", self.pool.generation))
+    self.log("==============================")
+
+    -- Start evaluating first genome
+    self.speciesIdx = 1
+    self.genomeIdx = 1
+    self:findNextGenome()
 end
 
---- Evaluate a single genome by playing a fight.
--- 1. Loads save state for deterministic start
--- 2. Runs frame-by-frame: read inputs -> forward pass -> apply controller
--- 3. Tracks damage, stalls, and logs combos
--- 4. Computes fitness after fight ends or timeout
---
--- IMPORTANT (Pitfall 5): All Lua tracking variables are explicitly reset here.
--- Save state load does NOT reset Lua script variables.
---
--- @param genome table  The genome to evaluate.
--- @param pool   table  The population pool (for context).
-function TrainingLoop.evaluateGenome(genome, pool)
-    -- Step 1: Load save state (reset fight)
-    local saveFile = getCurrentSaveStateFile()
-    if saveFile then
-        emu:loadStateFile(saveFile)
-    else
-        SaveState.resetFight()
+--- Find next unevaluated genome. Sets state to eval_setup or gen_done.
+function TrainingLoop:findNextGenome()
+    while self.speciesIdx <= #self.pool.species do
+        local sp = self.pool.species[self.speciesIdx]
+        while self.genomeIdx <= #sp.genomes do
+            if sp.genomes[self.genomeIdx].fitness == 0 then
+                self.state = "eval_setup"
+                return
+            end
+            self.genomeIdx = self.genomeIdx + 1
+        end
+        self.speciesIdx = self.speciesIdx + 1
+        self.genomeIdx = 1
     end
+    self.state = "gen_done"
+end
 
-    -- Step 2: Build network from genome
+--- EVAL_SETUP: load save state and prepare genome evaluation.
+function TrainingLoop:tick_eval_setup()
+    local genome = self.pool.species[self.speciesIdx].genomes[self.genomeIdx]
+
+    -- Reset fight to deterministic start
+    SaveState.resetFight()
+
+    -- Build neural network from genome
     Network.generateNetwork(genome, Config)
 
-    -- Step 3-5: Explicitly reset ALL Lua tracking variables (Pitfall 5)
-    local frameCount = 0
-    local lastDamageFrame = 0
-    local comboLogger = ComboLogger.newLogger()
+    -- Reset all evaluation tracking
+    self.frameCount = 0
+    self.lastDamageFrame = 0
+    self.comboLogger = ComboLogger.newLogger()
+    self.startP1HP = MemoryMap.read(MemoryMap.p1_health)
+    self.startP2HP = MemoryMap.read(MemoryMap.p2_health)
+    self.prevP2HP = self.startP2HP
 
-    -- Read starting health values
-    local startP1HP = MemoryMap.read(MemoryMap.p1_health)
-    local startP2HP = MemoryMap.read(MemoryMap.p2_health)
-    local prevP2HP = startP2HP
-
-    -- Step 6: Per-frame evaluation loop
-    while true do
-        -- 6a: Read game inputs (11-element normalized array)
-        local inputs = GameInputs.getGameInputs()
-
-        -- 6b: Forward pass through neural network
-        local outputs = Network.evaluateNetwork(genome.network, inputs, Config)
-
-        -- 6c: Apply outputs to controller (all buttons in ONE setKeys call)
-        Controller.applyController(outputs)
-
-        -- 6d: Record buttons in combo logger
-        local buttonState = Controller.outputsToController(outputs)
-        ComboLogger.record(comboLogger, buttonState)
-
-        -- 6e: Track damage dealt
-        local currentP2HP = MemoryMap.read(MemoryMap.p2_health)
-        if currentP2HP < prevP2HP then
-            lastDamageFrame = frameCount
-        end
-        prevP2HP = currentP2HP
-
-        -- 6f: Check termination conditions
-        frameCount = frameCount + 1
-
-        -- Check round state from memory
-        local roundState = MemoryMap.read(MemoryMap.round_state)
-
-        -- Determine round result
-        local endP1HP = MemoryMap.read(MemoryMap.p1_health)
-        local endP2HP = currentP2HP
-        local roundResult = Fitness.IN_PROGRESS
-
-        if roundState ~= 0 then
-            -- Round is over; determine outcome from health
-            if endP2HP <= 0 and endP1HP > 0 then
-                roundResult = Fitness.WIN
-            elseif endP1HP <= 0 and endP2HP > 0 then
-                roundResult = Fitness.LOSE
-            elseif endP1HP <= 0 and endP2HP <= 0 then
-                roundResult = Fitness.DRAW
-            else
-                -- Some other end state (timer, etc)
-                if endP1HP > endP2HP then
-                    roundResult = Fitness.WIN
-                elseif endP2HP > endP1HP then
-                    roundResult = Fitness.LOSE
-                else
-                    roundResult = Fitness.DRAW
-                end
-            end
-        end
-
-        -- 6g: Break on round over or timeout
-        if roundResult ~= Fitness.IN_PROGRESS or frameCount > Config.TimeoutConstant then
-            -- If timed out, determine result from health
-            if roundResult == Fitness.IN_PROGRESS then
-                local finalP1HP = MemoryMap.read(MemoryMap.p1_health)
-                local finalP2HP = MemoryMap.read(MemoryMap.p2_health)
-                if finalP1HP > finalP2HP then
-                    roundResult = Fitness.WIN
-                elseif finalP2HP > finalP1HP then
-                    roundResult = Fitness.LOSE
-                else
-                    roundResult = Fitness.DRAW
-                end
-                endP1HP = finalP1HP
-                endP2HP = finalP2HP
-            end
-
-            -- Step 7: Clear controller
-            Controller.clearController()
-
-            -- Step 8: Calculate fitness
-            local fitness = Fitness.calculateFitness({
-                startP1HP = startP1HP,
-                endP1HP = endP1HP,
-                startP2HP = startP2HP,
-                endP2HP = endP2HP,
-                roundResult = roundResult,
-                frameCount = frameCount,
-                lastDamageFrame = lastDamageFrame,
-            })
-
-            -- Step 9: Set genome fitness
-            genome.fitness = fitness
-
-            -- Step 10: Store combo analysis
-            genome.comboAnalysis = ComboLogger.analyzeInputLog(comboLogger.log)
-
-            return
-        end
-
-        -- 6h-6i: Continue to next frame
-        emu:runFrame()
-    end
+    self.state = "evaluating"
 end
 
---- Evaluate all unevaluated genomes in the population.
--- Iterates through all species and genomes, evaluating those with fitness == 0.
--- @param pool table  The population pool.
-function TrainingLoop.evaluatePopulation(pool)
-    local genomeCount = 0
-    local bestFitness = 0
+--- EVALUATING: run one frame of genome evaluation.
+function TrainingLoop:tick_evaluating()
+    local genome = self.pool.species[self.speciesIdx].genomes[self.genomeIdx]
 
-    for _, species in ipairs(pool.species) do
-        for _, genome in ipairs(species.genomes) do
-            if genome.fitness == 0 then
-                TrainingLoop.evaluateGenome(genome, pool)
-                genomeCount = genomeCount + 1
-            end
-            if genome.fitness > bestFitness then
-                bestFitness = genome.fitness
-            end
-        end
+    -- Forward pass: read game state -> neural network -> controller output
+    local inputs = GameInputs.getGameInputs()
+    local outputs = Network.evaluateNetwork(genome.network, inputs, Config)
+    Controller.applyController(outputs)
+
+    -- Record button state for combo analysis
+    ComboLogger.record(self.comboLogger, Controller.outputsToController(outputs))
+
+    -- Track damage dealt to opponent
+    local currentP2HP = MemoryMap.read(MemoryMap.p2_health)
+    if currentP2HP < self.prevP2HP then
+        self.lastDamageFrame = self.frameCount
+    end
+    self.prevP2HP = currentP2HP
+
+    self.frameCount = self.frameCount + 1
+
+    -- Check termination: HP-based or timeout.
+    -- NOTE: round_state address semantics are inverted (0=instant win trigger,
+    -- non-zero=normal gameplay), so we use HP to detect round end instead.
+    local endP1HP = MemoryMap.read(MemoryMap.p1_health)
+    local endP2HP = currentP2HP
+    local roundResult = Fitness.IN_PROGRESS
+
+    if endP1HP <= 0 and endP2HP > 0 then
+        roundResult = Fitness.LOSE
+    elseif endP2HP <= 0 and endP1HP > 0 then
+        roundResult = Fitness.WIN
+    elseif endP1HP <= 0 and endP2HP <= 0 then
+        roundResult = Fitness.DRAW
     end
 
-    log(string.format("Evaluated %d genomes, best fitness: %.1f, species: %d",
-        genomeCount, bestFitness, #pool.species))
+    -- Continue evaluating if nobody is KO'd and not timed out
+    if roundResult == Fitness.IN_PROGRESS and self.frameCount <= Config.TimeoutConstant then
+        return
+    end
+
+    -- Timed out: determine result from final HP comparison
+    if roundResult == Fitness.IN_PROGRESS then
+        if endP1HP > endP2HP then roundResult = Fitness.WIN
+        elseif endP2HP > endP1HP then roundResult = Fitness.LOSE
+        else roundResult = Fitness.DRAW end
+    end
+
+    Controller.clearController()
+
+    genome.fitness = Fitness.calculateFitness({
+        startP1HP = self.startP1HP, endP1HP = endP1HP,
+        startP2HP = self.startP2HP, endP2HP = endP2HP,
+        roundResult = roundResult,
+        frameCount = self.frameCount,
+        lastDamageFrame = self.lastDamageFrame,
+    })
+
+    genome.comboAnalysis = ComboLogger.analyzeInputLog(self.comboLogger.log)
+
+    -- Store HP deltas for debugging
+    genome.hpDelta = {
+        p1Start = self.startP1HP, p1End = endP1HP,
+        p2Start = self.startP2HP, p2End = endP2HP,
+        frames = self.frameCount,
+    }
+
+    -- Advance to next unevaluated genome
+    self.genomeIdx = self.genomeIdx + 1
+    self:findNextGenome()
 end
 
---- Run a single generation: evaluate, checkpoint, and breed.
--- @param pool table  The population pool.
-function TrainingLoop.runGeneration(pool)
-    -- 1. Evaluate all genomes
-    TrainingLoop.evaluatePopulation(pool)
+--- GEN_DONE: log stats, save checkpoint, breed next generation.
+function TrainingLoop:tick_gen_done()
+    local pool = self.pool
+    local cpDir = self.outputDir .. "/checkpoints"
 
-    -- 2. Track best fitness
-    local bestFitness = 0
+    -- Find best genome in this generation (start at -math.huge to capture negative fitness)
+    local bestFitness = -math.huge
     local bestGenome = nil
     local totalGenomes = 0
-    for _, species in ipairs(pool.species) do
-        for _, genome in ipairs(species.genomes) do
+    for _, sp in ipairs(pool.species) do
+        for _, genome in ipairs(sp.genomes) do
             totalGenomes = totalGenomes + 1
             if genome.fitness > bestFitness then
                 bestFitness = genome.fitness
@@ -266,116 +285,52 @@ function TrainingLoop.runGeneration(pool)
         pool.maxFitness = bestFitness
     end
 
-    -- 3. Log generation stats
-    log(string.format("Gen %d: best=%.1f (all-time=%.1f), species=%d, genomes=%d",
+    -- Track for HUD display
+    self.lastGenBest = bestFitness
+
+    self.log(string.format("Gen %d: best=%.1f (all-time=%.1f), species=%d, genomes=%d",
         pool.generation, bestFitness, pool.maxFitness, #pool.species, totalGenomes))
 
-    -- 4. Save checkpoint every generation
-    Checkpoint.saveCheckpoint(pool, Checkpoint.getCheckpointFilename(pool.generation))
-
-    -- 5. Also save "latest" checkpoint for easy resume
-    Checkpoint.saveCheckpoint(pool, "checkpoints/latest.json")
-
-    -- 6. Log combo analysis for best genome
     if bestGenome and bestGenome.comboAnalysis then
         local ca = bestGenome.comboAnalysis
-        log(string.format("  Best genome combo analysis: entropy=%.2f, unique=%d, mashing=%s",
+        self.log(string.format("  Combo: entropy=%.2f, unique=%d, mashing=%s",
             ca.entropy, ca.uniquePatterns, tostring(ca.isButtonMashing)))
-        if ca.topPatterns and #ca.topPatterns > 0 then
-            log("  Top pattern: " .. ca.topPatterns[1].buttons ..
-                " (x" .. ca.topPatterns[1].count .. ")")
-        end
     end
 
-    -- 7. Breed next generation
+    -- Log HP deltas for best genome to diagnose P2 HP address validity
+    if bestGenome and bestGenome.hpDelta then
+        local hp = bestGenome.hpDelta
+        self.log(string.format("  HP: P1 %d->%d (%+d), P2 %d->%d (%+d), frames=%d",
+            hp.p1Start, hp.p1End, hp.p1End - hp.p1Start,
+            hp.p2Start, hp.p2End, hp.p2End - hp.p2Start,
+            hp.frames))
+    end
+
+    -- Save checkpoints
+    Checkpoint.saveCheckpoint(pool, cpDir .. "/gen_" .. pool.generation .. ".json")
+    Checkpoint.saveCheckpoint(pool, cpDir .. "/latest.json")
+
+    -- Check if all generations complete
+    local targetGen = self.maxGenerations == 0 and math.huge or (self.startGen + self.maxGenerations)
+    if pool.generation + 1 >= targetGen then
+        self.log("Training complete!")
+        Checkpoint.saveCheckpoint(pool, cpDir .. "/final.json")
+        self.state = "complete"
+        return
+    end
+
+    -- Breed next generation
     Pool.newGeneration(pool, Config, Innovation)
-end
 
---- Main entry point: run the full NEAT training loop.
--- @param options table  Training options:
---   generations      number  How many generations to run (0 = infinite).
---   resume           boolean Attempt to load latest checkpoint on start.
---   checkpointFile   string  Specific checkpoint file to resume from.
---   opponents        table   Array of {file=string, desc=string} for multi-opponent.
---   opponentRotation number  Rotate opponent every N generations (default 10).
-function TrainingLoop.runTraining(options)
-    options = options or {}
-    local maxGenerations = options.generations or 100
-    local rotationInterval = options.opponentRotation or 10
+    local progress = pool.generation - self.startGen
+    self.log(string.format("Starting generation %d/%d (%d%%)",
+        pool.generation, self.maxGenerations,
+        math.floor(progress / self.maxGenerations * 100)))
 
-    -- 1. Create checkpoints directory
-    os.execute("mkdir -p checkpoints")
-
-    -- Configure multi-opponent if provided
-    if options.opponents then
-        TrainingLoop.setOpponentConfig(options.opponents)
-    end
-
-    -- 2-3. Load or create pool
-    local pool = nil
-
-    if options.checkpointFile then
-        -- Resume from specific checkpoint
-        log("Resuming from checkpoint: " .. options.checkpointFile)
-        pool = Checkpoint.loadCheckpoint(options.checkpointFile)
-    elseif options.resume then
-        -- Try to load latest checkpoint
-        local latest = Checkpoint.getLatestCheckpoint("checkpoints")
-        if latest then
-            log("Auto-resuming from: " .. latest)
-            pool = Checkpoint.loadCheckpoint(latest)
-        else
-            -- Also try latest.json
-            local f = io.open("checkpoints/latest.json", "r")
-            if f then
-                f:close()
-                log("Auto-resuming from: checkpoints/latest.json")
-                pool = Checkpoint.loadCheckpoint("checkpoints/latest.json")
-            end
-        end
-    end
-
-    if not pool then
-        log("Creating new population...")
-        pool = Pool.newPool(Config, Innovation)
-    end
-
-    -- 4. Log training configuration
-    log("=== Training Configuration ===")
-    log(string.format("  Population: %d", Config.Population))
-    log(string.format("  Inputs: %d, Outputs: %d", Config.Inputs, Config.Outputs))
-    log(string.format("  Target generations: %s", maxGenerations == 0 and "infinite" or tostring(maxGenerations)))
-    log(string.format("  Starting generation: %d", pool.generation))
-    if opponentConfig then
-        log(string.format("  Opponents: %d, rotation every %d generations",
-            #opponentConfig, rotationInterval))
-    end
-    log("==============================")
-
-    -- 5. Generation loop
-    local startGen = pool.generation
-    local targetGen = maxGenerations == 0 and math.huge or (startGen + maxGenerations)
-
-    while pool.generation < targetGen do
-        -- 5a. Rotate opponent if multi-opponent configured
-        if opponentConfig then
-            rotateOpponent(pool.generation, rotationInterval)
-        end
-
-        -- 5b. Run one generation
-        TrainingLoop.runGeneration(pool)
-
-        -- 5c. Log progress
-        if maxGenerations > 0 then
-            local progress = pool.generation - startGen
-            log(string.format("Generation %d/%d complete (%d%%)",
-                progress, maxGenerations, math.floor(progress / maxGenerations * 100)))
-        end
-    end
-
-    -- 6. Final save
-    log("Training complete. Final checkpoint saved.")
-    Checkpoint.saveCheckpoint(pool, "checkpoints/final.json")
+    -- Begin evaluating new generation
+    self.speciesIdx = 1
+    self.genomeIdx = 1
+    self:findNextGenome()
 end
 
 return TrainingLoop

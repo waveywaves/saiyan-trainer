@@ -22,7 +22,7 @@ local SAVE_STATE_DIR = project_root .. "/savestates/"
 -- File path for the fight-start save state.
 -- This state should capture the exact frame where a fight begins:
 -- both characters at full health, timer started, player has control.
-local FIGHT_START_FILE = SAVE_STATE_DIR .. "fight_start.State"
+local FIGHT_START_FILE = SAVE_STATE_DIR .. "fight_start.ss0"
 
 --- Check whether the fight-start save state file exists.
 -- @return boolean  true if the file exists and can be opened.

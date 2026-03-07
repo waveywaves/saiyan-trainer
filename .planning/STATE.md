@@ -100,6 +100,12 @@ None yet.
 
 - Phase 1 risk: GBA RAM map for DBZ Supersonic Warriors must be reverse-engineered from scratch. Timeline unpredictable. If >2 weeks, consider pivoting to a game with known RAM maps as proof-of-concept.
 - Phase 3 risk: BizHawk containerization with Xvfb is sparsely documented. Needs validation spike. Fallback: run emulator outside K8s.
+- [2026-03-07] NEAT TRAINING: Fitness plateaued at 775.5 from Gen 6-16+ (10 generations stagnation). Root causes identified from checkpoint analysis:
+  - Innovation counter bug: Checkpoint module creates separate Innovation instance via dofile(), always saves innovation=0. Auto-corrected on load but crossover alignment degrades.
+  - Species collapse: target=12 but actual=1 most of the time. No diversity protection. All genomes converge to same local optimum.
+  - Over-complexity: ~85 genes, ~11 hidden nodes by Gen 16 — networks too complex for problem. NodeMutationChance=0.50 too high.
+  - Population too small: 30 genomes insufficient for meaningful speciation and exploration.
+  - Fixes applied: shared Innovation module, tuned speciation params, improved overlay rendering.
 
 ## Session Continuity
 
