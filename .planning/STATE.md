@@ -104,4 +104,4 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 02.1-01-PLAN.md (neural network overlay + Docker FreeType)
+Stopped at: Completed 02.1-02-PLAN.md (P2 HP RAM scanner, save state guide, known issues). Phase 02.1 fully complete.

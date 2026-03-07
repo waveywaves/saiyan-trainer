@@ -60,8 +60,8 @@ Plans:
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 02.1-01-PLAN.md -- Neural network overlay with Painter API and Dockerfile FreeType fix
-- [ ] 02.1-02-PLAN.md -- P2 HP RAM scanner, save state guide, and known issues documentation
+- [x] 02.1-01-PLAN.md -- Neural network overlay with Painter API and Dockerfile FreeType fix
+- [x] 02.1-02-PLAN.md -- P2 HP RAM scanner, save state guide, and known issues documentation
 
 ### Phase 3: Containerization
 **Goal**: BizHawk runs NEAT training headlessly inside a Docker container, producing genome checkpoints on the filesystem. Container exposes BizHawk display via noVNC web UI so user can observe live training from a browser. The bridge between local development and Kubernetes orchestration.
@@ -104,6 +104,6 @@ Phases execute in numeric order: 1 -> 2 -> 2.1 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Emulation Foundation | 1/2 | In Progress|  |
 | 2. NEAT Training Engine | 2/3 | In Progress|  |
-| 2.1. On-Screen Visualization & Training Fixes | 0/2 | Ready |  |
+| 2.1. On-Screen Visualization & Training Fixes | 2/2 | Complete | 2026-03-07 |
 | 3. Containerization | 1/1 | Complete | 2026-03-06 |
 | 4. Tekton Pipeline and MLOps | 3/3 | Complete   | 2026-03-05 |
