@@ -36,32 +36,11 @@ spec:
     #    the PVC before this pipeline runs (e.g., via a setup Job or
     #    manual copy). This step only creates output directories.
     # ----------------------------------------------------------------
-    - name: setup
-      workspaces:
-        - name: data
-          workspace: training-data
-      taskSpec:
-        workspaces:
-          - name: data
-        steps:
-          - name: prepare
-            image: alpine:latest
-            script: |
-              #!/bin/sh
-              set -euo pipefail
-              WS="$(workspaces.data.path)"
-              mkdir -p "$WS/output/checkpoints" "$WS/output/results"
-              echo "Workspace prepared at $WS"
-              ls -la "$WS/"
-
-    # ----------------------------------------------------------------
-    # 2. Training Loop: iterate generations using Tekton Loop
-    #    Each iteration runs 5 NEAT generations in an mGBA container.
-    #    Loop terminates when fitness exceeds threshold or max batches.
+    # Training Loop: iterate generations using Tekton Loop
+    # Each iteration runs N NEAT generations in an mGBA container.
+    # Loop terminates when fitness exceeds threshold or max batches.
     # ----------------------------------------------------------------
     - name: train-batch
-      runAfter:
-        - setup
       timeout: "0"    # No timeout — training can take a while
       workspaces:
         - name: data
