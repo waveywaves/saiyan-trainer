@@ -59,6 +59,9 @@ spec:
           - name: batch-number
             type: string
             default: "0"
+          - name: run-id
+            type: string
+            default: "default"
         workspaces:
           - name: data
         results:
@@ -81,9 +84,11 @@ spec:
               - name: BATCH_NUMBER
                 value: "$(params.batch-number)"
               - name: CHECKPOINT_DIR
-                value: "$(workspaces.data.path)/output/checkpoints"
+                value: "$(workspaces.data.path)/output/$(params.run-id)/checkpoints"
               - name: RESULTS_DIR
-                value: "$(workspaces.data.path)/output/results"
+                value: "$(workspaces.data.path)/output/$(params.run-id)/results"
+              - name: RUN_ID
+                value: "$(params.run-id)"
               - name: ROM_PATH
                 value: "$(workspaces.data.path)/roms/rom.gba"
               - name: LUA_SCRIPT
