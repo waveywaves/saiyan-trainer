@@ -52,6 +52,17 @@ Plans:
 - [ ] 02-02-PLAN.md -- Training loop, checkpoint save/load, combo analysis, and multi-opponent support
 - [ ] 02-03-PLAN.md -- Neural network visualization overlay, HUD, and species timeline
 
+### Phase 02.1: On-Screen Visualization & Training Fixes (INSERTED)
+
+**Goal:** MarI/O-style neural network overlay on mGBA game screen using Painter API, Docker FreeType support, P2 HP address verification tooling, save state documentation, and known issue tracking
+**Requirements**: VIS-01, VIS-02, VIS-03
+**Depends on:** Phase 02
+**Plans:** 2 plans
+
+Plans:
+- [ ] 02.1-01-PLAN.md -- Neural network overlay with Painter API and Dockerfile FreeType fix
+- [ ] 02.1-02-PLAN.md -- P2 HP RAM scanner, save state guide, and known issues documentation
+
 ### Phase 3: Containerization
 **Goal**: BizHawk runs NEAT training headlessly inside a Docker container, producing genome checkpoints on the filesystem. Container exposes BizHawk display via noVNC web UI so user can observe live training from a browser. The bridge between local development and Kubernetes orchestration.
 **Depends on**: Phase 2
@@ -87,11 +98,12 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4
+Phases execute in numeric order: 1 -> 2 -> 2.1 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Emulation Foundation | 1/2 | In Progress|  |
 | 2. NEAT Training Engine | 2/3 | In Progress|  |
+| 2.1. On-Screen Visualization & Training Fixes | 0/2 | Ready |  |
 | 3. Containerization | 1/1 | Complete | 2026-03-06 |
 | 4. Tekton Pipeline and MLOps | 3/3 | Complete   | 2026-03-05 |
