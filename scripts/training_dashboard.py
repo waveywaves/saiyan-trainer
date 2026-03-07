@@ -16,6 +16,8 @@ import json
 import os
 import re
 import sys
+import subprocess
+import threading
 import argparse
 from pathlib import Path
 
@@ -175,14 +177,16 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
 <div class="view-toggle">
   <button class="active" id="btn-charts" onclick="showView('charts')">Charts</button>
   <button id="btn-game" onclick="showView('game')">Live Game</button>
+  <button onclick="window.open('http://localhost:6080/vnc.html?autoconnect=true&resize=scale','_blank')">Open VNC (New Tab)</button>
   <button id="btn-split" onclick="showView('split')">Split View</button>
 </div>
 
 <div class="vnc-panel" id="vnc-panel">
   <div class="vnc-header">
-    <h3>Live Training - noVNC</h3>
-    <span class="vnc-url">localhost:6080/vnc.html</span>
+    <h3>Live Training Pods</h3>
+    <div id="pod-selector" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
   </div>
+  <div id="no-pods-msg" style="color:#666;padding:20px;text-align:center;">Scanning for training pods...</div>
   <iframe id="vnc-frame" src="" allow="autoplay"></iframe>
 </div>
 
@@ -366,12 +370,155 @@ async function poll() {
   }
 }
 
+let currentPodUrl = null;
+
+async function pollPods() {
+  try {
+    const res = await fetch('/api/pods');
+    const pods = await res.json();
+    const selector = document.getElementById('pod-selector');
+    const noPodsMsg = document.getElementById('no-pods-msg');
+    const frame = document.getElementById('vnc-frame');
+
+    while (selector.firstChild) selector.removeChild(selector.firstChild);
+
+    const runningPods = pods.filter(p => p.phase === 'Running' && p.vncUrl);
+    if (runningPods.length === 0) {
+      noPodsMsg.style.display = 'block';
+      noPodsMsg.textContent = 'No training pods found. Start training to see live view.';
+      frame.style.display = 'none';
+      return;
+    }
+
+    noPodsMsg.style.display = 'none';
+    frame.style.display = 'block';
+
+    runningPods.forEach(pod => {
+      const btn = document.createElement('button');
+      const label = pod.taskrun || pod.name;
+      btn.textContent = label;
+      btn.style.cssText = 'padding:6px 14px;border:1px solid #4488ff;background:transparent;color:#4488ff;border-radius:4px;cursor:pointer;font-size:12px;';
+      if (pod.vncUrl === currentPodUrl) {
+        btn.style.background = '#4488ff';
+        btn.style.color = '#000';
+      }
+      btn.addEventListener('click', function() {
+        currentPodUrl = pod.vncUrl;
+        frame.src = pod.vncUrl;
+        pollPods(); // refresh button styles
+      });
+      selector.appendChild(btn);
+    });
+
+    // Auto-select first pod if none selected
+    if (!currentPodUrl && runningPods.length > 0) {
+      currentPodUrl = runningPods[0].vncUrl;
+      frame.src = currentPodUrl;
+    }
+  } catch (e) {
+    // silently fail
+  }
+}
+
 poll();
+pollPods();
 setInterval(poll, 5000);
+setInterval(pollPods, 10000);
 </script>
 </body>
 </html>
 '''
+
+
+# Track active port-forwards: {pod_name: {"port": local_port, "process": Popen}}
+active_forwards = {}
+next_vnc_port = 7000
+
+def get_training_pods():
+    """Discover training pods via kubectl — finds pods with the mGBA image or saiyan label."""
+    pods = []
+
+    # Try Tekton TaskRun pods first
+    try:
+        result = subprocess.run(
+            ["kubectl", "--context", "kind-saiyan", "get", "pods",
+             "-l", "app.kubernetes.io/managed-by=tekton-pipelines",
+             "-o", "json"],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0:
+            data = json.loads(result.stdout)
+            for item in data.get("items", []):
+                name = item["metadata"]["name"]
+                phase = item["status"].get("phase", "Unknown")
+                taskrun = item["metadata"].get("labels", {}).get("tekton.dev/taskRun", "")
+                pods.append({
+                    "name": name,
+                    "phase": phase,
+                    "taskrun": taskrun,
+                    "source": "tekton",
+                })
+    except Exception:
+        pass
+
+    # Also check for standalone mGBA containers (Docker, not K8s)
+    try:
+        result = subprocess.run(
+            ["docker", "ps", "--filter", "ancestor=saiyan-trainer/mgba:latest",
+             "--format", "{{.Names}}\t{{.Status}}\t{{.Ports}}"],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0:
+            for line in result.stdout.strip().split("\n"):
+                if not line:
+                    continue
+                parts = line.split("\t")
+                name = parts[0]
+                status = parts[1] if len(parts) > 1 else ""
+                ports = parts[2] if len(parts) > 2 else ""
+                # Extract VNC port from port mapping
+                vnc_port = None
+                if "6080" in ports:
+                    for mapping in ports.split(","):
+                        mapping = mapping.strip()
+                        if "6080" in mapping and "->" in mapping:
+                            vnc_port = int(mapping.split(":")[1].split("->")[0])
+                pods.append({
+                    "name": name,
+                    "phase": "Running" if "Up" in status else status,
+                    "taskrun": "",
+                    "source": "docker",
+                    "vncPort": vnc_port,
+                })
+    except Exception:
+        pass
+
+    return pods
+
+
+def ensure_port_forward(pod_name):
+    """Start a kubectl port-forward for a pod's noVNC port (6080)."""
+    global next_vnc_port
+    if pod_name in active_forwards:
+        proc = active_forwards[pod_name]["process"]
+        if proc.poll() is None:  # still running
+            return active_forwards[pod_name]["port"]
+        # Process died, clean up
+        del active_forwards[pod_name]
+
+    local_port = next_vnc_port
+    next_vnc_port += 1
+
+    try:
+        proc = subprocess.Popen(
+            ["kubectl", "--context", "kind-saiyan", "port-forward",
+             f"pod/{pod_name}", f"{local_port}:6080"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+        active_forwards[pod_name] = {"port": local_port, "process": proc}
+        return local_port
+    except Exception:
+        return None
 
 
 class DashboardHandler(http.server.BaseHTTPRequestHandler):
@@ -388,6 +535,22 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             data = parse_training_log(LOG_FILE)
             self.wfile.write(json.dumps(data).encode())
+        elif self.path == '/api/pods':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            pods = get_training_pods()
+            # For Docker containers, VNC port is already mapped
+            # For K8s pods, set up port-forward on demand
+            for pod in pods:
+                if pod["source"] == "docker" and pod.get("vncPort"):
+                    pod["vncUrl"] = f"http://localhost:{pod['vncPort']}/vnc.html?autoconnect=true&resize=scale"
+                elif pod["source"] == "tekton" and pod["phase"] == "Running":
+                    port = ensure_port_forward(pod["name"])
+                    if port:
+                        pod["vncUrl"] = f"http://localhost:{port}/vnc.html?autoconnect=true&resize=scale"
+            self.wfile.write(json.dumps(pods).encode())
         else:
             self.send_error(404)
 
