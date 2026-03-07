@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-05T21:41:41.110Z"
+status: executing
+last_updated: "2026-03-07T11:52:05Z"
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** A working, public demonstration that Tekton can orchestrate real ML workloads end-to-end -- using a neuroevolution fighting game bot as a fun, visual example.
-**Current focus:** Phase 4: Tekton Pipeline and MLOps
+**Current focus:** Phase 02.1: On-Screen Visualization & Training Fixes
 
 ## Current Position
 
-Phase: 4 of 4 (Tekton Pipeline and MLOps)
-Plan: 2 of 3 in current phase
-Status: Executing Phase 4
-Last activity: 2026-03-06 -- Completed 04-01-PLAN.md
+Phase: 02.1 (On-Screen Visualization & Training Fixes)
+Plan: 2 of 2 in current phase (COMPLETE)
+Status: All Phase 02.1 plans complete (01 and 02)
+Last activity: 2026-03-07 -- Completed 02.1-01-PLAN.md
 
-Progress: [████████░░] 78% (Phase 4 Plan 1 complete)
+Progress: [█████████░] 90% (Phase 02.1 Plan 2 complete)
 
 ## Performance Metrics
 
@@ -53,6 +53,8 @@ Progress: [████████░░] 78% (Phase 4 Plan 1 complete)
 | Phase 03 P01 | 2m | 1 task | 24 files |
 | Phase 04 P01 | 2m 32s | 2 tasks | 11 files |
 | Phase 04 P03 | 5m17s | 2 tasks | 11 files |
+| Phase 02.1 P01 | 2m50s | 2 tasks | 3 files |
+| Phase 02.1 P02 | 2m52s | 1 task | 3 files |
 
 ## Accumulated Context
 
@@ -79,6 +81,16 @@ Recent decisions affecting current work:
 - [Phase 04]: Pushgateway with run_id grouping key for metrics isolation
 - [Phase 04]: Dashboard ConfigMaps with k8s-sidecar auto-provisioning
 - [Phase 04]: Fight replay recording deferred as stretch goal TODO
+- [Phase 02.1]: Standalone tool scripts go in lua/tools/ directory
+- [Phase 02.1]: RAM scanner uses decrease-weighted scoring for HP-like behavior identification
+- [Phase 02.1]: Project limitations tracked in docs/KNOWN_ISSUES.md with status markers
+- [Phase 02.1]: Dual-renderer architecture for vis: Painter API shapes always, FreeType text primary, pixel_draw.lua fallback
+- [Phase 02.1]: 132x160 semi-transparent overlay at top-left for network display
+- [Phase 02.1]: 5-frame draw interval for overlay updates (~12 FPS visual at 60 FPS game)
+
+### Roadmap Evolution
+
+- Phase 02.1 inserted after Phase 02: On-Screen Visualization & Training Fixes (URGENT)
 
 ### Pending Todos
 
@@ -91,6 +103,5 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-06
-Stopped at: Pivoting from BizHawk to mGBA. BizHawk+Mono incompatible with Apple Silicon. Dockerfile and Lua scripts need porting.
-Resume file: .planning/phases/03/.continue-here.md
+Last session: 2026-03-07
+Stopped at: Completed 02.1-01-PLAN.md (neural network overlay + Docker FreeType)
