@@ -79,6 +79,7 @@ spec:
         params:
           - name: batch-number
             type: string
+            default: "0"
         workspaces:
           - name: data
         results:
