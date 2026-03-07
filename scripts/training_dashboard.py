@@ -11,13 +11,14 @@ Usage:
 Then open http://localhost:8080 in your browser.
 """
 
+import atexit
 import http.server
 import json
 import os
 import re
+import signal
 import sys
 import subprocess
-import threading
 import argparse
 from pathlib import Path
 
@@ -43,43 +44,44 @@ def parse_training_log(log_path):
     time_pattern = re.compile(r'^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})')
 
     current_gen = None
-    for line in open(log_path, 'r'):
-        gen_match = gen_pattern.search(line)
-        if gen_match:
-            time_match = time_pattern.match(line)
-            current_gen = {
-                'generation': int(gen_match.group(1)),
-                'bestFitness': float(gen_match.group(2)),
-                'allTimeBest': float(gen_match.group(3)),
-                'species': int(gen_match.group(4)),
-                'genomes': int(gen_match.group(5)),
-                'timestamp': time_match.group(1) if time_match else '',
-                'hp': None,
-                'combo': None,
-            }
-            generations.append(current_gen)
-            continue
-
-        if current_gen:
-            hp_match = hp_pattern.search(line)
-            if hp_match:
-                current_gen['hp'] = {
-                    'p1Start': int(hp_match.group(1)),
-                    'p1End': int(hp_match.group(2)),
-                    'p1Delta': int(hp_match.group(3)),
-                    'p2Start': int(hp_match.group(4)),
-                    'p2End': int(hp_match.group(5)),
-                    'p2Delta': int(hp_match.group(6)),
-                    'frames': int(hp_match.group(7)),
+    with open(log_path, 'r') as f:
+        for line in f:
+            gen_match = gen_pattern.search(line)
+            if gen_match:
+                time_match = time_pattern.match(line)
+                current_gen = {
+                    'generation': int(gen_match.group(1)),
+                    'bestFitness': float(gen_match.group(2)),
+                    'allTimeBest': float(gen_match.group(3)),
+                    'species': int(gen_match.group(4)),
+                    'genomes': int(gen_match.group(5)),
+                    'timestamp': time_match.group(1) if time_match else '',
+                    'hp': None,
+                    'combo': None,
                 }
+                generations.append(current_gen)
+                continue
 
-            combo_match = combo_pattern.search(line)
-            if combo_match:
-                current_gen['combo'] = {
-                    'entropy': float(combo_match.group(1)),
-                    'unique': int(combo_match.group(2)),
-                    'mashing': combo_match.group(3) == 'true',
-                }
+            if current_gen:
+                hp_match = hp_pattern.search(line)
+                if hp_match:
+                    current_gen['hp'] = {
+                        'p1Start': int(hp_match.group(1)),
+                        'p1End': int(hp_match.group(2)),
+                        'p1Delta': int(hp_match.group(3)),
+                        'p2Start': int(hp_match.group(4)),
+                        'p2End': int(hp_match.group(5)),
+                        'p2Delta': int(hp_match.group(6)),
+                        'frames': int(hp_match.group(7)),
+                    }
+
+                combo_match = combo_pattern.search(line)
+                if combo_match:
+                    current_gen['combo'] = {
+                        'entropy': float(combo_match.group(1)),
+                        'unique': int(combo_match.group(2)),
+                        'mashing': combo_match.group(3) == 'true',
+                    }
 
     # Deduplicate (same gen can appear multiple times from restarts)
     seen = {}
@@ -299,12 +301,6 @@ const hpChart = new Chart(document.getElementById('hpChart'), {
   options: chartDefaults
 });
 
-function escapeText(str) {
-  const div = document.createElement('span');
-  div.textContent = str;
-  return div.textContent;
-}
-
 function updateDashboard(data) {
   if (!data || data.length === 0) return;
   const latest = data[data.length - 1];
@@ -449,6 +445,24 @@ setInterval(pollPods, 10000);
 active_forwards = {}
 next_vnc_port = 7000
 
+
+def cleanup_port_forwards():
+    """Terminate all kubectl port-forward subprocesses."""
+    for name, info in active_forwards.items():
+        try:
+            info["process"].terminate()
+            info["process"].wait(timeout=5)
+        except Exception:
+            try:
+                info["process"].kill()
+            except Exception:
+                pass
+
+
+atexit.register(cleanup_port_forwards)
+signal.signal(signal.SIGTERM, lambda s, f: (cleanup_port_forwards(), sys.exit(0)))
+
+
 def get_training_pods():
     """Discover training pods via kubectl — finds pods with the mGBA image or saiyan label."""
     pods = []
@@ -490,6 +504,14 @@ def ensure_port_forward(pod_name):
             return active_forwards[pod_name]["port"]
         # Process died, clean up
         del active_forwards[pod_name]
+
+    if next_vnc_port > 7999:
+        # Reclaim ports from dead forwards before wrapping
+        dead = [name for name, info in active_forwards.items()
+                if info["process"].poll() is not None]
+        for name in dead:
+            del active_forwards[name]
+        next_vnc_port = 7000
 
     local_port = next_vnc_port
     next_vnc_port += 1
@@ -582,7 +604,6 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
         elif self.path == '/api/stats':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             # Combine local log stats + K8s pod metrics
             local_data = parse_training_log(LOG_FILE)
@@ -612,7 +633,6 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
         elif self.path == '/api/pods':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             pods = get_training_pods()
             for pod in pods:
@@ -624,7 +644,6 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
         elif self.path == '/api/k8s-metrics':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             metrics = get_k8s_metrics()
             self.wfile.write(json.dumps(metrics).encode())
@@ -673,7 +692,7 @@ def _update_log_file(path):
 
 def _start_server(port):
 
-    server = http.server.HTTPServer(('0.0.0.0', port), DashboardHandler)
+    server = http.server.HTTPServer(('127.0.0.1', port), DashboardHandler)
     print(f'Dashboard: http://localhost:{port}')
     print(f'Reading: {LOG_FILE}')
     print('Press Ctrl+C to stop')
