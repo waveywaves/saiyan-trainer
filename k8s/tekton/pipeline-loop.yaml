@@ -124,6 +124,10 @@ spec:
                 "${ROM_PATH}" &
               MGBA_PID=$!
 
+              # Wait for game window to appear, then raise it above the scripting console
+              sleep 3
+              xdotool search --name "Dragon Ball" windowactivate windowraise windowfocus 2>/dev/null || true
+
               # Wait for batch to complete (watch for results file)
               RESULTS_FILE="${RESULTS_DIR}/batch_${BATCH_NUMBER}.txt"
               TIMEOUT=1800  # 30 minutes max per batch
