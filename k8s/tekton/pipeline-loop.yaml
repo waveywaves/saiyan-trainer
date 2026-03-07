@@ -1,0 +1,214 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: saiyan-loop-training
+spec:
+  description: >-
+    NEAT training pipeline using Tekton's native Loop feature.
+    Each loop iteration trains N generations inside an mGBA container,
+    checks convergence via fitness threshold, and continues or stops.
+    Uses $(loop.iteration) for batch tracking and
+    $(loop.previousResult.best-fitness) for convergence detection.
+  params:
+    - name: run-id
+      type: string
+      description: "Unique identifier for this training run"
+    - name: generations-per-batch
+      type: string
+      default: "5"
+      description: "Number of NEAT generations to run per loop iteration"
+    - name: fitness-threshold
+      type: string
+      default: "5000"
+      description: "Target fitness score — loop stops when exceeded"
+    - name: max-batches
+      type: string
+      default: "20"
+      description: "Maximum number of loop iterations (safety limit)"
+  workspaces:
+    - name: training-data
+      description: "PVC for checkpoints, savestates, and results"
+  tasks:
+    # ----------------------------------------------------------------
+    # 1. Setup: prepare workspace with ROM, savestates, Lua scripts
+    # ----------------------------------------------------------------
+    - name: setup
+      workspaces:
+        - name: data
+          workspace: training-data
+      taskSpec:
+        workspaces:
+          - name: data
+        steps:
+          - name: prepare
+            image: alpine:latest
+            script: |
+              #!/bin/sh
+              set -euo pipefail
+              WS="$(workspaces.data.path)"
+              mkdir -p "$WS/output/checkpoints" "$WS/output/results"
+              echo "Workspace prepared at $WS"
+              ls -la "$WS/"
+
+    # ----------------------------------------------------------------
+    # 2. Training Loop: iterate generations using Tekton Loop
+    #    Each iteration runs 5 NEAT generations in an mGBA container.
+    #    Loop terminates when fitness exceeds threshold or max batches.
+    # ----------------------------------------------------------------
+    - name: train-batch
+      runAfter:
+        - setup
+      timeout: "0"    # No timeout — training can take a while
+      workspaces:
+        - name: data
+          workspace: training-data
+      loop:
+        maxIterations: 20    # Overridden by params in practice
+        until: "'$(loop.previousResult.converged)' == 'true'"
+        iterationParams:
+          - name: batch-number
+            value: "$(loop.iteration)"
+      taskSpec:
+        params:
+          - name: batch-number
+            type: string
+        workspaces:
+          - name: data
+        results:
+          - name: best-fitness
+            type: string
+            description: "Best fitness achieved in this batch"
+          - name: generation
+            type: string
+            description: "Current generation number after this batch"
+          - name: converged
+            type: string
+            description: "Whether fitness threshold was met"
+        steps:
+          - name: train
+            image: saiyan-trainer/mgba:latest
+            env:
+              - name: GENERATIONS_PER_BATCH
+                value: "$(params.generations-per-batch)"
+              - name: BATCH_NUMBER
+                value: "$(params.batch-number)"
+              - name: CHECKPOINT_DIR
+                value: "$(workspaces.data.path)/output/checkpoints"
+              - name: RESULTS_DIR
+                value: "$(workspaces.data.path)/output/results"
+              - name: ROM_PATH
+                value: "$(workspaces.data.path)/roms/rom.gba"
+              - name: LUA_SCRIPT
+                value: "$(workspaces.data.path)/lua/training/evaluate_batch.lua"
+              - name: DISPLAY
+                value: ":99"
+              - name: LIBGL_ALWAYS_SOFTWARE
+                value: "1"
+              - name: GALLIUM_DRIVER
+                value: "llvmpipe"
+            script: |
+              #!/bin/bash
+              set -euo pipefail
+
+              # Start Xvfb for headless rendering
+              Xvfb :99 -screen 0 640x480x24 -ac &
+              sleep 2
+
+              # Run mGBA with the batch training script
+              mgba-qt \
+                --script "${LUA_SCRIPT}" \
+                "${ROM_PATH}" &
+              MGBA_PID=$!
+
+              # Wait for batch to complete (watch for results file)
+              RESULTS_FILE="${RESULTS_DIR}/batch_${BATCH_NUMBER}.txt"
+              TIMEOUT=1800  # 30 minutes max per batch
+              ELAPSED=0
+              while [ ! -f "$RESULTS_FILE" ] && [ $ELAPSED -lt $TIMEOUT ]; do
+                sleep 5
+                ELAPSED=$((ELAPSED + 5))
+              done
+
+              # Kill mGBA
+              kill $MGBA_PID 2>/dev/null || true
+              wait $MGBA_PID 2>/dev/null || true
+
+              if [ ! -f "$RESULTS_FILE" ]; then
+                echo "ERROR: Batch ${BATCH_NUMBER} did not produce results within ${TIMEOUT}s"
+                echo -n "0" > $(results.best-fitness.path)
+                echo -n "0" > $(results.generation.path)
+                echo -n "false" > $(results.converged.path)
+                exit 1
+              fi
+
+              # Parse results and write to Tekton results
+              BEST_FITNESS=$(grep "best-fitness=" "$RESULTS_FILE" | cut -d= -f2)
+              GENERATION=$(grep "generation=" "$RESULTS_FILE" | cut -d= -f2)
+              CONVERGED=$(grep "converged=" "$RESULTS_FILE" | cut -d= -f2)
+
+              echo "Batch ${BATCH_NUMBER} complete: fitness=${BEST_FITNESS}, gen=${GENERATION}, converged=${CONVERGED}"
+
+              echo -n "${BEST_FITNESS}" > $(results.best-fitness.path)
+              echo -n "${GENERATION}" > $(results.generation.path)
+              echo -n "${CONVERGED}" > $(results.converged.path)
+
+    # ----------------------------------------------------------------
+    # 3. Store champion: runs after loop converges or hits max iterations
+    # ----------------------------------------------------------------
+    - name: store-champion
+      runAfter:
+        - train-batch
+      workspaces:
+        - name: data
+          workspace: training-data
+      taskSpec:
+        workspaces:
+          - name: data
+        steps:
+          - name: report
+            image: alpine:latest
+            script: |
+              #!/bin/sh
+              set -euo pipefail
+              WS="$(workspaces.data.path)"
+
+              echo "=== Training Complete ==="
+              echo "Checkpoints:"
+              ls -la "$WS/output/checkpoints/" | tail -5
+
+              echo ""
+              echo "Results:"
+              cat "$WS/output/results/"*.txt 2>/dev/null || echo "No results"
+
+              echo ""
+              echo "Training log (last 20 lines):"
+              tail -20 "$WS/output/training.log" 2>/dev/null || echo "No log"
+
+              echo ""
+              echo "Champion genome saved at: $WS/output/checkpoints/latest.json"
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: saiyan-training-
+spec:
+  pipelineRef:
+    name: saiyan-loop-training
+  params:
+    - name: run-id
+      value: "run-001"
+    - name: generations-per-batch
+      value: "5"
+    - name: fitness-threshold
+      value: "5000"
+    - name: max-batches
+      value: "20"
+  workspaces:
+    - name: training-data
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
