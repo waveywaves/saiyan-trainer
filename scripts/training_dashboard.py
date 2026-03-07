@@ -1065,8 +1065,8 @@ function renderGridView(pods) {
     statusDot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:#00ff88;display:inline-block;';
     label.appendChild(statusDot);
     const iframe = document.createElement('iframe');
-    iframe.src = pod.vncUrl;
-    iframe.style.cssText = 'width:100%;height:350px;border:none;';
+    iframe.src = pod.vncUrl + '&show_dot=false&reconnect=true&view_only=true';
+    iframe.style.cssText = 'width:100%;height:400px;border:none;background:#000;';
     iframe.allow = 'autoplay';
     cell.appendChild(label);
     cell.appendChild(iframe);
@@ -1418,7 +1418,7 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
                 if pod["source"] == "tekton" and pod["phase"] == "Running":
                     port = ensure_port_forward(pod["name"])
                     if port:
-                        pod["vncUrl"] = f"http://localhost:{port}/vnc.html?autoconnect=true&resize=scale"
+                        pod["vncUrl"] = f"http://localhost:{port}/vnc_lite.html?autoconnect=true&resize=scale"
             self.wfile.write(json.dumps(pods).encode())
         elif self.path == '/api/k8s-metrics':
             self.send_response(200)
