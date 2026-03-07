@@ -1065,7 +1065,7 @@ function renderGridView(pods) {
     statusDot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:#00ff88;display:inline-block;';
     label.appendChild(statusDot);
     const iframe = document.createElement('iframe');
-    iframe.src = pod.vncUrl + '&show_dot=false&reconnect=true&view_only=true';
+    iframe.src = pod.vncUrl + '&reconnect=true';
     iframe.style.cssText = 'width:100%;height:400px;border:none;background:#000;';
     iframe.allow = 'autoplay';
     cell.appendChild(label);
