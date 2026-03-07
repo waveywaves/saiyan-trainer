@@ -24,7 +24,7 @@ services:
     ports:
       - "6080:6080"
     volumes:
-      - ../roms:/data/roms:ro
+      - ../roms:/data/roms
       - ../savestates:/data/savestates:ro
       - ../lua:/data/lua:ro
       - ../output:/data/output

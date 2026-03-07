@@ -3,8 +3,22 @@
 -- Entry point script loaded by mGBA.
 --
 -- Usage:
---   mGBA: mgba-sdl -s lua/main.lua rom.gba
+--   mGBA: mgba-qt --script lua/main.lua rom.gba
 --   Or: Load this script from mGBA's scripting window (Tools > Scripting)
+
+-- Resolve the project root from this script's location so that
+-- dofile("lua/...") works regardless of the emulator's working directory.
+local script_path = debug.getinfo(1, "S").source:match("^@(.+)$") or ""
+local project_root = script_path:match("^(.*)/lua/main%.lua$") or "."
+if project_root ~= "." then
+    local _dofile = dofile
+    dofile = function(path)
+        if path:sub(1,1) ~= "/" then
+            return _dofile(project_root .. "/" .. path)
+        end
+        return _dofile(path)
+    end
+end
 
 print("========================================")
 print("  Saiyan Trainer - NEAT Fighting Game AI")
@@ -16,64 +30,63 @@ print("")
 -- Load the save state helper to check prerequisites
 local SaveState = dofile("lua/savestate_helper.lua")
 
--- Check for fight-start save state
-if not SaveState.hasFightStartState() then
-    print("ERROR: Fight start save state not found!")
-    print("")
-    print("Before training can begin, you need to create a save state:")
-    print("  1. Launch the ROM in mGBA")
-    print("  2. Go to VS Mode and select your characters")
-    print("  3. Start a fight and wait for the countdown to finish")
-    print("  4. When the player has control, save state to:")
-    print("     " .. SaveState.getFightStartFile())
-    print("  5. Or run in scripting window: dofile('lua/savestate_helper.lua').createFightStartState()")
-    print("")
-    print("Waiting for save state file...")
-
-    -- Wait loop: check every 60 frames (1 second) for the save state
-    while not SaveState.hasFightStartState() do
-        emu:runFrame()
-    end
-
-    print("Save state detected! Starting training...")
+-- Patch emu:runFrame() to yield instead of blocking.
+-- mGBA advances frames automatically; our frame callback resumes
+-- the training coroutine each frame. This keeps Qt's event loop
+-- alive so the display updates during training.
+local _emu_runFrame = emu.runFrame
+function emu:runFrame()
+    coroutine.yield()
 end
 
--- Load the training loop
-local TrainingLoop = dofile("lua/training/loop.lua")
+local training_co = nil
+local frame_count = 0
 
--- ============================================================
--- TRAINING CONFIGURATION
--- Edit these options to customize training behavior.
--- ============================================================
+callbacks:add("frame", function()
+    -- If training coroutine is running, resume it
+    if training_co and coroutine.status(training_co) ~= "dead" then
+        local ok, err = coroutine.resume(training_co)
+        if not ok then
+            console:log("[ERROR] " .. tostring(err))
+            training_co = nil
+        end
+        return
+    end
 
-local options = {
-    -- How many generations to train (0 = run forever)
-    generations = 100,
+    -- Otherwise, wait for save state
+    frame_count = frame_count + 1
+    if frame_count % 60 ~= 1 then return end
 
-    -- Auto-resume from latest checkpoint if available
-    resume = true,
+    if not SaveState.hasFightStartState() then
+        if frame_count == 1 then
+            console:log("Waiting for fight start save state...")
+            console:log("Create one via: Tools > Save State File")
+            console:log("  Save to: " .. SaveState.getFightStartFile())
+        end
+        return
+    end
 
-    -- Set to a specific checkpoint path to resume from that file
-    -- checkpointFile = "checkpoints/gen_50.json",
+    -- Save state found — start training in a coroutine
+    console:log("Save state detected! Starting training...")
 
-    -- Multi-opponent rotation: set to a table of save states
-    -- to train against different opponents/difficulties.
-    -- Each entry: {file = "path/to/state.State", desc = "Description"}
-    opponents = nil,
-    -- Example:
-    -- opponents = {
-    --     {file = "savestates/vs_easy.State",   desc = "Easy CPU"},
-    --     {file = "savestates/vs_medium.State", desc = "Medium CPU"},
-    --     {file = "savestates/vs_hard.State",   desc = "Hard CPU"},
-    -- },
+    local TrainingLoop = dofile("lua/training/loop.lua")
 
-    -- Rotate opponent every N generations (only used if opponents is set)
-    opponentRotation = 10,
-}
+    local options = {
+        generations = 100,
+        resume = true,
+        opponents = nil,
+        opponentRotation = 10,
+    }
 
--- ============================================================
--- START TRAINING
--- ============================================================
+    console:log("Starting NEAT training...")
+    training_co = coroutine.create(function()
+        TrainingLoop.runTraining(options)
+    end)
 
-print("Starting NEAT training...")
-TrainingLoop.runTraining(options)
+    -- First resume to kick it off
+    local ok, err = coroutine.resume(training_co)
+    if not ok then
+        console:log("[ERROR] " .. tostring(err))
+        training_co = nil
+    end
+end)

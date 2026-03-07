@@ -12,8 +12,12 @@
 
 local SaveStateHelper = {}
 
+-- Resolve project root from this script's location
+local script_path = debug.getinfo(1, "S").source:match("^@(.+)$") or ""
+local project_root = script_path:match("^(.*)/lua/savestate_helper%.lua$") or "."
+
 -- Directory where save state files are stored.
-local SAVE_STATE_DIR = "savestates/"
+local SAVE_STATE_DIR = project_root .. "/savestates/"
 
 -- File path for the fight-start save state.
 -- This state should capture the exact frame where a fight begins:
@@ -45,7 +49,6 @@ function SaveStateHelper.resetFight()
         return false, msg
     end
     emu:loadStateFile(FIGHT_START_FILE)
-    console:log("Fight reset from save state")
     return true
 end
 

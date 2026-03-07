@@ -19,15 +19,15 @@ FROM debian:bookworm-slim AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential cmake git ca-certificates \
     libsdl2-dev \
-    qtbase5-dev qtmultimedia5-dev libqt5opengl5-dev \
+    qtbase5-dev qtmultimedia5-dev libqt5opengl5-dev qttools5-dev \
     liblua5.4-dev \
     libpng-dev zlib1g-dev \
     libsqlite3-dev libelf-dev \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Clone and build mGBA from latest stable tag
-ARG MGBA_VERSION=0.10.5
+# Clone and build mGBA from master (--script flag requires post-0.10.5 code)
+ARG MGBA_VERSION=master
 RUN git clone --depth 1 --branch ${MGBA_VERSION} \
         https://github.com/mgba-emu/mgba.git /tmp/mgba \
     && mkdir /tmp/mgba/build && cd /tmp/mgba/build \
@@ -39,6 +39,7 @@ RUN git clone --depth 1 --branch ${MGBA_VERSION} \
         -DUSE_LIBZIP=OFF \
         -DUSE_PNG=ON \
         -DUSE_LUA=ON \
+        -DSKIP_GIT=ON \
     && make -j$(nproc) \
     && make install
 
@@ -59,7 +60,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     x11vnc \
     fluxbox \
     mesa-utils libgl1-mesa-dri libegl1-mesa libgles2 \
-    wget git python3 xz-utils ca-certificates \
+    wget git python3 xz-utils ca-certificates procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy built mGBA from builder
@@ -82,6 +83,9 @@ RUN git clone --depth 1 https://github.com/novnc/noVNC.git /usr/share/novnc \
 
 # Create data directories for volume mounts
 RUN mkdir -p /data/roms /data/savestates /data/output /data/lua
+
+# Bake save states into the image
+COPY savestates/ /data/savestates/
 
 # Copy s6-overlay service definitions
 COPY rootfs/ /

@@ -9,7 +9,7 @@ local Config = {}
 
 -- Population
 Config.Population = 300
-Config.Inputs = 11          -- 10 game state + 1 bias
+Config.Inputs = 9           -- 8 game state + 1 bias
 Config.Outputs = 8          -- from Controller.getNumOutputs()
 Config.MaxNodes = 1000000
 

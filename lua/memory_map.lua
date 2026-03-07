@@ -4,12 +4,29 @@
 -- IMPORTANT:
 --   * This file is the ONLY place where memory addresses are defined.
 --     No other Lua file should contain hardcoded addresses.
---   * All addresses below are PLACEHOLDERS in the 0x03000000 (IWRAM / System Bus)
---     range.  Replace them with real addresses discovered via RAM Search.
 --   * mGBA reads use direct GBA memory addresses (no domain parameter needed).
 --   * The `verified` field tracks which addresses have been confirmed against
 --     the running game.  Set to true after you verify each one.
---   * Refer to docs/MEMORY_MAP.md for discovery instructions and notes.
+--   * Sources & methodology:
+--       - CodeBreaker raw codes: 8300274A (Ki), 33002826 (Round), 3300273E/3F (HP)
+--       - GameShark v1/v2 encrypted codes decrypted via TEA algorithm:
+--           B8CE7B32 38AB9D94 -> 0300273F 000000FF (Max HP)
+--           3EDD7118 5A58A127 -> 0300273E 000000FF (Infinite HP)
+--           CB1E748C 4A108A48 -> 03002738 00000003 (Power Level)
+--           DC4B8E1A AF073E65 -> 1300274A 00006400 (Ki 100%)
+--           B9298C5C 769EFDFB -> 13004DB4 0000270F (Shop Points)
+--           4734D246 90FE8764 -> D4000130 000003FB (Select button check)
+--           9E69DA42 35B196E8 -> 03002826 00000000 (Instant Win)
+--       - Old VBA code: github.com/waveywaves/VisualBoyAdvance-LUA (tested in-game)
+--       - French cheat database (jeuxvideo.com forum): 3300273E, 3300273F codes
+--       - Refer to docs/MEMORY_MAP.md for discovery instructions.
+--
+-- P1 struct appears to be based around 0x03002700 in IWRAM (0x03000000-0x03007FFF).
+-- Known offsets from base: +0x38=power_level, +0x3E=current_hp, +0x3F=max_hp,
+--                          +0x4A=ki_u16 (low=fractional, high=integer 0-100).
+-- P2 struct offset from P1 is NOT YET CONFIRMED. Old VBA code used scattered
+-- addresses (P2 HP at 0x03004C30, P2 Ki at 0x03002833) which don't follow a
+-- simple struct offset pattern -- they may be correct or may be display/shadow copies.
 --
 -- Usage (mGBA):
 --   local mm = dofile("lua/memory_map.lua")
@@ -21,77 +38,91 @@
 local MemoryMap = {
 
     --------------- Player 1 ---------------
+    -- Confirmed via GameShark TEA decryption + CodeBreaker raw codes.
+    -- HP is stored as a u8 (0-255), NOT as a percentage.
+    -- Ki is stored as u16: high byte = integer 0-100, low byte = fractional.
+
     p1_health = {
-        addr     = 0x03002700,
-        size     = 2,
-        type     = "u16",
-        desc     = "P1 Health (expected range 0-100 or 0-1000)",
-        verified = false,
+        addr     = 0x0300273E,
+        size     = 1,
+        type     = "u8",
+        desc     = "P1 Current HP (0-255). Confirmed by GS decryption + CB 3300273E + old VBA code.",
+        verified = true,   -- GS decrypt: 3EDD7118 5A58A127 -> 0300273E 000000FF
+    },
+    p1_health_max = {
+        addr     = 0x0300273F,
+        size     = 1,
+        type     = "u8",
+        desc     = "P1 Max HP (0-255). GS 'Max Vie' writes 0xFF here once; game caps current HP at this.",
+        verified = true,   -- GS decrypt: B8CE7B32 38AB9D94 -> 0300273F 000000FF
     },
     p1_ki = {
         addr     = 0x0300274A,
         size     = 2,
         type     = "u16",
-        desc     = "P1 Ki Energy (known seed from CodeBreaker 8300274A)",
-        verified = true,  -- cheat-code seed
+        desc     = "P1 Ki as u16 (high byte=integer 0-100%, low byte=fractional). CB 8300274A 6400.",
+        verified = true,   -- CodeBreaker 8300274A + GS decrypt DC4B8E1A -> 1300274A 00006400
     },
-    p1_x = {
-        addr     = 0x03002710,
-        size     = 2,
-        type     = "s16",
-        desc     = "P1 X Position (signed, increases moving right)",
-        verified = false,
-    },
-    p1_y = {
-        addr     = 0x03002712,
-        size     = 2,
-        type     = "s16",
-        desc     = "P1 Y Position (signed, changes during jumps/flight)",
-        verified = false,
-    },
-    p1_state = {
-        addr     = 0x03002720,
+    p1_ki_int = {
+        addr     = 0x0300274B,
         size     = 1,
         type     = "u8",
-        desc     = "P1 Attack/Animation State (state machine byte)",
-        verified = false,
+        desc     = "P1 Ki integer only (0-100 = 0%-100%). Read this for simpler Ki percentage.",
+        verified = true,   -- high byte of Ki u16; 0x64=100 confirmed by cheat code
+    },
+    p1_power_level = {
+        addr     = 0x03002738,
+        size     = 1,
+        type     = "u8",
+        desc     = "P1 Power Level / transformation form (0=base, 3=max). GS 'All Chars Stronger'.",
+        verified = true,   -- GS decrypt: CB1E748C 4A108A48 -> 03002738 00000003
     },
 
     --------------- Player 2 ---------------
+    -- These addresses come from old VBA code that was tested in-game.
+    -- They do NOT follow a simple struct offset from P1 (P2 HP is at 0x03004C30,
+    -- far from P1 HP at 0x0300273E). They may be display copies or the game may
+    -- use non-contiguous storage. Needs visual confirmation in mGBA.
+
     p2_health = {
-        addr     = 0x03002800,
-        size     = 2,
-        type     = "u16",
-        desc     = "P2 Health",
-        verified = false,
-    },
-    p2_ki = {
-        addr     = 0x03002802,
-        size     = 2,
-        type     = "u16",
-        desc     = "P2 Ki Energy",
-        verified = false,
-    },
-    p2_x = {
-        addr     = 0x03002810,
-        size     = 2,
-        type     = "s16",
-        desc     = "P2 X Position",
-        verified = false,
-    },
-    p2_y = {
-        addr     = 0x03002812,
-        size     = 2,
-        type     = "s16",
-        desc     = "P2 Y Position",
-        verified = false,
-    },
-    p2_state = {
-        addr     = 0x03002820,
+        addr     = 0x03004C30,
         size     = 1,
         type     = "u8",
-        desc     = "P2 Attack/Animation State",
-        verified = false,
+        desc     = "P2 Health (0-255, from old VBA code; different memory region than P1)",
+        verified = false,  -- from old VBA code, needs visual confirmation
+    },
+    p2_ki = {
+        addr     = 0x03002833,
+        size     = 2,
+        type     = "u16",
+        desc     = "P2 Ki Energy (from old VBA code)",
+        verified = false,  -- from old VBA code, needs visual confirmation
+    },
+
+    --------------- Spatial (relative distances) ---------------
+    -- These come from old VBA code. The game may pre-compute relative distances
+    -- rather than storing absolute X/Y per player.
+
+    dist_x = {
+        addr     = 0x03002CD4,
+        size     = 2,
+        type     = "u16",
+        desc     = "X distance between players (0-630 range, from old VBA code)",
+        verified = false,  -- from old VBA code, needs visual confirmation
+    },
+    dist_y = {
+        addr     = 0x03002CD8,
+        size     = 2,
+        type     = "u16",
+        desc     = "Y distance between players (0-630 range, from old VBA code)",
+        verified = false,  -- from old VBA code, needs visual confirmation
+    },
+    polar_dir = {
+        addr     = 0x0300288C,
+        size     = 1,
+        type     = "u8",
+        desc     = "Direction quadrant (0-8=NE, 8-16=SE, 16-24=SW, 24-32=NW, from old VBA code)",
+        verified = false,  -- from old VBA code, needs visual confirmation
     },
 
     --------------- Match State ---------------
@@ -99,15 +130,31 @@ local MemoryMap = {
         addr     = 0x03002826,
         size     = 1,
         type     = "u8",
-        desc     = "Round/match outcome state (known seed from CodeBreaker 33002826)",
-        verified = true,  -- cheat-code seed
+        desc     = "Round/match outcome state. 0x00=instant win trigger. CB 33002826 + GS decrypted.",
+        verified = true,   -- CodeBreaker 33002826 + GS decrypt: 9E69DA42 35B196E8 -> 03002826 00000000
     },
     timer = {
         addr     = 0x03002830,
         size     = 2,
         type     = "u16",
-        desc     = "Match timer countdown value",
+        desc     = "Match timer countdown value -- PLACEHOLDER, needs RAM search",
         verified = false,
+    },
+
+    --------------- Shop / Unlock State (not used during fights) ---------------
+    shop_points = {
+        addr     = 0x03004DB4,
+        size     = 2,
+        type     = "u16",
+        desc     = "Shop points (0-9999). GS decrypt: B9298C5C 769EFDFB -> 13004DB4 0000270F.",
+        verified = true,   -- GS decrypted
+    },
+    unlock_flags = {
+        addr     = 0x03004D58,
+        size     = 2,  -- first of 4 consecutive u16 entries (4D58, 4D5A, 4D5C, 4D5E)
+        type     = "u16",
+        desc     = "Unlock flags base addr. CB slide 43004D58 FFFF x4 inc2 unlocks everything.",
+        verified = true,   -- CodeBreaker 43004D58 FFFF 00000004 0002
     },
 }
 

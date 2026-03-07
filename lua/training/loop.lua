@@ -27,8 +27,10 @@ local Species = dofile("lua/neat/species.lua")
 local Crossover = dofile("lua/neat/crossover.lua")
 local Mutation = dofile("lua/neat/mutation.lua")
 
--- Wire up Pool dependencies
+-- Wire up module dependencies
 Pool.setDependencies(Genome, Species, Crossover, Mutation, Network)
+Mutation.setDependencies(Network, Genome)
+Crossover.setDependencies(Genome)
 
 -- Memory map for direct health reads during evaluation
 local MemoryMap = dofile("lua/memory_map.lua")

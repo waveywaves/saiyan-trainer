@@ -8,30 +8,27 @@
 
 local Inputs = {}
 
--- Constants for normalization (best guesses, may need tuning after RAM discovery)
-local MAX_HEALTH = 1000
-local MAX_KI = 100
-local SCREEN_WIDTH = 240
-local SCREEN_HEIGHT = 160
+-- Constants for normalization (based on old VBA code + address analysis)
+local MAX_HEALTH = 255     -- u8 health byte (0-255)
+local MAX_KI = 25600       -- CodeBreaker sets 0x6400 = 25600 for 100%
+local MAX_DIST = 630       -- old VBA code normalizes distances to 630
 local MAX_TIMER = 99
+local DIR_MAX = 32         -- polar direction: 32 discrete units = full circle
 
 -- Number of game state inputs (not counting bias)
-Inputs.NUM_INPUTS = 10
+Inputs.NUM_INPUTS = 8
 
 -- Input labels for visualization
 local INPUT_LABELS = {
     "P1HP", "P2HP", "P1Ki", "P2Ki",
-    "DistX", "DistY",
-    "P1Atk", "P2Atk",
-    "RoundState", "Timer",
+    "DistX", "DistY", "Dir", "RoundState",
 }
 
 --- Get the normalized game input vector from memory.
--- Reads game state via MemoryMap and normalizes to [0,1] or [-1,1].
--- Appends a bias value of 1.0 as the 11th element.
--- @return table  Array of 11 numbers (10 game state + 1 bias).
+-- Reads game state via MemoryMap and normalizes to [0,1].
+-- Appends a bias value of 1.0 as the last element.
+-- @return table  Array of 9 numbers (8 game state + 1 bias).
 function Inputs.getGameInputs()
-    -- Load memory map module
     local mm = dofile("lua/memory_map.lua")
     local state = mm.readAll()
 
@@ -49,30 +46,20 @@ function Inputs.getGameInputs()
     -- P2 Ki normalized to [0, 1]
     inputs[4] = (state.p2_ki or 0) / MAX_KI
 
-    -- Signed distance X normalized to [-1, 1]
-    local p1x = state.p1_x or 0
-    local p2x = state.p2_x or 0
-    inputs[5] = (p2x - p1x) / SCREEN_WIDTH
+    -- X distance normalized to [0, 1]
+    inputs[5] = (state.dist_x or 0) / MAX_DIST
 
-    -- Signed distance Y normalized to [-1, 1]
-    local p1y = state.p1_y or 0
-    local p2y = state.p2_y or 0
-    inputs[6] = (p2y - p1y) / SCREEN_HEIGHT
+    -- Y distance normalized to [0, 1]
+    inputs[6] = (state.dist_y or 0) / MAX_DIST
 
-    -- P1 attack state normalized to [0, 1]
-    inputs[7] = (state.p1_state or 0) / 255
-
-    -- P2 attack state normalized to [0, 1]
-    inputs[8] = (state.p2_state or 0) / 255
+    -- Direction normalized to [0, 1]
+    inputs[7] = (state.polar_dir or 0) / DIR_MAX
 
     -- Round state normalized to [0, 1]
-    inputs[9] = (state.round_state or 0) / 255
-
-    -- Timer normalized to [0, 1]
-    inputs[10] = (state.timer or 0) / MAX_TIMER
+    inputs[8] = (state.round_state or 0) / 255
 
     -- Bias node (always 1.0)
-    inputs[11] = 1.0
+    inputs[9] = 1.0
 
     return inputs
 end
