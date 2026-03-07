@@ -91,7 +91,11 @@ end
 --- Get the ordered list of button names.
 -- @return table  Array of button name strings.
 function Controller.getButtonNames()
-    return ButtonNames
+    local copy = {}
+    for i, name in ipairs(ButtonNames) do
+        copy[i] = name
+    end
+    return copy
 end
 
 --- Get the number of output neurons needed for NEAT configuration.

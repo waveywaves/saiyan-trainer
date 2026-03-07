@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Clone and build mGBA from master (--script flag requires post-0.10.5 code)
+# WARNING: builds from master -- pin to a specific commit for production
 ARG MGBA_VERSION=master
 RUN git clone --depth 1 --branch ${MGBA_VERSION} \
         https://github.com/mgba-emu/mgba.git /tmp/mgba \
@@ -43,6 +44,10 @@ RUN git clone --depth 1 --branch ${MGBA_VERSION} \
         -DSKIP_GIT=ON \
     && make -j$(nproc) \
     && make install
+
+# Clone noVNC + websockify in builder so git is not needed in the runtime image
+RUN git clone --depth 1 https://github.com/novnc/noVNC.git /usr/share/novnc \
+    && git clone --depth 1 https://github.com/novnc/websockify.git /usr/share/novnc/utils/websockify
 
 # --- Runtime stage ---
 FROM debian:bookworm-slim
@@ -62,7 +67,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     x11vnc \
     fluxbox \
     mesa-utils libgl1-mesa-dri libegl1-mesa libgles2 \
-    wget git python3 xz-utils ca-certificates procps \
+    wget python3 xz-utils ca-certificates procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy built mGBA from builder
@@ -78,10 +83,9 @@ RUN S6_ARCH=$(case "${TARGETARCH}" in arm64) echo "aarch64";; amd64) echo "x86_6
     && tar -C / -Jxpf /tmp/s6-overlay-arch.tar.xz \
     && rm /tmp/s6-overlay-*.tar.xz
 
-# Install noVNC + websockify for browser-based VNC access
-RUN git clone --depth 1 https://github.com/novnc/noVNC.git /usr/share/novnc \
-    && git clone --depth 1 https://github.com/novnc/websockify.git /usr/share/novnc/utils/websockify \
-    && ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html
+# Copy noVNC + websockify from builder (avoids git in runtime image, saves ~30MB)
+COPY --from=builder /usr/share/novnc /usr/share/novnc
+RUN ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html
 
 # Create data directories for volume mounts
 RUN mkdir -p /data/roms /data/savestates /data/output /data/lua

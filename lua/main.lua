@@ -27,6 +27,8 @@ end
 -- Set up file-based logging (mGBA print/console:log don't reach docker stdout)
 local output_dir = project_root .. "/output"
 os.execute("mkdir -p " .. output_dir)
+-- Log file is intentionally kept open for the lifetime of the process.
+-- flush() is called on every write (see log() below) to ensure data is persisted.
 local log_file = io.open(output_dir .. "/training.log", "a")
 
 local function log(msg)

@@ -89,7 +89,17 @@ The current `fight_start.ss0` save state has P1 HP=44, P2 HP=72, round_state=71.
 
 ## Resolved Issues
 
-_No resolved issues yet. Items will move here when fixed._
+### Crossover Bug
+**Status:** RESOLVED
+The crossover implementation had incorrect gene alignment causing malformed offspring genomes. Fixed by properly matching genes by innovation number during crossover.
+
+### Innovation Tracking
+**Status:** RESOLVED
+Innovation numbers were not being tracked globally across generations, leading to duplicate innovation numbers for different structural mutations. Fixed by persisting the global innovation counter.
+
+### Fitness Reporting Bug
+**Status:** RESOLVED
+Fitness scores were not being reported correctly after evaluation, causing the pool to retain stale fitness values. Fixed by ensuring fitness is written back to the genome immediately after evaluation completes.
 
 ## Notes
 

@@ -75,7 +75,7 @@ In the mGBA window through noVNC:
 Load a minimal save-state helper script:
 
 ```bash
-docker exec saiyan-trainer mgba-qt --script /data/lua/save_helper.lua /data/roms/your-rom.gba
+docker exec saiyan-trainer mgba-qt --script /data/lua/savestate_helper.lua /data/roms/your-rom.gba
 ```
 
 ### 6. Copy the Save State (if using Option B)

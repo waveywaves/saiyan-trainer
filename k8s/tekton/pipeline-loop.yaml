@@ -1,3 +1,4 @@
+# Requires Tekton Pipeline with Loop feature (feat/pipeline-iteration branch)
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
@@ -31,6 +32,9 @@ spec:
   tasks:
     # ----------------------------------------------------------------
     # 1. Setup: prepare workspace with ROM, savestates, Lua scripts
+    #    NOTE: ROM, savestates, and Lua scripts must be pre-loaded on
+    #    the PVC before this pipeline runs (e.g., via a setup Job or
+    #    manual copy). This step only creates output directories.
     # ----------------------------------------------------------------
     - name: setup
       workspaces:
@@ -63,7 +67,10 @@ spec:
         - name: data
           workspace: training-data
       loop:
-        maxIterations: 20    # Overridden by params in practice
+        # NOTE: maxIterations cannot use $(params.max-batches) because the loop
+        # field does not support param substitution. Update this literal value
+        # manually or via a pipeline-generation script.
+        maxIterations: 20
         until: "'$(loop.previousResult.converged)' == 'true'"
         iterationParams:
           - name: batch-number
@@ -87,6 +94,7 @@ spec:
         steps:
           - name: train
             image: saiyan-trainer/mgba:latest
+            imagePullPolicy: Never
             env:
               - name: GENERATIONS_PER_BATCH
                 value: "$(params.generations-per-batch)"
@@ -109,6 +117,13 @@ spec:
             script: |
               #!/bin/bash
               set -euo pipefail
+
+              # Validate ROM exists before starting
+              if [ ! -f "${ROM_PATH}" ]; then
+                echo "ERROR: ROM not found at ${ROM_PATH}"
+                echo "Ensure the ROM is pre-loaded on the PVC before running the pipeline."
+                exit 1
+              fi
 
               # Start Xvfb + x11vnc + noVNC for live observation
               Xvfb :99 -screen 0 1024x768x24 -ac &

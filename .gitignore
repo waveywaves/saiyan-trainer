@@ -8,3 +8,8 @@ roms/*.rar
 # Save states - binary, machine-specific, should not be committed
 savestates/*.State
 savestates/*.state
+savestates/*.ss0
+docker/savestates/*.ss0
+
+# Training output
+output/

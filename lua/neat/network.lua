@@ -40,7 +40,10 @@ function Network.generateNetwork(genome, config)
         network.neurons[config.MaxNodes + o] = { incoming = {}, value = 0.0 }
     end
 
-    -- Sort genes by out neuron for consistent evaluation order
+    -- Sort genes by out neuron for consistent evaluation order.
+    -- NOTE: This intentionally mutates genome.genes in-place (MarI/O pattern).
+    -- Sorting by `out` ensures neurons are wired in a deterministic order,
+    -- which is required for consistent forward-pass evaluation.
     table.sort(genome.genes, function(a, b)
         return a.out < b.out
     end)

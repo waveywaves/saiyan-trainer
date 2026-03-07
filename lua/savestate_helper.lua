@@ -45,7 +45,7 @@ end
 function SaveStateHelper.resetFight()
     if not SaveStateHelper.hasFightStartState() then
         local msg = "Fight start save state not found at: " .. FIGHT_START_FILE
-        console:log(msg)
+        pcall(function() console:log(msg) end)
         return false, msg
     end
     emu:loadStateFile(FIGHT_START_FILE)
@@ -62,7 +62,7 @@ end
 -- The saved state captures the entire emulator state at that frame.
 function SaveStateHelper.createFightStartState()
     emu:saveStateFile(FIGHT_START_FILE)
-    console:log("Fight start save state created at: " .. FIGHT_START_FILE)
+    pcall(function() console:log("Fight start save state created at: " .. FIGHT_START_FILE) end)
 end
 
 --- Get the path to the fight-start save state file.

@@ -21,7 +21,6 @@ local Fitness = {}
 local W_OFFENSE = 3.0        -- reward per HP of damage dealt to P2 (primary signal)
 local W_KO_BONUS = 2000      -- bonus for KO'ing the opponent
 local W_TIMEOUT_WIN = 200    -- small bonus for timeout win (not the goal)
-local W_LOSE_PENALTY = 0     -- no penalty: P1 HP is confounded by char switching
 local W_STALL = 1.0          -- penalty per frame of stalling
 local W_SPEED_BONUS = 0.5    -- bonus per frame SAVED (faster KO = more bonus)
 
@@ -89,7 +88,6 @@ function Fitness.getWeights()
         offense = W_OFFENSE,
         koBonus = W_KO_BONUS,
         timeoutWin = W_TIMEOUT_WIN,
-        losePenalty = W_LOSE_PENALTY,
         stall = W_STALL,
         speedBonus = W_SPEED_BONUS,
     }
@@ -97,7 +95,7 @@ end
 
 --- Get the round result constants.
 function Fitness.getRoundConstants()
-    return Fitness.WIN, Fitness.LOSE, Fitness.DRAW, Fitness.IN_PROGRESS
+    return Fitness.WIN, Fitness.LOSE, Fitness.DRAW, Fitness.IN_PROGRESS, Fitness.KO
 end
 
 return Fitness

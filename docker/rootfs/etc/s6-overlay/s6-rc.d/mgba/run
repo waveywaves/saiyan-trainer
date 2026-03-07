@@ -1,9 +1,17 @@
 #!/command/with-contenv bash
+# NOTE: This s6 run script is used for Docker standalone (docker run) usage.
+# When running under Tekton, the pipeline step's script overrides the
+# ENTRYPOINT (/init), bypassing s6 entirely. See k8s/tekton/pipeline.yaml.
+
 export DISPLAY=:99
 # Force Mesa software rendering (llvmpipe) for headless OpenGL
 export LIBGL_ALWAYS_SOFTWARE=1
 export MESA_GL_VERSION_OVERRIDE=3.3
 export GALLIUM_DRIVER=llvmpipe
+
+# Validate that the ROM file exists before launching
+test -f "${ROM_PATH:-/data/roms/rom.gba}" || { echo "ROM not found: ${ROM_PATH:-/data/roms/rom.gba}"; sleep infinity; }
+
 exec mgba-qt \
     --script "${LUA_SCRIPT:-/data/lua/main.lua}" \
     "${ROM_PATH:-/data/roms/rom.gba}"

@@ -233,6 +233,11 @@ function Species.adjustCompatibilityThreshold(pool, config)
     if config.DeltaThreshold < config.ThresholdFloor then
         config.DeltaThreshold = config.ThresholdFloor
     end
+    -- Upper bound prevents runaway threshold growth that would collapse
+    -- all genomes into a single species, eliminating diversity pressure.
+    if config.DeltaThreshold > 5.0 then
+        config.DeltaThreshold = 5.0
+    end
 end
 
 return Species
