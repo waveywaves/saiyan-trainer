@@ -187,6 +187,10 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
     <div id="pod-selector" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
   </div>
   <div id="no-pods-msg" style="color:#666;padding:20px;text-align:center;">Scanning for training pods...</div>
+  <div id="active-pod-label" style="display:none;padding:8px 0;font-size:12px;font-family:monospace;">
+    <span style="color:#888;">Connected to:</span> <span id="active-pod-name" style="color:#00ff88;"></span>
+    <span id="active-pod-source" style="color:#666;margin-left:10px;"></span>
+  </div>
   <iframe id="vnc-frame" src="" allow="autoplay"></iframe>
 </div>
 
@@ -371,6 +375,17 @@ async function poll() {
 }
 
 let currentPodUrl = null;
+let currentPodName = null;
+
+function setActivePod(name, source, url) {
+  currentPodUrl = url;
+  currentPodName = name;
+  const label = document.getElementById('active-pod-label');
+  document.getElementById('active-pod-name').textContent = name;
+  document.getElementById('active-pod-source').textContent = '(' + source + ')';
+  label.style.display = 'block';
+  document.getElementById('vnc-frame').src = url;
+}
 
 async function pollPods() {
   try {
@@ -403,8 +418,7 @@ async function pollPods() {
         btn.style.color = '#000';
       }
       btn.addEventListener('click', function() {
-        currentPodUrl = pod.vncUrl;
-        frame.src = pod.vncUrl;
+        setActivePod(label, pod.source, pod.vncUrl);
         pollPods(); // refresh button styles
       });
       selector.appendChild(btn);
@@ -412,8 +426,9 @@ async function pollPods() {
 
     // Auto-select first pod if none selected
     if (!currentPodUrl && runningPods.length > 0) {
-      currentPodUrl = runningPods[0].vncUrl;
-      frame.src = currentPodUrl;
+      const first = runningPods[0];
+      const label = first.taskrun || first.name;
+      setActivePod(label, first.source, first.vncUrl);
     }
   } catch (e) {
     // silently fail
