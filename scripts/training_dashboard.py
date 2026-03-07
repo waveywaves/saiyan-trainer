@@ -506,6 +506,72 @@ def ensure_port_forward(pod_name):
         return None
 
 
+def get_k8s_metrics():
+    """Read metrics.json from training pods via kubectl exec."""
+    metrics = []
+    try:
+        # Find running training pods
+        result = subprocess.run(
+            ["kubectl", "--context", "kind-saiyan", "get", "pods",
+             "-l", "app.kubernetes.io/managed-by=tekton-pipelines",
+             "-o", "jsonpath={range .items[?(@.status.phase=='Running')]}{.metadata.name}{' '}{end}"],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0:
+            for pod_name in result.stdout.strip().split():
+                if "train-batch" not in pod_name:
+                    continue
+                # Read metrics.json from pod
+                exec_result = subprocess.run(
+                    ["kubectl", "--context", "kind-saiyan", "exec", pod_name,
+                     "--", "cat", "/workspace/data/output/results/metrics.json"],
+                    capture_output=True, text=True, timeout=10
+                )
+                if exec_result.returncode == 0 and exec_result.stdout.strip():
+                    try:
+                        pod_metrics = json.loads(exec_result.stdout)
+                        for m in pod_metrics:
+                            m["pod"] = pod_name
+                        metrics.extend(pod_metrics)
+                    except json.JSONDecodeError:
+                        pass
+    except Exception:
+        pass
+    return metrics
+
+
+def format_prometheus_metrics(metrics):
+    """Format metrics as Prometheus exposition format."""
+    lines = [
+        "# HELP saiyan_best_fitness Best fitness score per generation",
+        "# TYPE saiyan_best_fitness gauge",
+        "# HELP saiyan_avg_fitness Average fitness score per generation",
+        "# TYPE saiyan_avg_fitness gauge",
+        "# HELP saiyan_species_count Number of NEAT species per generation",
+        "# TYPE saiyan_species_count gauge",
+        "# HELP saiyan_generation Current generation number",
+        "# TYPE saiyan_generation counter",
+        "# HELP saiyan_p2_damage Damage dealt to opponent by best genome",
+        "# TYPE saiyan_p2_damage gauge",
+        "# HELP saiyan_gene_count Number of genes in best genome",
+        "# TYPE saiyan_gene_count gauge",
+    ]
+    for m in metrics:
+        batch = m.get("batch", 0)
+        gen = m.get("generation", 0)
+        pod = m.get("pod", "local")
+        labels = f'batch="{batch}",generation="{gen}",pod="{pod}"'
+        lines.append(f'saiyan_best_fitness{{{labels}}} {m.get("bestFitness", 0)}')
+        lines.append(f'saiyan_avg_fitness{{{labels}}} {m.get("avgFitness", 0):.2f}')
+        lines.append(f'saiyan_species_count{{{labels}}} {m.get("species", 0)}')
+        lines.append(f'saiyan_generation{{{labels}}} {gen}')
+        if m.get("p2HpStart") is not None and m.get("p2HpEnd") is not None:
+            damage = m["p2HpStart"] - m["p2HpEnd"]
+            lines.append(f'saiyan_p2_damage{{{labels}}} {damage}')
+        lines.append(f'saiyan_gene_count{{{labels}}} {m.get("geneCount", 0)}')
+    return "\n".join(lines) + "\n"
+
+
 class DashboardHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/' or self.path == '/index.html':
@@ -518,24 +584,71 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            data = parse_training_log(LOG_FILE)
-            self.wfile.write(json.dumps(data).encode())
+            # Combine local log stats + K8s pod metrics
+            local_data = parse_training_log(LOG_FILE)
+            k8s_data = get_k8s_metrics()
+            # Convert k8s metrics to same format as local stats
+            for m in k8s_data:
+                local_data.append({
+                    "generation": m.get("generation", 0),
+                    "bestFitness": m.get("bestFitness", 0),
+                    "allTimeBest": m.get("maxFitness", 0),
+                    "species": m.get("species", 0),
+                    "genomes": m.get("genomes", 0),
+                    "timestamp": m.get("timestamp", ""),
+                    "hp": {
+                        "p1Start": m.get("p1HpStart", 0),
+                        "p1End": m.get("p1HpEnd", 0),
+                        "p1Delta": (m.get("p1HpEnd", 0) or 0) - (m.get("p1HpStart", 0) or 0),
+                        "p2Start": m.get("p2HpStart", 0),
+                        "p2End": m.get("p2HpEnd", 0),
+                        "p2Delta": (m.get("p2HpEnd", 0) or 0) - (m.get("p2HpStart", 0) or 0),
+                        "frames": m.get("frames", 0),
+                    } if m.get("p1HpStart") is not None else None,
+                    "combo": None,
+                    "source": "k8s:" + m.get("pod", ""),
+                })
+            self.wfile.write(json.dumps(local_data).encode())
         elif self.path == '/api/pods':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             pods = get_training_pods()
-            # For Docker containers, VNC port is already mapped
-            # For K8s pods, set up port-forward on demand
             for pod in pods:
-                if pod["source"] == "docker" and pod.get("vncPort"):
-                    pod["vncUrl"] = f"http://localhost:{pod['vncPort']}/vnc.html?autoconnect=true&resize=scale"
-                elif pod["source"] == "tekton" and pod["phase"] == "Running":
+                if pod["source"] == "tekton" and pod["phase"] == "Running":
                     port = ensure_port_forward(pod["name"])
                     if port:
                         pod["vncUrl"] = f"http://localhost:{port}/vnc.html?autoconnect=true&resize=scale"
             self.wfile.write(json.dumps(pods).encode())
+        elif self.path == '/api/k8s-metrics':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            metrics = get_k8s_metrics()
+            self.wfile.write(json.dumps(metrics).encode())
+        elif self.path == '/metrics':
+            # Prometheus scrape endpoint
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain; version=0.0.4')
+            self.end_headers()
+            local_data = parse_training_log(LOG_FILE)
+            k8s_data = get_k8s_metrics()
+            all_metrics = k8s_data
+            # Add local metrics too
+            for g in local_data:
+                if g.get("bestFitness") is not None:
+                    m = {
+                        "batch": 0, "generation": g["generation"],
+                        "bestFitness": g["bestFitness"], "avgFitness": 0,
+                        "species": g["species"], "pod": "local",
+                    }
+                    if g.get("hp"):
+                        m["p2HpStart"] = g["hp"].get("p2Start")
+                        m["p2HpEnd"] = g["hp"].get("p2End")
+                    all_metrics.append(m)
+            self.wfile.write(format_prometheus_metrics(all_metrics).encode())
         else:
             self.send_error(404)
 
