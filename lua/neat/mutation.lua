@@ -180,13 +180,14 @@ end
 -- @param config     table  The NEAT config table.
 -- @param innovation table  The innovation tracker.
 function Mutation.mutate(genome, config, innovation)
-    -- Perturb mutation rates
+    -- Perturb mutation rates, then clamp to [0.001, 5.0] to prevent drift to zero or infinity
     for key, value in pairs(genome.mutationRates) do
         if math.random() < 0.5 then
             genome.mutationRates[key] = value * 0.95
         else
             genome.mutationRates[key] = value * 1.05263
         end
+        genome.mutationRates[key] = math.max(0.001, math.min(5.0, genome.mutationRates[key]))
     end
 
     -- Weight mutations

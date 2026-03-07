@@ -80,8 +80,11 @@ function Network.evaluateNetwork(network, inputs, config)
         network.neurons[i].value = inputs[i]
     end
 
-    -- Evaluate all non-input neurons
-    -- We need to iterate in a consistent order. Collect neuron IDs and sort.
+    -- Evaluate all non-input neurons.
+    -- A single pass with numeric sort doesn't guarantee topological order for
+    -- deep hidden chains (hidden neuron IDs are assigned incrementally but
+    -- connections can point backward). Two passes handle chains up to 2 hidden
+    -- layers deep, which covers most NEAT networks.
     local neuronIds = {}
     for id, _ in pairs(network.neurons) do
         if id > config.Inputs then
@@ -90,17 +93,19 @@ function Network.evaluateNetwork(network, inputs, config)
     end
     table.sort(neuronIds)
 
-    for _, id in ipairs(neuronIds) do
-        local neuron = network.neurons[id]
-        local sum = 0
-        for _, incoming in ipairs(neuron.incoming) do
-            local other = network.neurons[incoming.into]
-            if other then
-                sum = sum + incoming.weight * other.value
+    for _pass = 1, 2 do
+        for _, id in ipairs(neuronIds) do
+            local neuron = network.neurons[id]
+            local sum = 0
+            for _, incoming in ipairs(neuron.incoming) do
+                local other = network.neurons[incoming.into]
+                if other then
+                    sum = sum + incoming.weight * other.value
+                end
             end
-        end
-        if #neuron.incoming > 0 then
-            neuron.value = Network.sigmoid(sum)
+            if #neuron.incoming > 0 then
+                neuron.value = Network.sigmoid(sum)
+            end
         end
     end
 

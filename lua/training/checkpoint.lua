@@ -23,6 +23,14 @@ function Checkpoint.setInnovation(innovationModule)
     Innovation = innovationModule
 end
 
+-- Safe mkdir: validate path contains only safe characters to prevent shell injection.
+local function safeMkdir(dir)
+    if dir:match("[^%w/%.%-%_]") then
+        error("safeMkdir: path contains unsafe characters: " .. dir)
+    end
+    os.execute("mkdir -p '" .. dir .. "'")
+end
+
 -- Log helper compatible with mGBA and standalone Lua
 local function log(msg)
     if console and type(console) == "userdata" then
@@ -86,7 +94,7 @@ function Checkpoint.saveCheckpoint(pool, filename)
     -- Ensure parent directory exists
     local dir = filename:match("(.+)/[^/]+$")
     if dir then
-        os.execute("mkdir -p " .. dir)
+        safeMkdir(dir)
     end
 
     local file, err = io.open(filename, "w")

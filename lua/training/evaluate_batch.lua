@@ -21,17 +21,26 @@ if project_root ~= "." then
     end
 end
 
+-- Safe mkdir: validate path contains only safe characters to prevent shell injection.
+local function safeMkdir(dir)
+    if dir:match("[^%w/%.%-%_]") then
+        error("safeMkdir: path contains unsafe characters: " .. dir)
+    end
+    os.execute("mkdir -p '" .. dir .. "'")
+end
+
 local GENERATIONS_PER_BATCH = tonumber(os.getenv("GENERATIONS_PER_BATCH") or "5")
 local CHECKPOINT_DIR = os.getenv("CHECKPOINT_DIR") or (project_root .. "/output/checkpoints")
 local RESULTS_DIR = os.getenv("RESULTS_DIR") or (project_root .. "/output/results")
 local BATCH_NUMBER = tonumber(os.getenv("BATCH_NUMBER") or "0")
+local FITNESS_THRESHOLD = tonumber(os.getenv("FITNESS_THRESHOLD") or "3000")
 
-os.execute("mkdir -p " .. CHECKPOINT_DIR)
-os.execute("mkdir -p " .. RESULTS_DIR)
+safeMkdir(CHECKPOINT_DIR)
+safeMkdir(RESULTS_DIR)
 
 -- Logging
 local output_dir = project_root .. "/output"
-os.execute("mkdir -p " .. output_dir)
+safeMkdir(output_dir)
 local log_file = io.open(output_dir .. "/training.log", "a")
 
 local function log(msg)
@@ -160,7 +169,7 @@ callbacks:add("frame", function()
             rf:write("generation=" .. tostring(trainer.pool.generation) .. "\n")
             rf:write("species=" .. tostring(#trainer.pool.species) .. "\n")
             rf:write("elapsed=" .. tostring(elapsed) .. "\n")
-            rf:write("converged=" .. (trainer.pool.maxFitness > 5000 and "true" or "false") .. "\n")
+            rf:write("converged=" .. (trainer.pool.maxFitness > FITNESS_THRESHOLD and "true" or "false") .. "\n")
             rf:close()
         end
 

@@ -24,9 +24,17 @@ if project_root ~= "." then
     end
 end
 
+-- Safe mkdir: validate path contains only safe characters to prevent shell injection.
+local function safeMkdir(dir)
+    if dir:match("[^%w/%.%-%_]") then
+        error("safeMkdir: path contains unsafe characters: " .. dir)
+    end
+    os.execute("mkdir -p '" .. dir .. "'")
+end
+
 -- Set up file-based logging (mGBA print/console:log don't reach docker stdout)
 local output_dir = project_root .. "/output"
-os.execute("mkdir -p " .. output_dir)
+safeMkdir(output_dir)
 local log_file = io.open(output_dir .. "/training.log", "a")
 
 local function log(msg)
