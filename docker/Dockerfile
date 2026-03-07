@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     liblua5.4-dev \
     libpng-dev zlib1g-dev \
     libsqlite3-dev libelf-dev \
+    libfreetype-dev \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
@@ -56,6 +57,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     liblua5.4-0 \
     libpng16-16 zlib1g \
     libsqlite3-0 libelf1 \
+    libfreetype6 \
     xvfb \
     x11vnc \
     fluxbox \
