@@ -76,17 +76,27 @@ function Genome.copyGenome(genome)
     return copy
 end
 
---- Create a minimal genome with direct input-to-output connections.
--- This is the seed genome for population initialization.
+--- Create a minimal genome with a small random subset of connections.
+-- NEAT should start minimal and grow complexity through mutations.
+-- Starting fully connected (Inputs*Outputs=72 genes) defeats the purpose
+-- of topology search -- instead we seed ~12 random links.
 -- @param config table       The NEAT config table.
 -- @param innovation table   The innovation tracker module.
--- @return table  A basic genome with Inputs*Outputs random connections.
+-- @return table  A basic genome with a sparse random subset of connections.
 function Genome.basicGenome(config, innovation)
     local genome = Genome.newGenome(config)
     genome.maxneuron = config.Inputs
 
-    for o = 1, config.Outputs do
-        for i = 1, config.Inputs do
+    -- Start with a small random subset of connections (not fully connected)
+    -- NEAT grows topology through mutations — starting minimal is key
+    local numInitialLinks = math.min(12, config.Inputs * config.Outputs)
+    local attempted = {}
+    for _ = 1, numInitialLinks do
+        local i = math.random(1, config.Inputs)
+        local o = math.random(1, config.Outputs)
+        local key = i .. "_" .. o
+        if not attempted[key] then
+            attempted[key] = true
             local gene = Genome.newGene()
             gene.into = i
             gene.out = config.MaxNodes + o
