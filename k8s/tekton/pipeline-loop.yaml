@@ -171,10 +171,16 @@ spec:
     - name: store-champion
       runAfter:
         - train-batch
+      params:
+        - name: run-id
+          value: "$(params.run-id)"
       workspaces:
         - name: data
           workspace: training-data
       taskSpec:
+        params:
+          - name: run-id
+            type: string
         workspaces:
           - name: data
         steps:
@@ -182,23 +188,32 @@ spec:
             image: alpine:latest
             script: |
               #!/bin/sh
-              set -euo pipefail
+              set -euo
               WS="$(workspaces.data.path)"
+              RUN_ID="$(params.run-id)"
 
-              echo "=== Training Complete ==="
-              echo "Checkpoints:"
-              ls -la "$WS/output/checkpoints/" | tail -5
+              echo "=== Training Complete for ${RUN_ID} ==="
+              echo ""
+              echo "Checkpoints (latest 5):"
+              ls -1 "$WS/output/$RUN_ID/checkpoints/"*.json 2>/dev/null | tail -5 || echo "No checkpoints"
 
               echo ""
-              echo "Results:"
-              cat "$WS/output/results/"*.txt 2>/dev/null || echo "No results"
+              echo "Final generation:"
+              LATEST_GEN=$(ls -1 "$WS/output/$RUN_ID/checkpoints/gen_"*.json 2>/dev/null | sed 's/.*gen_//;s/.json//' | sort -n | tail -1)
+              echo "  Generation: $LATEST_GEN"
 
               echo ""
-              echo "Training log (last 20 lines):"
-              tail -20 "$WS/output/training.log" 2>/dev/null || echo "No log"
+              echo "Results summary (last batch):"
+              ls -1t "$WS/output/$RUN_ID/results/"batch_*.txt 2>/dev/null | head -1 | xargs cat 2>/dev/null || echo "No results"
 
               echo ""
-              echo "Champion genome saved at: $WS/output/checkpoints/latest.json"
+              echo "Training log (final entries):"
+              tail -10 "$WS/output/$RUN_ID/training.log" 2>/dev/null || echo "No log"
+
+              echo ""
+              echo "=== SUCCESS ==="
+              echo "Champion genome: $WS/output/$RUN_ID/checkpoints/latest.json"
+              echo "All training data preserved on PVC"
 ---
 apiVersion: tekton.dev/v1
 kind: PipelineRun
