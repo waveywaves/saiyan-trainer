@@ -1632,18 +1632,49 @@ setInterval(pollPods, 10000);
 # Track active port-forwards: {pod_name: {"port": local_port, "process": Popen}}
 active_forwards = {}
 
-# Cache for expensive kubectl calls
+# Cache for expensive kubectl calls — persisted to disk
 import time as _time
 _cache = {}
 _CACHE_TTL = 30  # seconds
+_CACHE_DIR = PROJECT_ROOT / ".dashboard-cache"
+
+def _cache_path(key):
+    return _CACHE_DIR / f"{key}.json"
+
+def _load_disk_cache(key):
+    p = _cache_path(key)
+    if p.exists():
+        try:
+            with open(p, "r") as f:
+                obj = json.load(f)
+            _cache[key] = {"data": obj["data"], "ts": obj["ts"]}
+            return True
+        except (json.JSONDecodeError, KeyError):
+            pass
+    return False
+
+def _save_disk_cache(key, data, ts):
+    _CACHE_DIR.mkdir(exist_ok=True)
+    with open(_cache_path(key), "w") as f:
+        json.dump({"data": data, "ts": ts}, f)
 
 def cached_fetch(key, fetch_fn):
-    """Return cached result if fresh, otherwise fetch and cache."""
+    """Serve from memory or disk cache, refresh when TTL expires."""
     now = _time.time()
+    # In-memory hit
     if key in _cache and now - _cache[key]["ts"] < _CACHE_TTL:
         return _cache[key]["data"]
+    # Cold start: load disk cache as if it were fresh (instant first page load)
+    if key not in _cache and _load_disk_cache(key):
+        _cache[key]["ts"] = now  # treat disk data as fresh
+        return _cache[key]["data"]
+    # TTL expired or no cache: fetch fresh
     data = fetch_fn()
-    _cache[key] = {"data": data, "ts": now}
+    if data:
+        _cache[key] = {"data": data, "ts": now}
+        _save_disk_cache(key, data, now)
+    elif key in _cache:
+        return _cache[key]["data"]
     return data
 next_vnc_port = 7000
 

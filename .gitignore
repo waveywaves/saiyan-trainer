@@ -14,3 +14,4 @@ docker/savestates/*.ss0
 # Training output
 output/
 .claude/worktrees/
+.dashboard-cache/
