@@ -117,5 +117,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-07
-Stopped at: Completed 02.1-02-PLAN.md (P2 HP RAM scanner, save state guide, known issues). Phase 02.1 fully complete.
+Last session: 2026-03-08
+Stopped at: Session resumed, proceeding to check training status and continue improvements
+Resume file: .planning/phases/02.1-on-screen-visualization-training-fixes/.continue-here.md
