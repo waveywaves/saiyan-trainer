@@ -136,5 +136,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Training fixes deployed, tuned run active (saiyan-tuned-8xgl4), blog post phase to be planned
+Stopped at: 4 islands training (Gen 9+, plateaued at 115 fitness / 20 P2 damage), dashboard updated with Islands page, Phase 5 (Blog Post) to be planned
 Resume file: .planning/phases/02.1-on-screen-visualization-training-fixes/.continue-here.md
