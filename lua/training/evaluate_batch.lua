@@ -38,8 +38,9 @@ local FITNESS_THRESHOLD = tonumber(os.getenv("FITNESS_THRESHOLD") or "3000")
 safeMkdir(CHECKPOINT_DIR)
 safeMkdir(RESULTS_DIR)
 
--- Logging
-local output_dir = project_root .. "/output"
+-- Derive output_dir from CHECKPOINT_DIR (strips /checkpoints suffix)
+-- This ensures each run-id gets isolated checkpoints, logs, and metrics.
+local output_dir = CHECKPOINT_DIR:match("^(.*)/checkpoints$") or (project_root .. "/output")
 safeMkdir(output_dir)
 local log_file = io.open(output_dir .. "/training.log", "a")
 
