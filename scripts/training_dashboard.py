@@ -634,6 +634,10 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       Live Training
     </a>
+    <a class="nav-item" data-page="islands" onclick="navigate('islands', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><line x1="9" y1="6" x2="15" y2="6" stroke-dasharray="2"/><line x1="6" y1="9" x2="6" y2="15" stroke-dasharray="2"/><line x1="18" y1="9" x2="18" y2="15" stroke-dasharray="2"/><line x1="9" y1="18" x2="15" y2="18" stroke-dasharray="2"/></svg>
+      Islands
+    </a>
     <div class="nav-section-label">Infrastructure</div>
     <a class="nav-item" data-page="pods" onclick="navigate('pods', this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="6" cy="7.5" r="1" fill="currentColor"/><circle cx="10" cy="7.5" r="1" fill="currentColor"/></svg>
@@ -763,6 +767,51 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
     </div>
   </div>
 
+  <!-- ======================== ISLANDS PAGE ======================== -->
+  <div class="page" id="page-islands">
+    <div class="page-header">
+      <h2>Island Comparison</h2>
+      <button onclick="downloadIslandData()" style="background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;">Export JSON</button>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-title">Fitness Progression (All Islands)</div>
+      <canvas id="island-fitness-chart" height="300"></canvas>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-title">P2 Damage Dealt (All Islands)</div>
+      <canvas id="island-damage-chart" height="250"></canvas>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-title">Species Count (All Islands)</div>
+      <canvas id="island-species-chart" height="250"></canvas>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-title">Island Summary</div>
+      <table style="width:100%;border-collapse:collapse;color:var(--fg);" id="island-table">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border);">
+            <th style="padding:8px;text-align:left;">Island</th>
+            <th style="padding:8px;text-align:right;">Gens</th>
+            <th style="padding:8px;text-align:right;">Best Fitness</th>
+            <th style="padding:8px;text-align:right;">P2 Damage</th>
+            <th style="padding:8px;text-align:right;">Species</th>
+            <th style="padding:8px;text-align:right;">Entropy</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-title">Raw Island Data</div>
+      <div class="json-viewer" id="json-island-viewer">Loading...</div>
+    </div>
+  </div>
+
   <!-- ======================== METRICS PAGE ======================== -->
   <div class="page" id="page-metrics">
     <div class="page-header">
@@ -797,6 +846,7 @@ function navigate(page, el) {
   document.getElementById('page-' + page).classList.add('active');
   if (el) el.classList.add('active');
   if (page === 'metrics') loadMetrics();
+  if (page === 'islands') loadIslands();
   closeSidebar();
 }
 function toggleSidebar() {
@@ -1209,6 +1259,131 @@ async function loadMetrics() {
   }
 }
 
+/* ---- Island Comparison ---- */
+const ISLAND_COLORS = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#a29bfe', '#fd79a8'];
+let islandCharts = {};
+let islandData = null;
+
+async function loadIslands() {
+  try {
+    const res = await fetch('/api/island-stats');
+    islandData = await res.json();
+    renderIslandCharts(islandData);
+    renderIslandTable(islandData);
+    document.getElementById('json-island-viewer').textContent = JSON.stringify(islandData, null, 2);
+  } catch (e) {
+    document.getElementById('json-island-viewer').textContent = 'Failed: ' + e.message;
+  }
+}
+
+function renderIslandCharts(data) {
+  const islands = Object.keys(data).sort();
+  if (!islands.length) return;
+
+  // Fitness chart
+  const fitnessCtx = document.getElementById('island-fitness-chart');
+  if (islandCharts.fitness) islandCharts.fitness.destroy();
+  islandCharts.fitness = new Chart(fitnessCtx, {
+    type: 'line',
+    data: {
+      datasets: islands.map((id, i) => ({
+        label: id,
+        data: data[id].map(g => ({x: g.generation, y: g.bestFitness})),
+        borderColor: ISLAND_COLORS[i % ISLAND_COLORS.length],
+        backgroundColor: ISLAND_COLORS[i % ISLAND_COLORS.length] + '22',
+        borderWidth: 2, tension: 0.3, fill: true, pointRadius: 3,
+      }))
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {type: 'linear', title: {display: true, text: 'Generation'}},
+        y: {title: {display: true, text: 'Best Fitness'}, beginAtZero: true}
+      },
+      plugins: {legend: {labels: {color: '#aab'}}}
+    }
+  });
+
+  // Damage chart
+  const damageCtx = document.getElementById('island-damage-chart');
+  if (islandCharts.damage) islandCharts.damage.destroy();
+  islandCharts.damage = new Chart(damageCtx, {
+    type: 'line',
+    data: {
+      datasets: islands.map((id, i) => ({
+        label: id,
+        data: data[id].filter(g => g.hp).map(g => ({x: g.generation, y: Math.abs(g.hp.p2Delta)})),
+        borderColor: ISLAND_COLORS[i % ISLAND_COLORS.length],
+        borderWidth: 2, tension: 0.3, pointRadius: 3,
+      }))
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {type: 'linear', title: {display: true, text: 'Generation'}},
+        y: {title: {display: true, text: 'P2 Damage Dealt'}, beginAtZero: true}
+      },
+      plugins: {legend: {labels: {color: '#aab'}}}
+    }
+  });
+
+  // Species chart
+  const speciesCtx = document.getElementById('island-species-chart');
+  if (islandCharts.species) islandCharts.species.destroy();
+  islandCharts.species = new Chart(speciesCtx, {
+    type: 'line',
+    data: {
+      datasets: islands.map((id, i) => ({
+        label: id,
+        data: data[id].map(g => ({x: g.generation, y: g.species})),
+        borderColor: ISLAND_COLORS[i % ISLAND_COLORS.length],
+        borderWidth: 2, tension: 0.3, pointRadius: 3,
+      }))
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {type: 'linear', title: {display: true, text: 'Generation'}},
+        y: {title: {display: true, text: 'Species Count'}, beginAtZero: true}
+      },
+      plugins: {legend: {labels: {color: '#aab'}}}
+    }
+  });
+}
+
+function renderIslandTable(data) {
+  const tbody = document.querySelector('#island-table tbody');
+  tbody.textContent = '';
+  for (const [id, gens] of Object.entries(data).sort()) {
+    if (!gens.length) continue;
+    const last = gens[gens.length - 1];
+    const bestFitness = Math.max(...gens.map(g => g.bestFitness));
+    const maxDamage = Math.max(...gens.filter(g => g.hp).map(g => Math.abs(g.hp.p2Delta)));
+    const entropy = last.combo ? last.combo.entropy.toFixed(2) : '--';
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--border)';
+    const cells = [id, gens.length, bestFitness.toFixed(1), maxDamage, last.species, entropy];
+    cells.forEach((val, ci) => {
+      const td = document.createElement('td');
+      td.style.padding = '8px';
+      td.textContent = val;
+      if (ci === 0) td.style.fontWeight = '600';
+      if (ci > 0) td.style.textAlign = 'right';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  }
+}
+
+function downloadIslandData() {
+  if (!islandData) return;
+  const blob = new Blob([JSON.stringify(islandData, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'island-training-data.json';
+  a.click();
+}
+
 /* ---- Init ---- */
 poll();
 pollPods();
@@ -1308,37 +1483,109 @@ def ensure_port_forward(pod_name):
 
 
 def get_k8s_metrics():
-    """Read metrics.json from training pods via kubectl exec."""
+    """Read metrics.json from all island directories on training pods."""
     metrics = []
     try:
-        # Find running training pods
         result = subprocess.run(
             ["kubectl", "--context", "kind-saiyan", "get", "pods",
              "-l", "app.kubernetes.io/managed-by=tekton-pipelines",
              "-o", "jsonpath={range .items[?(@.status.phase=='Running')]}{.metadata.name}{' '}{end}"],
             capture_output=True, text=True, timeout=5
         )
-        if result.returncode == 0:
-            for pod_name in result.stdout.strip().split():
-                if "train-batch" not in pod_name:
-                    continue
-                # Read metrics.json from pod
-                exec_result = subprocess.run(
-                    ["kubectl", "--context", "kind-saiyan", "exec", pod_name,
-                     "--", "cat", "/workspace/data/output/results/metrics.json"],
-                    capture_output=True, text=True, timeout=10
-                )
-                if exec_result.returncode == 0 and exec_result.stdout.strip():
-                    try:
-                        pod_metrics = json.loads(exec_result.stdout)
-                        for m in pod_metrics:
-                            m["pod"] = pod_name
-                        metrics.extend(pod_metrics)
-                    except json.JSONDecodeError:
-                        pass
+        if result.returncode != 0:
+            return metrics
+        pods = [p for p in result.stdout.strip().split() if "train-batch" in p]
+        if not pods:
+            return metrics
+        # Use first available pod to scan all island directories on shared PVC
+        pod_name = pods[0]
+        find_result = subprocess.run(
+            ["kubectl", "--context", "kind-saiyan", "exec", pod_name,
+             "--", "find", "/workspace/data/output", "-name", "metrics.json", "-path", "*/results/*"],
+            capture_output=True, text=True, timeout=10
+        )
+        if find_result.returncode != 0:
+            return metrics
+        for metrics_path in find_result.stdout.strip().split("\n"):
+            if not metrics_path:
+                continue
+            # Extract island ID from path (e.g., /workspace/data/output/island-1/results/metrics.json)
+            parts = metrics_path.split("/")
+            island_id = "unknown"
+            for i, part in enumerate(parts):
+                if part == "output" and i + 1 < len(parts) and parts[i + 1] != "results":
+                    island_id = parts[i + 1]
+                    break
+            exec_result = subprocess.run(
+                ["kubectl", "--context", "kind-saiyan", "exec", pod_name,
+                 "--", "cat", metrics_path],
+                capture_output=True, text=True, timeout=10
+            )
+            if exec_result.returncode == 0 and exec_result.stdout.strip():
+                try:
+                    pod_metrics = json.loads(exec_result.stdout)
+                    for m in pod_metrics:
+                        m["pod"] = pod_name
+                        m["island"] = island_id
+                    metrics.extend(pod_metrics)
+                except json.JSONDecodeError:
+                    pass
     except Exception:
         pass
     return metrics
+
+
+def get_island_stats():
+    """Read training logs from all island directories for comparison."""
+    islands = {}
+    try:
+        result = subprocess.run(
+            ["kubectl", "--context", "kind-saiyan", "get", "pods",
+             "-l", "app.kubernetes.io/managed-by=tekton-pipelines",
+             "-o", "jsonpath={range .items[?(@.status.phase=='Running')]}{.metadata.name}{' '}{end}"],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode != 0:
+            return islands
+        pods = [p for p in result.stdout.strip().split() if "train-batch" in p]
+        if not pods:
+            return islands
+        pod_name = pods[0]
+        # Find all training logs
+        find_result = subprocess.run(
+            ["kubectl", "--context", "kind-saiyan", "exec", pod_name,
+             "--", "find", "/workspace/data/output", "-name", "training.log"],
+            capture_output=True, text=True, timeout=10
+        )
+        if find_result.returncode != 0:
+            return islands
+        for log_path in find_result.stdout.strip().split("\n"):
+            if not log_path:
+                continue
+            parts = log_path.split("/")
+            island_id = "default"
+            for i, part in enumerate(parts):
+                if part == "output" and i + 1 < len(parts) and parts[i + 1] != "training.log":
+                    island_id = parts[i + 1]
+                    break
+            exec_result = subprocess.run(
+                ["kubectl", "--context", "kind-saiyan", "exec", pod_name,
+                 "--", "cat", log_path],
+                capture_output=True, text=True, timeout=10
+            )
+            if exec_result.returncode == 0:
+                # Write to temp file and parse
+                import tempfile
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.log', delete=False) as f:
+                    f.write(exec_result.stdout)
+                    tmp_path = Path(f.name)
+                gens = parse_training_log(tmp_path)
+                tmp_path.unlink()
+                if gens:
+                    islands[island_id] = gens
+    except Exception:
+        pass
+    return islands
 
 
 def format_prometheus_metrics(metrics):
@@ -1420,6 +1667,12 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
                     if port:
                         pod["vncUrl"] = f"http://localhost:{port}/vnc_lite.html?autoconnect=true&resize=scale"
             self.wfile.write(json.dumps(pods).encode())
+        elif self.path == '/api/island-stats':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            islands = get_island_stats()
+            self.wfile.write(json.dumps(islands).encode())
         elif self.path == '/api/k8s-metrics':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
