@@ -1069,6 +1069,1525 @@
           "hiddenNodes": 7
         }
       }
+    },
+    {
+      "timestamp": "2026-03-08T11:44:31Z",
+      "islands": {
+        "island-1": {
+          "generation": 48,
+          "bestFitness": 171.6,
+          "maxDamage": 38,
+          "species": 5,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 53,
+          "hiddenNodes": 4
+        },
+        "island-2": {
+          "generation": 48,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 5,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 59,
+          "hiddenNodes": 9
+        },
+        "island-3": {
+          "generation": 48,
+          "bestFitness": 191.3,
+          "maxDamage": 45,
+          "species": 3,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 106,
+          "hiddenNodes": 19
+        },
+        "island-4": {
+          "generation": 48,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 4,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 76,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T11:49:33Z",
+      "islands": {
+        "island-1": {
+          "generation": 49,
+          "bestFitness": 171.6,
+          "maxDamage": 38,
+          "species": 2,
+          "entropy": 1.16,
+          "uniquePatterns": 8,
+          "p1Delta": 27,
+          "geneCount": 55,
+          "hiddenNodes": 4
+        },
+        "island-2": {
+          "generation": 49,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 1,
+          "entropy": 0.88,
+          "uniquePatterns": 17,
+          "p1Delta": 22,
+          "geneCount": 59,
+          "hiddenNodes": 9
+        },
+        "island-3": {
+          "generation": 49,
+          "bestFitness": 237.1,
+          "maxDamage": 60,
+          "species": 1,
+          "entropy": 2.13,
+          "uniquePatterns": 18,
+          "p1Delta": -6,
+          "geneCount": 109,
+          "hiddenNodes": 20
+        },
+        "island-4": {
+          "generation": 49,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 1.92,
+          "uniquePatterns": 20,
+          "p1Delta": 27,
+          "geneCount": 76,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T11:54:34Z",
+      "islands": {
+        "island-1": {
+          "generation": 50,
+          "bestFitness": 171.6,
+          "maxDamage": 38,
+          "species": 2,
+          "entropy": 1.16,
+          "uniquePatterns": 8,
+          "p1Delta": 27,
+          "geneCount": 52,
+          "hiddenNodes": 3
+        },
+        "island-2": {
+          "generation": 50,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 3,
+          "entropy": 0.88,
+          "uniquePatterns": 17,
+          "p1Delta": 22,
+          "geneCount": 59,
+          "hiddenNodes": 9
+        },
+        "island-3": {
+          "generation": 50,
+          "bestFitness": 237.2,
+          "maxDamage": 60,
+          "species": 1,
+          "entropy": 2.25,
+          "uniquePatterns": 25,
+          "p1Delta": -6,
+          "geneCount": 112,
+          "hiddenNodes": 21
+        },
+        "island-4": {
+          "generation": 50,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 3,
+          "entropy": 1.92,
+          "uniquePatterns": 20,
+          "p1Delta": 27,
+          "geneCount": 76,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T11:59:36Z",
+      "islands": {
+        "island-1": {
+          "generation": 52,
+          "bestFitness": 171.6,
+          "maxDamage": 38,
+          "species": 10,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 63,
+          "hiddenNodes": 6
+        },
+        "island-2": {
+          "generation": 51,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 3,
+          "entropy": 0.88,
+          "uniquePatterns": 17,
+          "p1Delta": 22,
+          "geneCount": 59,
+          "hiddenNodes": 9
+        },
+        "island-3": {
+          "generation": 51,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 1.62,
+          "uniquePatterns": 13,
+          "p1Delta": -5,
+          "geneCount": 114,
+          "hiddenNodes": 21
+        },
+        "island-4": {
+          "generation": 51,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 4,
+          "entropy": 1.92,
+          "uniquePatterns": 20,
+          "p1Delta": 27,
+          "geneCount": 76,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T12:04:38Z",
+      "islands": {
+        "island-1": {
+          "generation": 53,
+          "bestFitness": 171.6,
+          "maxDamage": 38,
+          "species": 1,
+          "entropy": 1.11,
+          "uniquePatterns": 4,
+          "p1Delta": 27,
+          "geneCount": 63,
+          "hiddenNodes": 6
+        },
+        "island-2": {
+          "generation": 53,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 1,
+          "entropy": 0.88,
+          "uniquePatterns": 17,
+          "p1Delta": 22,
+          "geneCount": 59,
+          "hiddenNodes": 9
+        },
+        "island-3": {
+          "generation": 52,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 10,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 114,
+          "hiddenNodes": 21
+        },
+        "island-4": {
+          "generation": 52,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 3,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 77,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T12:09:39Z",
+      "islands": {
+        "island-1": {
+          "generation": 54,
+          "bestFitness": 171.6,
+          "maxDamage": 38,
+          "species": 4,
+          "entropy": 1.11,
+          "uniquePatterns": 4,
+          "p1Delta": 27,
+          "geneCount": 63,
+          "hiddenNodes": 6
+        },
+        "island-2": {
+          "generation": 54,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 2,
+          "entropy": 0.88,
+          "uniquePatterns": 17,
+          "p1Delta": 22,
+          "geneCount": 59,
+          "hiddenNodes": 9
+        },
+        "island-3": {
+          "generation": 54,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 1.62,
+          "uniquePatterns": 13,
+          "p1Delta": -5,
+          "geneCount": 114,
+          "hiddenNodes": 21
+        },
+        "island-4": {
+          "generation": 54,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 2.27,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T12:14:41Z",
+      "islands": {
+        "island-1": {
+          "generation": 55,
+          "bestFitness": 171.6,
+          "maxDamage": 38,
+          "species": 2,
+          "entropy": 1.16,
+          "uniquePatterns": 9,
+          "p1Delta": 27,
+          "geneCount": 65,
+          "hiddenNodes": 6
+        },
+        "island-2": {
+          "generation": 55,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 3,
+          "entropy": 0.88,
+          "uniquePatterns": 17,
+          "p1Delta": 22,
+          "geneCount": 59,
+          "hiddenNodes": 9
+        },
+        "island-3": {
+          "generation": 55,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 3,
+          "entropy": 1.62,
+          "uniquePatterns": 13,
+          "p1Delta": -5,
+          "geneCount": 114,
+          "hiddenNodes": 21
+        },
+        "island-4": {
+          "generation": 55,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 2.27,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T12:19:42Z",
+      "islands": {
+        "island-1": {
+          "generation": 56,
+          "bestFitness": 171.6,
+          "maxDamage": 38,
+          "species": 11,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 65,
+          "hiddenNodes": 6
+        },
+        "island-2": {
+          "generation": 56,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 4,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 59,
+          "hiddenNodes": 9
+        },
+        "island-3": {
+          "generation": 56,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 5,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 114,
+          "hiddenNodes": 21
+        },
+        "island-4": {
+          "generation": 56,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 6,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T12:24:44Z",
+      "islands": {
+        "island-1": {
+          "generation": 58,
+          "bestFitness": 171.6,
+          "maxDamage": 38,
+          "species": 1,
+          "entropy": 1.16,
+          "uniquePatterns": 9,
+          "p1Delta": 27,
+          "geneCount": 65,
+          "hiddenNodes": 6
+        },
+        "island-2": {
+          "generation": 57,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 1,
+          "entropy": 0.88,
+          "uniquePatterns": 17,
+          "p1Delta": 22,
+          "geneCount": 59,
+          "hiddenNodes": 9
+        },
+        "island-3": {
+          "generation": 57,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 1.64,
+          "uniquePatterns": 13,
+          "p1Delta": -5,
+          "geneCount": 122,
+          "hiddenNodes": 24
+        },
+        "island-4": {
+          "generation": 57,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 2.27,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T12:29:45Z",
+      "islands": {
+        "island-1": {
+          "generation": 59,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 12,
+          "entropy": 1.06,
+          "uniquePatterns": 12,
+          "p1Delta": 27,
+          "geneCount": 68,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 59,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 3,
+          "entropy": 1.16,
+          "uniquePatterns": 7,
+          "p1Delta": 27,
+          "geneCount": 82,
+          "hiddenNodes": 11
+        },
+        "island-3": {
+          "generation": 58,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 3,
+          "entropy": 1.64,
+          "uniquePatterns": 13,
+          "p1Delta": -5,
+          "geneCount": 122,
+          "hiddenNodes": 24
+        },
+        "island-4": {
+          "generation": 58,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 2.27,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T12:34:47Z",
+      "islands": {
+        "island-1": {
+          "generation": 60,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 4,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 68,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 60,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 7,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 82,
+          "hiddenNodes": 11
+        },
+        "island-3": {
+          "generation": 60,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 8,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 60,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 8,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T12:39:49Z",
+      "islands": {
+        "island-1": {
+          "generation": 61,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.06,
+          "uniquePatterns": 13,
+          "p1Delta": 27,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 61,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 1,
+          "entropy": 1.16,
+          "uniquePatterns": 7,
+          "p1Delta": 27,
+          "geneCount": 82,
+          "hiddenNodes": 11
+        },
+        "island-3": {
+          "generation": 61,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 61,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 2.27,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T12:44:51Z",
+      "islands": {
+        "island-1": {
+          "generation": 62,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 3,
+          "entropy": 1.06,
+          "uniquePatterns": 13,
+          "p1Delta": 27,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 62,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 4,
+          "entropy": 1.16,
+          "uniquePatterns": 7,
+          "p1Delta": 27,
+          "geneCount": 82,
+          "hiddenNodes": 11
+        },
+        "island-3": {
+          "generation": 62,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 62,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 2,
+          "entropy": 2.27,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T12:49:52Z",
+      "islands": {
+        "island-1": {
+          "generation": 62,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 3,
+          "entropy": 1.06,
+          "uniquePatterns": 13,
+          "p1Delta": 27,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 62,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 4,
+          "entropy": 1.16,
+          "uniquePatterns": 7,
+          "p1Delta": 27,
+          "geneCount": 82,
+          "hiddenNodes": 11
+        },
+        "island-3": {
+          "generation": 62,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 62,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 2,
+          "entropy": 2.27,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T14:16:48Z",
+      "islands": {
+        "island-1": {
+          "generation": 62,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 3,
+          "entropy": 1.06,
+          "uniquePatterns": 13,
+          "p1Delta": 27,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 62,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 4,
+          "entropy": 1.16,
+          "uniquePatterns": 7,
+          "p1Delta": 27,
+          "geneCount": 82,
+          "hiddenNodes": 11
+        },
+        "island-3": {
+          "generation": 62,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 62,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 2,
+          "entropy": 2.27,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T14:17:03Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 62,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 4,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 82,
+          "hiddenNodes": 11
+        },
+        "island-3": {
+          "generation": 62,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 62,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 2,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T14:21:52Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 62,
+          "bestFitness": 116.7,
+          "maxDamage": 20,
+          "species": 4,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 82,
+          "hiddenNodes": 11
+        },
+        "island-3": {
+          "generation": 62,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 62,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 2,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T14:26:53Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 63,
+          "bestFitness": 131.9,
+          "maxDamage": 25,
+          "species": 2,
+          "entropy": 1.85,
+          "uniquePatterns": 13,
+          "p1Delta": 19,
+          "geneCount": 85,
+          "hiddenNodes": 12
+        },
+        "island-3": {
+          "generation": 63,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 63,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 2.27,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T14:31:55Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 65,
+          "bestFitness": 131.9,
+          "maxDamage": 25,
+          "species": 1,
+          "entropy": 0.79,
+          "uniquePatterns": 11,
+          "p1Delta": 22,
+          "geneCount": 90,
+          "hiddenNodes": 14
+        },
+        "island-3": {
+          "generation": 64,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 2,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 65,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 3,
+          "entropy": 2.27,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T14:36:57Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 66,
+          "bestFitness": 161.1,
+          "maxDamage": 25,
+          "species": 3,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 94,
+          "hiddenNodes": 16
+        },
+        "island-3": {
+          "generation": 66,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 4,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 66,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 4,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 79,
+          "hiddenNodes": 7
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T14:42:00Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 67,
+          "bestFitness": 161.1,
+          "maxDamage": 35,
+          "species": 1,
+          "entropy": 1.12,
+          "uniquePatterns": 5,
+          "p1Delta": 0,
+          "geneCount": 94,
+          "hiddenNodes": 16
+        },
+        "island-3": {
+          "generation": 67,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 67,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 2.45,
+          "uniquePatterns": 33,
+          "p1Delta": 27,
+          "geneCount": 102,
+          "hiddenNodes": 10
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T14:47:02Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 68,
+          "bestFitness": 161.1,
+          "maxDamage": 35,
+          "species": 2,
+          "entropy": 1.12,
+          "uniquePatterns": 5,
+          "p1Delta": 0,
+          "geneCount": 94,
+          "hiddenNodes": 16
+        },
+        "island-3": {
+          "generation": 68,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 3,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 68,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 2.1,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 96,
+          "hiddenNodes": 9
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T14:52:03Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 69,
+          "bestFitness": 161.1,
+          "maxDamage": 35,
+          "species": 4,
+          "entropy": 1.12,
+          "uniquePatterns": 5,
+          "p1Delta": 0,
+          "geneCount": 94,
+          "hiddenNodes": 16
+        },
+        "island-3": {
+          "generation": 69,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 2,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 69,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 2.1,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 96,
+          "hiddenNodes": 9
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T14:57:05Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 70,
+          "bestFitness": 161.1,
+          "maxDamage": 35,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 106,
+          "hiddenNodes": 18
+        },
+        "island-3": {
+          "generation": 70,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 2,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 71,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 2.94,
+          "uniquePatterns": 50,
+          "p1Delta": 27,
+          "geneCount": 110,
+          "hiddenNodes": 13
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T15:02:07Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 72,
+          "bestFitness": 161.1,
+          "maxDamage": 35,
+          "species": 1,
+          "entropy": 0.94,
+          "uniquePatterns": 22,
+          "p1Delta": 27,
+          "geneCount": 116,
+          "hiddenNodes": 21
+        },
+        "island-3": {
+          "generation": 71,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 72,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 2.89,
+          "uniquePatterns": 48,
+          "p1Delta": 27,
+          "geneCount": 113,
+          "hiddenNodes": 13
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T15:07:08Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 73,
+          "bestFitness": 161.1,
+          "maxDamage": 35,
+          "species": 4,
+          "entropy": 1.2,
+          "uniquePatterns": 33,
+          "p1Delta": 27,
+          "geneCount": 117,
+          "hiddenNodes": 21
+        },
+        "island-3": {
+          "generation": 72,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 1.65,
+          "uniquePatterns": 11,
+          "p1Delta": -5,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 73,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 2,
+          "entropy": 2.22,
+          "uniquePatterns": 23,
+          "p1Delta": 27,
+          "geneCount": 111,
+          "hiddenNodes": 11
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T15:12:10Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 74,
+          "bestFitness": 161.1,
+          "maxDamage": 35,
+          "species": 6,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 117,
+          "hiddenNodes": 21
+        },
+        "island-3": {
+          "generation": 74,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 4,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 74,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 115,
+          "hiddenNodes": 11
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T15:17:11Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 74,
+          "bestFitness": 161.1,
+          "maxDamage": 35,
+          "species": 6,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 117,
+          "hiddenNodes": 21
+        },
+        "island-3": {
+          "generation": 74,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 4,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 74,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 115,
+          "hiddenNodes": 11
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T16:39:57Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 74,
+          "bestFitness": 161.1,
+          "maxDamage": 35,
+          "species": 6,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 117,
+          "hiddenNodes": 21
+        },
+        "island-3": {
+          "generation": 74,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 4,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 74,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 115,
+          "hiddenNodes": 11
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T16:40:12Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 75,
+          "bestFitness": 161.1,
+          "maxDamage": 35,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 117,
+          "hiddenNodes": 21
+        },
+        "island-3": {
+          "generation": 75,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 75,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 115,
+          "hiddenNodes": 11
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-08T16:45:12Z",
+      "islands": {
+        "island-1": {
+          "generation": 63,
+          "bestFitness": 191.1,
+          "maxDamage": 45,
+          "species": 2,
+          "entropy": 1.03,
+          "uniquePatterns": 9,
+          "p1Delta": 22,
+          "geneCount": 70,
+          "hiddenNodes": 7
+        },
+        "island-2": {
+          "generation": 75,
+          "bestFitness": 161.1,
+          "maxDamage": 35,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 117,
+          "hiddenNodes": 21
+        },
+        "island-3": {
+          "generation": 75,
+          "bestFitness": 2234.4,
+          "maxDamage": 71,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 126,
+          "hiddenNodes": 25
+        },
+        "island-4": {
+          "generation": 75,
+          "bestFitness": 158.2,
+          "maxDamage": 34,
+          "species": 1,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 115,
+          "hiddenNodes": 11
+        }
+      }
     }
   ],
   "breakthroughs": [
@@ -1154,6 +2673,66 @@
       "newDamage": 38,
       "fitness": 171.6,
       "entropy": 2.65,
+      "type": "damage"
+    },
+    {
+      "timestamp": "2026-03-08T11:49:33Z",
+      "island": "island-3",
+      "generation": 49,
+      "previousDamage": 45,
+      "newDamage": 60,
+      "fitness": 237.1,
+      "entropy": 2.13,
+      "type": "damage"
+    },
+    {
+      "timestamp": "2026-03-08T11:59:36Z",
+      "island": "island-3",
+      "generation": 51,
+      "previousDamage": 60,
+      "newDamage": 71,
+      "fitness": 2234.4,
+      "entropy": 1.62,
+      "type": "damage"
+    },
+    {
+      "timestamp": "2026-03-08T12:29:45Z",
+      "island": "island-1",
+      "generation": 59,
+      "previousDamage": 38,
+      "newDamage": 45,
+      "fitness": 191.1,
+      "entropy": 1.06,
+      "type": "damage"
+    },
+    {
+      "timestamp": "2026-03-08T14:26:53Z",
+      "island": "island-2",
+      "generation": 63,
+      "previousDamage": 20,
+      "newDamage": 25,
+      "fitness": 131.9,
+      "entropy": 1.85,
+      "type": "damage"
+    },
+    {
+      "timestamp": "2026-03-08T14:36:57Z",
+      "island": "island-2",
+      "generation": 66,
+      "previousFitness": 131.9,
+      "newFitness": 161.1,
+      "fitness": 161.1,
+      "entropy": 0,
+      "type": "fitness"
+    },
+    {
+      "timestamp": "2026-03-08T14:42:00Z",
+      "island": "island-2",
+      "generation": 67,
+      "previousDamage": 25,
+      "newDamage": 35,
+      "fitness": 161.1,
+      "entropy": 1.12,
       "type": "damage"
     }
   ]

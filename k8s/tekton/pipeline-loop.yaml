@@ -118,6 +118,11 @@ spec:
               /usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 &
               sleep 1
 
+              # Remove stale results file from previous PipelineRun
+              # (Tekton Loop resets iteration to 0, but old batch_N.txt files persist on PVC)
+              RESULTS_FILE="${RESULTS_DIR}/batch_${BATCH_NUMBER}.txt"
+              rm -f "$RESULTS_FILE"
+
               # Run mGBA with the batch training script
               mgba-qt \
                 --script "${LUA_SCRIPT}" \
