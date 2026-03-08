@@ -16,13 +16,15 @@
 local Fitness = {}
 
 -- Weight constants (tunable)
--- P1 HP is NOT used: character switching in DBZ:SW causes P1 HP to go UP,
--- which confounds any defense-based fitness signal.
+-- P1 HP is NOT used for offense: character switching in DBZ:SW causes P1 HP
+-- to go UP, which confounds any defense-based fitness signal.
 local W_OFFENSE = 3.0        -- reward per HP of damage dealt to P2 (primary signal)
 local W_KO_BONUS = 2000      -- bonus for KO'ing the opponent
-local W_TIMEOUT_WIN = 200    -- small bonus for timeout win (not the goal)
-local W_STALL = 1.0          -- penalty per frame of stalling
+local W_TIMEOUT_WIN = 50     -- reduced: timeout win is not the goal, KO and damage are
+local W_STALL = 1.0          -- penalty per frame of stalling (only when damage was dealt)
 local W_SPEED_BONUS = 0.5    -- bonus per frame SAVED (faster KO = more bonus)
+local W_SURVIVAL = 5.0       -- small reward for surviving longer (gradient when no damage)
+local W_DIVERSITY = 1.0      -- reward for button pattern variety (anti-degenerate signal)
 
 -- Round result constants
 Fitness.WIN = 1
@@ -43,40 +45,46 @@ local STALL_FRAME_THRESHOLD = 300  -- ~5 seconds at 60fps
 --   roundResult      number  WIN/LOSE/DRAW/KO/IN_PROGRESS
 --   frameCount       number  Total frames elapsed
 --   timeoutConstant  number  Max frames before timeout (for speed bonus calc)
---   lastDamageFrame  number  Frame of most recent damage dealt (optional)
--- @return number  The fitness score.
+--   lastDamageFrame  number  Frame of most recent damage dealt (nil if none)
+--   comboEntropy     number  Button pattern entropy (optional, for diversity signal)
+-- @return number  The fitness score (always > 0 for evaluated genomes).
 function Fitness.calculateFitness(params)
     local damageDealt = (params.startP2HP or 0) - (params.endP2HP or 0)
     local frameCount = params.frameCount or 0
     local timeout = params.timeoutConstant or 1800
 
-    -- FIT-01: Offense reward (primary and only HP-based signal)
-    -- P1 HP is deliberately ignored: character switching in DBZ:SW causes
-    -- P1 HP to increase, which confounds any defense fitness component.
+    -- FIT-01: Offense reward (primary signal when P2 HP address is working)
     local fitness = damageDealt * W_OFFENSE
 
     -- FIT-02: KO bonus (massive reward for actually killing the opponent)
     if params.roundResult == Fitness.KO then
         fitness = fitness + W_KO_BONUS
-        -- FIT-02b: Speed bonus — faster KO = higher fitness
         local framesSaved = math.max(0, timeout - frameCount)
         fitness = fitness + framesSaved * W_SPEED_BONUS
     elseif params.roundResult == Fitness.WIN then
-        -- Timeout win: small bonus (not the goal, but better than losing)
         fitness = fitness + W_TIMEOUT_WIN
     end
 
-    -- FIT-03: Anti-stall penalty (harsher to discourage passive play)
-    if params.lastDamageFrame then
+    -- FIT-03: Survival signal (small gradient even when no damage is dealt)
+    local survivalRatio = math.min(frameCount, timeout) / timeout
+    fitness = fitness + survivalRatio * W_SURVIVAL
+
+    -- FIT-04: Button diversity reward (anti-degenerate signal)
+    if params.comboEntropy and params.comboEntropy > 0 then
+        fitness = fitness + params.comboEntropy * W_DIVERSITY
+    end
+
+    -- FIT-05: Anti-stall penalty (only when damage WAS dealt then stopped)
+    if params.lastDamageFrame and params.lastDamageFrame > 0 then
         local stallFrames = frameCount - params.lastDamageFrame
         if stallFrames > STALL_FRAME_THRESHOLD then
             fitness = fitness - (stallFrames - STALL_FRAME_THRESHOLD) * W_STALL
         end
     end
 
-    -- Floor: avoid 0 which is used as "not evaluated"
+    -- Ensure fitness > 0 for evaluated genomes (0 = "not yet evaluated")
     if fitness <= 0 then
-        fitness = -1
+        fitness = 0.001
     end
 
     return fitness
