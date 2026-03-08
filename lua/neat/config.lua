@@ -14,7 +14,7 @@
 local Config = {}
 
 -- Population
-Config.Population = 50          -- was 30 (too small for speciation); 50 balances speed/diversity
+Config.Population = 40          -- balance between speed (30) and diversity (50)
 Config.Inputs = 5               -- 4 game state (P1HP, P2HP, P1Ki, P1Pwr) + 1 bias
 Config.Outputs = 8              -- from Controller.getNumOutputs()
 Config.MaxNodes = 1000000
@@ -25,13 +25,13 @@ Config.DeltaWeights = 0.4
 Config.DeltaThreshold = 0.8     -- was 1.0; lower = more species created
 
 -- Stagnation (reduced from 30 to kill stale species faster)
-Config.StaleSpecies = 20
+Config.StaleSpecies = 12        -- kill stale species faster to make room for new strategies
 
 -- Mutation rates (rebalanced to favor weight tuning over topology growth)
 Config.MutateConnectionsChance = 0.25
 Config.PerturbChance = 0.90
 Config.LinkMutationChance = 1.5     -- was 2.0; slower connection growth
-Config.NodeMutationChance = 0.25    -- was 0.50; halved to reduce over-complexity
+Config.NodeMutationChance = 0.35    -- bumped from 0.25; need topology diversity for combo discovery
 Config.BiasMutationChance = 0.40
 Config.StepSize = 0.1
 Config.DisableMutationChance = 0.3  -- was 0.4; less pruning
@@ -39,7 +39,7 @@ Config.EnableMutationChance = 0.3   -- was 0.2; re-enable disabled genes more of
 Config.CrossoverChance = 0.75
 
 -- Fitness
-Config.TimeoutConstant = 1800      -- ~30 seconds at 60fps (testing; raise to 5400 for real training)
+Config.TimeoutConstant = 600       -- ~10 seconds at 60fps (faster iteration; raise to 1800+ for final training)
 Config.StallFrameThreshold = 300   -- ~5 seconds before anti-stall kicks in
 
 -- Dynamic compatibility (more aggressive species targeting)
