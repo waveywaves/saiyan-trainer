@@ -231,4 +231,27 @@ callbacks:add("frame", function()
     end
 end)
 
+-- Diagnostic: log P2 HP address values at startup to verify the new address
+local function logP2Diagnostic()
+    local old_addr = 0x03004C30  -- old (broken) P2 HP address
+    local new_addr = 0x03002826  -- new (struct-stride derived) P2 HP address
+    local p1_hp = emu:read8(0x0300273E)
+    local old_p2 = emu:read8(old_addr)
+    local new_p2 = emu:read8(new_addr)
+    log(string.format("P2 HP DIAG: P1_HP=%d, old_addr(0x4C30)=%d, new_addr(0x2826)=%d",
+        p1_hp, old_p2, new_p2))
+end
+
+-- Run diagnostic after a few frames (let save state settle)
+local diag_counter = 0
+local diag_done = false
+callbacks:add("frame", function()
+    if diag_done then return end
+    diag_counter = diag_counter + 1
+    if diag_counter == 30 then
+        logP2Diagnostic()
+        diag_done = true
+    end
+end)
+
 log("Frame callback registered. Training will start automatically.")
