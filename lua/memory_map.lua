@@ -79,24 +79,51 @@ local MemoryMap = {
     },
 
     --------------- Player 2 ---------------
-    -- These addresses come from old VBA code that was tested in-game.
-    -- They do NOT follow a simple struct offset from P1 (P2 HP is at 0x03004C30,
-    -- far from P1 HP at 0x0300273E). They may be display copies or the game may
-    -- use non-contiguous storage. Needs visual confirmation in mGBA.
+    -- P2 struct at P1_base + 0xE8 stride = 0x030027E8.
+    -- Evidence: P2 Ki int at 0x03002833 (old VBA code, tested in-game) matches
+    -- P1 Ki int (0x0300274B) + 0xE8. Applying same stride to all P1 offsets:
+    --   P2 power_level: 0x030027E8 + 0x38 = 0x03002820
+    --   P2 HP:          0x030027E8 + 0x3E = 0x03002826
+    --   P2 max_hp:      0x030027E8 + 0x3F = 0x03002827
+    --   P2 ki_u16:      0x030027E8 + 0x4A = 0x03002832
+    --   P2 ki_int:      0x030027E8 + 0x4B = 0x03002833 (confirmed by VBA code)
+    -- The "instant win" cheat (CB 33002826 00) writes 0 to P2 HP = KO.
+    -- Previous address 0x03004C30 (old VBA) read constant 72, never changed.
 
     p2_health = {
-        addr     = 0x03004C30,
+        addr     = 0x03002826,
         size     = 1,
         type     = "u8",
-        desc     = "P2 Health (0-255, from old VBA code; different memory region than P1)",
-        verified = false,  -- from old VBA code, needs visual confirmation
+        desc     = "P2 Current HP (0-255). Derived: P2 struct base 0x030027E8 + offset 0x3E. Cheat code 33002826 00 (instant win) confirms: writing 0 here = KO.",
+        verified = false,  -- derived from struct stride + cheat code correlation; needs visual confirmation
+    },
+    p2_health_max = {
+        addr     = 0x03002827,
+        size     = 1,
+        type     = "u8",
+        desc     = "P2 Max HP (0-255). Derived: P2 struct base + 0x3F (same offset as P1 max HP).",
+        verified = false,
+    },
+    p2_power_level = {
+        addr     = 0x03002820,
+        size     = 1,
+        type     = "u8",
+        desc     = "P2 Power Level (0-3). Derived: P2 struct base + 0x38.",
+        verified = false,
     },
     p2_ki = {
-        addr     = 0x03002833,
+        addr     = 0x03002832,
         size     = 2,
         type     = "u16",
-        desc     = "P2 Ki Energy (from old VBA code)",
-        verified = false,  -- from old VBA code, needs visual confirmation
+        desc     = "P2 Ki as u16 (high byte=integer 0-100%). Derived: P2 struct base + 0x4A.",
+        verified = false,
+    },
+    p2_ki_int = {
+        addr     = 0x03002833,
+        size     = 1,
+        type     = "u8",
+        desc     = "P2 Ki integer (0-100). From old VBA code, confirmed in-game. Used to derive P2 struct stride.",
+        verified = false,  -- from old VBA code, tested in-game
     },
 
     --------------- Spatial (relative distances) ---------------
@@ -126,13 +153,10 @@ local MemoryMap = {
     },
 
     --------------- Match State ---------------
-    round_state = {
-        addr     = 0x03002826,
-        size     = 1,
-        type     = "u8",
-        desc     = "Round/match outcome state. 0x00=instant win trigger. CB 33002826 + GS decrypted.",
-        verified = true,   -- CodeBreaker 33002826 + GS decrypt: 9E69DA42 35B196E8 -> 03002826 00000000
-    },
+    -- round_state was previously mapped to 0x03002826, but struct stride analysis
+    -- shows this address is P2 HP (see p2_health above). The "instant win" cheat
+    -- (writing 0x00) works because it sets P2 HP to 0 = KO, not because it's a
+    -- separate round state flag. Removed to avoid address collision with p2_health.
     timer = {
         addr     = 0x03002830,
         size     = 2,
