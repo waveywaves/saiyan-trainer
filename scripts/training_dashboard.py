@@ -836,11 +836,6 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
       <canvas id="network-canvas" width="800" height="400" style="width:100%;background:var(--bg);border-radius:8px;border:1px solid var(--border);"></canvas>
     </div>
 
-    <div class="chart-panel">
-      <div class="chart-title">Network Complexity Over Generations</div>
-      <canvas id="network-complexity-chart" height="250"></canvas>
-    </div>
-
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px;">
       <div class="chart-panel">
         <div class="chart-title">Gene Count</div>
@@ -1636,6 +1631,20 @@ setInterval(pollPods, 10000);
 
 # Track active port-forwards: {pod_name: {"port": local_port, "process": Popen}}
 active_forwards = {}
+
+# Cache for expensive kubectl calls
+import time as _time
+_cache = {}
+_CACHE_TTL = 30  # seconds
+
+def cached_fetch(key, fetch_fn):
+    """Return cached result if fresh, otherwise fetch and cache."""
+    now = _time.time()
+    if key in _cache and now - _cache[key]["ts"] < _CACHE_TTL:
+        return _cache[key]["data"]
+    data = fetch_fn()
+    _cache[key] = {"data": data, "ts": now}
+    return data
 next_vnc_port = 7000
 
 
@@ -1727,8 +1736,8 @@ def get_k8s_metrics():
     try:
         result = subprocess.run(
             ["kubectl", "--context", "kind-saiyan", "get", "pods",
-             "-l", "app.kubernetes.io/managed-by=tekton-pipelines",
-             "-o", "jsonpath={range .items[?(@.status.phase=='Running')]}{.metadata.name}{' '}{end}"],
+             "--field-selector=status.phase=Running",
+             "-o", "jsonpath={range .items[*]}{.metadata.name}{' '}{end}"],
             capture_output=True, text=True, timeout=5
         )
         if result.returncode != 0:
@@ -1780,8 +1789,8 @@ def get_island_stats():
     try:
         result = subprocess.run(
             ["kubectl", "--context", "kind-saiyan", "get", "pods",
-             "-l", "app.kubernetes.io/managed-by=tekton-pipelines",
-             "-o", "jsonpath={range .items[?(@.status.phase=='Running')]}{.metadata.name}{' '}{end}"],
+             "--field-selector=status.phase=Running",
+             "-o", "jsonpath={range .items[*]}{.metadata.name}{' '}{end}"],
             capture_output=True, text=True, timeout=5
         )
         if result.returncode != 0:
@@ -1828,13 +1837,13 @@ def get_island_stats():
 
 
 def get_island_networks():
-    """Read checkpoint files from all islands, extract best genome network per generation."""
+    """Read checkpoint files from all islands in one kubectl call, extract best genome networks."""
     islands = {}
     try:
         result = subprocess.run(
             ["kubectl", "--context", "kind-saiyan", "get", "pods",
-             "-l", "app.kubernetes.io/managed-by=tekton-pipelines",
-             "-o", "jsonpath={range .items[?(@.status.phase=='Running')]}{.metadata.name}{' '}{end}"],
+             "--field-selector=status.phase=Running",
+             "-o", "jsonpath={range .items[*]}{.metadata.name}{' '}{end}"],
             capture_output=True, text=True, timeout=5
         )
         if result.returncode != 0:
@@ -1843,95 +1852,85 @@ def get_island_networks():
         if not pods:
             return islands
         pod_name = pods[0]
-        # Find all checkpoint files
-        find_result = subprocess.run(
-            ["kubectl", "--context", "kind-saiyan", "exec", pod_name,
-             "--", "find", "/workspace/data/output", "-name", "gen_*.json", "-path", "*/checkpoints/*"],
-            capture_output=True, text=True, timeout=10
-        )
-        if find_result.returncode != 0:
-            return islands
-        for cp_path in sorted(find_result.stdout.strip().split("\n")):
-            if not cp_path:
-                continue
-            parts = cp_path.split("/")
-            island_id = "default"
-            for i, part in enumerate(parts):
-                if part == "output" and i + 1 < len(parts) and parts[i + 1] != "checkpoints":
-                    island_id = parts[i + 1]
-                    break
-            # Extract generation number from filename
-            fname = parts[-1]
-            gen_num = int(fname.replace("gen_", "").replace(".json", ""))
 
-            exec_result = subprocess.run(
-                ["kubectl", "--context", "kind-saiyan", "exec", pod_name,
-                 "--", "cat", cp_path],
-                capture_output=True, text=True, timeout=15
-            )
-            if exec_result.returncode != 0:
-                continue
-            try:
-                checkpoint = json.loads(exec_result.stdout)
-            except json.JSONDecodeError:
-                continue
-
-            # Find best genome across all species
-            best_genome = None
-            best_fitness = -1e9
-            for sp in checkpoint.get("species", []):
-                for g in sp.get("genomes", []):
-                    if g.get("fitness", 0) > best_fitness:
-                        best_fitness = g["fitness"]
-                        best_genome = g
-
-            if not best_genome:
-                continue
-
-            # Extract network topology
-            nodes = set()
-            connections = []
-            for gene in best_genome.get("genes", []):
-                nodes.add(gene["into"])
-                nodes.add(gene["out"])
-                connections.append({
-                    "from": gene["into"],
-                    "to": gene["out"],
-                    "weight": round(gene["weight"], 3),
-                    "enabled": gene.get("enabled", True),
-                })
-
-            # Classify nodes
-            max_nodes = 1000000  # Config.MaxNodes
-            num_inputs = 5
-            num_outputs = 8
-            input_labels = ["P1HP", "P2HP", "P1Ki", "P1Pwr", "Bias"]
-            output_labels = ["A", "B", "L", "R", "Up", "Down", "Left", "Right"]
-
-            classified_nodes = []
-            for n in sorted(nodes):
-                if 1 <= n <= num_inputs:
-                    classified_nodes.append({"id": n, "type": "input", "label": input_labels[n - 1]})
-                elif max_nodes < n <= max_nodes + num_outputs:
-                    idx = n - max_nodes - 1
-                    classified_nodes.append({"id": n, "type": "output", "label": output_labels[idx]})
-                else:
-                    classified_nodes.append({"id": n, "type": "hidden", "label": f"H{n}"})
-
-            if island_id not in islands:
-                islands[island_id] = []
-            islands[island_id].append({
-                "generation": gen_num,
-                "fitness": round(best_fitness, 1),
-                "maxneuron": best_genome.get("maxneuron", 0),
-                "geneCount": len(best_genome.get("genes", [])),
-                "nodes": classified_nodes,
-                "connections": connections,
+        # Single kubectl exec: extract only best genome genes from each checkpoint
+        # Uses python3 on the pod to parse JSON and output minimal data
+        script = r'''python3 -c "
+import json, os, glob
+result = {}
+for f in sorted(glob.glob('/workspace/data/output/*/checkpoints/gen_*.json')):
+    parts = f.split('/')
+    island = parts[4]
+    gen = int(parts[-1].replace('gen_','').replace('.json',''))
+    try:
+        with open(f) as fh:
+            cp = json.load(fh)
+        best, bf = None, -1e9
+        for sp in cp.get('species',[]):
+            for g in sp.get('genomes',[]):
+                if g.get('fitness',0) > bf:
+                    bf = g['fitness']; best = g
+        if best:
+            if island not in result: result[island] = []
+            result[island].append({
+                'g': gen, 'f': round(bf,1),
+                'm': best.get('maxneuron',0),
+                'genes': [{'i':g['into'],'o':g['out'],'w':round(g['weight'],3),'e':g.get('enabled',True)} for g in best.get('genes',[])]
             })
+    except: pass
+for k in result: result[k].sort(key=lambda x:x['g'])
+print(json.dumps(result))
+"'''
+        exec_result = subprocess.run(
+            ["kubectl", "--context", "kind-saiyan", "exec", pod_name, "--", "sh", "-c", script],
+            capture_output=True, text=True, timeout=30
+        )
+        if exec_result.returncode != 0:
+            return islands
 
-        # Sort each island's generations
-        for island_id in islands:
-            islands[island_id].sort(key=lambda x: x["generation"])
+        # Parse compact JSON output from pod-side python script
+        max_nodes = 1000000
+        num_inputs = 5
+        num_outputs = 8
+        input_labels = ["P1HP", "P2HP", "P1Ki", "P1Pwr", "Bias"]
+        output_labels = ["A", "B", "L", "R", "Up", "Down", "Left", "Right"]
+
+        try:
+            raw = json.loads(exec_result.stdout.strip())
+        except json.JSONDecodeError:
+            return islands
+
+        for island_id, gens in raw.items():
+            islands[island_id] = []
+            for g in gens:
+                nodes = set()
+                connections = []
+                for gene in g.get("genes", []):
+                    nodes.add(gene["i"])
+                    nodes.add(gene["o"])
+                    connections.append({
+                        "from": gene["i"], "to": gene["o"],
+                        "weight": gene["w"], "enabled": gene.get("e", True),
+                    })
+
+                classified_nodes = []
+                for n in sorted(nodes):
+                    if 1 <= n <= num_inputs:
+                        classified_nodes.append({"id": n, "type": "input", "label": input_labels[n - 1]})
+                    elif max_nodes < n <= max_nodes + num_outputs:
+                        idx = n - max_nodes - 1
+                        classified_nodes.append({"id": n, "type": "output", "label": output_labels[idx]})
+                    else:
+                        classified_nodes.append({"id": n, "type": "hidden", "label": f"H{n}"})
+
+                islands[island_id].append({
+                    "generation": g["g"],
+                    "fitness": g["f"],
+                    "maxneuron": g.get("m", 0),
+                    "geneCount": len(g.get("genes", [])),
+                    "nodes": classified_nodes,
+                    "connections": connections,
+                })
     except Exception:
         pass
     return islands
@@ -2020,13 +2019,13 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            networks = get_island_networks()
+            networks = cached_fetch("island-networks", get_island_networks)
             self.wfile.write(json.dumps(networks).encode())
         elif self.path == '/api/island-stats':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            islands = get_island_stats()
+            islands = cached_fetch("island-stats", get_island_stats)
             self.wfile.write(json.dumps(islands).encode())
         elif self.path == '/api/k8s-metrics':
             self.send_response(200)
