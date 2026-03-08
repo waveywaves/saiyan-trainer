@@ -2012,7 +2012,7 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             # Combine local log stats + K8s pod metrics
             local_data = parse_training_log(LOG_FILE)
-            k8s_data = get_k8s_metrics()
+            k8s_data = cached_fetch("k8s-metrics", get_k8s_metrics)
             # Convert k8s metrics to same format as local stats
             for m in k8s_data:
                 local_data.append({
@@ -2039,7 +2039,7 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            pods = get_training_pods()
+            pods = cached_fetch("pods", get_training_pods)
             for pod in pods:
                 if pod["source"] == "tekton" and pod["phase"] == "Running":
                     port = ensure_port_forward(pod["name"])
@@ -2062,7 +2062,7 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            metrics = get_k8s_metrics()
+            metrics = cached_fetch("k8s-metrics", get_k8s_metrics)
             self.wfile.write(json.dumps(metrics).encode())
         elif self.path == '/metrics':
             # Prometheus scrape endpoint
