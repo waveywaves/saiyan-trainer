@@ -95,3 +95,437 @@ Similar to Island 2 but even more static. 26 generations of identical 20 P2 dama
 
 **island-4** [Exploring]: fitness=116.2, dealing 20 damage, 4 species, entropy=1.15 (12 patterns), network=54 genes/6 hidden, char-switching (+27 P1 HP)
 
+
+---
+
+## Check 4 — 2026-03-08T10:20:39Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 28 | 158.4 | 34 | 10 | 0.00 | 0 | 45 | 5 | +0 |
+| island-2 | 28 | 115.8 | 20 | 4 | 0.00 | 0 | 44 | 6 | +0 |
+| island-3 | 28 | 188.9 | 35 | 10 | 0.00 | 0 | 59 | 8 | +0 |
+| island-4 | 28 | 116.2 | 20 | 6 | 1.15 | 12 | 54 | 6 | +27 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 10 species, entropy=0.00 (0 patterns), network=45 genes/5 hidden, pure offense (no char-switch)
+
+**island-2** [Plateaued]: fitness=115.8, dealing 20 damage, 4 species, entropy=0.00 (0 patterns), network=44 genes/6 hidden
+
+**island-3** (LEADER) [Breakthrough]: fitness=188.9, dealing 35 damage, 10 species, entropy=0.00 (0 patterns), network=59 genes/8 hidden, pure offense (no char-switch)
+
+**island-4** [Exploring]: fitness=116.2, dealing 20 damage, 6 species, entropy=1.15 (12 patterns), network=54 genes/6 hidden, char-switching (+27 P1 HP)
+
+
+---
+
+## Check 5 — 2026-03-08T10:24:08Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 29 | 158.4 | 34 | 3 | 2.02 | 21 | 45 | 5 | +23 |
+| island-2 | 29 | 115.8 | 20 | 3 | 0.82 | 13 | 42 | 5 | +22 |
+| island-3 | 29 | 188.9 | 44 | 1 | 1.89 | 19 | 59 | 8 | +7 |
+| island-4 | 28 | 116.2 | 20 | 6 | 0.00 | 0 | 54 | 6 | +0 |
+
+### Breakthroughs Detected
+
+- **island-3** Gen 29: P2 damage 35→44 (fitness=188.9, entropy=1.89)
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 3 species, entropy=2.02 (21 patterns), network=45 genes/5 hidden, char-switching (+23 P1 HP)
+
+**island-2** [Plateaued]: fitness=115.8, dealing 20 damage, 3 species, entropy=0.82 (13 patterns), network=42 genes/5 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=188.9, dealing 44 damage, 1 species, entropy=1.89 (19 patterns), network=59 genes/8 hidden, char-switching (+7 P1 HP)
+
+**island-4** [Plateaued]: fitness=116.2, dealing 20 damage, 6 species, entropy=0.00 (0 patterns), network=54 genes/6 hidden
+
+
+---
+
+## Check 6 — 2026-03-08T10:29:10Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 30 | 158.4 | 34 | 3 | 1.16 | 8 | 42 | 2 | +22 |
+| island-2 | 30 | 115.8 | 20 | 1 | 0.82 | 13 | 42 | 5 | +22 |
+| island-3 | 30 | 188.9 | 44 | 5 | 1.89 | 19 | 59 | 8 | +7 |
+| island-4 | 30 | 116.2 | 20 | 2 | 1.15 | 12 | 54 | 6 | +27 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 3 species, entropy=1.16 (8 patterns), network=42 genes/2 hidden, char-switching (+22 P1 HP)
+
+**island-2** [Plateaued]: fitness=115.8, dealing 20 damage, 1 species, entropy=0.82 (13 patterns), network=42 genes/5 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=188.9, dealing 44 damage, 5 species, entropy=1.89 (19 patterns), network=59 genes/8 hidden, char-switching (+7 P1 HP)
+
+**island-4** [Exploring]: fitness=116.2, dealing 20 damage, 2 species, entropy=1.15 (12 patterns), network=54 genes/6 hidden, char-switching (+27 P1 HP)
+
+
+---
+
+## Check 7 — 2026-03-08T10:34:11Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 31 | 158.4 | 34 | 7 | 1.16 | 8 | 42 | 2 | +22 |
+| island-2 | 31 | 115.8 | 20 | 5 | 0.82 | 13 | 42 | 5 | +22 |
+| island-3 | 31 | 188.9 | 44 | 5 | 1.89 | 19 | 59 | 8 | +7 |
+| island-4 | 31 | 158.2 | 34 | 2 | 1.21 | 12 | 63 | 7 | +22 |
+
+### Breakthroughs Detected
+
+- **island-4** Gen 31: P2 damage 20→34 (fitness=158.2, entropy=1.21)
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 7 species, entropy=1.16 (8 patterns), network=42 genes/2 hidden, char-switching (+22 P1 HP)
+
+**island-2** [Plateaued]: fitness=115.8, dealing 20 damage, 5 species, entropy=0.82 (13 patterns), network=42 genes/5 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=188.9, dealing 44 damage, 5 species, entropy=1.89 (19 patterns), network=59 genes/8 hidden, char-switching (+7 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 2 species, entropy=1.21 (12 patterns), network=63 genes/7 hidden, char-switching (+22 P1 HP)
+
+
+---
+
+## Check 8 — 2026-03-08T10:36:00Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 31 | 158.4 | 34 | 7 | 1.16 | 8 | 42 | 2 | +22 |
+| island-2 | 31 | 115.8 | 20 | 5 | 0.82 | 13 | 42 | 5 | +22 |
+| island-3 | 31 | 188.9 | 44 | 5 | 1.89 | 19 | 59 | 8 | +7 |
+| island-4 | 31 | 158.2 | 34 | 2 | 1.21 | 12 | 63 | 7 | +22 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 7 species, entropy=1.16 (8 patterns), network=42 genes/2 hidden, char-switching (+22 P1 HP)
+
+**island-2** [Plateaued]: fitness=115.8, dealing 20 damage, 5 species, entropy=0.82 (13 patterns), network=42 genes/5 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=188.9, dealing 44 damage, 5 species, entropy=1.89 (19 patterns), network=59 genes/8 hidden, char-switching (+7 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 2 species, entropy=1.21 (12 patterns), network=63 genes/7 hidden, char-switching (+22 P1 HP)
+
+
+---
+
+## Check 9 — 2026-03-08T10:39:13Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 32 | 158.4 | 34 | 12 | 0.00 | 0 | 42 | 2 | +0 |
+| island-2 | 32 | 115.8 | 20 | 5 | 0.00 | 0 | 45 | 5 | +0 |
+| island-3 | 32 | 188.9 | 44 | 6 | 0.00 | 0 | 59 | 8 | +0 |
+| island-4 | 32 | 158.2 | 34 | 4 | 0.00 | 0 | 64 | 8 | +0 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 12 species, entropy=0.00 (0 patterns), network=42 genes/2 hidden, pure offense (no char-switch)
+
+**island-2** [Plateaued]: fitness=115.8, dealing 20 damage, 5 species, entropy=0.00 (0 patterns), network=45 genes/5 hidden
+
+**island-3** (LEADER) [Breakthrough]: fitness=188.9, dealing 44 damage, 6 species, entropy=0.00 (0 patterns), network=59 genes/8 hidden, pure offense (no char-switch)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 4 species, entropy=0.00 (0 patterns), network=64 genes/8 hidden, pure offense (no char-switch)
+
+
+---
+
+## Check 10 — 2026-03-08T10:44:14Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 33 | 158.4 | 34 | 2 | 1.16 | 8 | 42 | 2 | +22 |
+| island-2 | 33 | 115.8 | 20 | 3 | 0.82 | 13 | 45 | 5 | +22 |
+| island-3 | 33 | 188.9 | 44 | 3 | 1.89 | 19 | 59 | 8 | +7 |
+| island-4 | 33 | 158.2 | 34 | 2 | 1.52 | 15 | 69 | 9 | +27 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 2 species, entropy=1.16 (8 patterns), network=42 genes/2 hidden, char-switching (+22 P1 HP)
+
+**island-2** [Plateaued]: fitness=115.8, dealing 20 damage, 3 species, entropy=0.82 (13 patterns), network=45 genes/5 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=188.9, dealing 44 damage, 3 species, entropy=1.89 (19 patterns), network=59 genes/8 hidden, char-switching (+7 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 2 species, entropy=1.52 (15 patterns), network=69 genes/9 hidden, char-switching (+27 P1 HP)
+
+
+---
+
+## Check 11 — 2026-03-08T10:49:16Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 35 | 158.4 | 34 | 4 | 1.16 | 8 | 42 | 2 | +22 |
+| island-2 | 35 | 115.8 | 20 | 3 | 0.83 | 14 | 51 | 7 | +22 |
+| island-3 | 35 | 188.9 | 44 | 2 | 1.89 | 19 | 59 | 8 | +7 |
+| island-4 | 34 | 158.2 | 34 | 2 | 1.52 | 15 | 69 | 9 | +27 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 4 species, entropy=1.16 (8 patterns), network=42 genes/2 hidden, char-switching (+22 P1 HP)
+
+**island-2** [Plateaued]: fitness=115.8, dealing 20 damage, 3 species, entropy=0.83 (14 patterns), network=51 genes/7 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=188.9, dealing 44 damage, 2 species, entropy=1.89 (19 patterns), network=59 genes/8 hidden, char-switching (+7 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 2 species, entropy=1.52 (15 patterns), network=69 genes/9 hidden, char-switching (+27 P1 HP)
+
+
+---
+
+## Check 12 — 2026-03-08T10:54:17Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 36 | 158.4 | 34 | 11 | 0.00 | 0 | 42 | 2 | +0 |
+| island-2 | 36 | 115.8 | 20 | 6 | 0.00 | 0 | 51 | 7 | +0 |
+| island-3 | 36 | 188.9 | 44 | 1 | 0.00 | 0 | 78 | 13 | +0 |
+| island-4 | 36 | 158.2 | 34 | 7 | 0.00 | 0 | 69 | 9 | +0 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 11 species, entropy=0.00 (0 patterns), network=42 genes/2 hidden, pure offense (no char-switch)
+
+**island-2** [Plateaued]: fitness=115.8, dealing 20 damage, 6 species, entropy=0.00 (0 patterns), network=51 genes/7 hidden
+
+**island-3** (LEADER) [Breakthrough]: fitness=188.9, dealing 44 damage, 1 species, entropy=0.00 (0 patterns), network=78 genes/13 hidden, pure offense (no char-switch)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 7 species, entropy=0.00 (0 patterns), network=69 genes/9 hidden, pure offense (no char-switch)
+
+
+---
+
+## Check 13 — 2026-03-08T10:59:19Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 37 | 158.4 | 34 | 2 | 1.16 | 8 | 42 | 2 | +22 |
+| island-2 | 37 | 115.9 | 20 | 1 | 0.86 | 14 | 47 | 5 | +22 |
+| island-3 | 37 | 191.3 | 45 | 1 | 1.28 | 15 | 84 | 15 | +27 |
+| island-4 | 37 | 158.2 | 34 | 1 | 1.69 | 21 | 69 | 9 | +27 |
+
+### Breakthroughs Detected
+
+- **island-3** Gen 37: P2 damage 44→45 (fitness=191.3, entropy=1.28)
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 2 species, entropy=1.16 (8 patterns), network=42 genes/2 hidden, char-switching (+22 P1 HP)
+
+**island-2** [Plateaued]: fitness=115.9, dealing 20 damage, 1 species, entropy=0.86 (14 patterns), network=47 genes/5 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=191.3, dealing 45 damage, 1 species, entropy=1.28 (15 patterns), network=84 genes/15 hidden, char-switching (+27 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 1 species, entropy=1.69 (21 patterns), network=69 genes/9 hidden, char-switching (+27 P1 HP)
+
+
+---
+
+## Check 14 — 2026-03-08T11:04:20Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 38 | 158.4 | 34 | 3 | 2.45 | 20 | 43 | 2 | +27 |
+| island-2 | 38 | 116.7 | 20 | 1 | 1.70 | 17 | 50 | 6 | +16 |
+| island-3 | 38 | 191.3 | 45 | 1 | 1.28 | 15 | 84 | 15 | +27 |
+| island-4 | 38 | 158.2 | 34 | 2 | 1.69 | 21 | 69 | 9 | +27 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 3 species, entropy=2.45 (20 patterns), network=43 genes/2 hidden, char-switching (+27 P1 HP)
+
+**island-2** [Exploring]: fitness=116.7, dealing 20 damage, 1 species, entropy=1.70 (17 patterns), network=50 genes/6 hidden, char-switching (+16 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=191.3, dealing 45 damage, 1 species, entropy=1.28 (15 patterns), network=84 genes/15 hidden, char-switching (+27 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 2 species, entropy=1.69 (21 patterns), network=69 genes/9 hidden, char-switching (+27 P1 HP)
+
+
+---
+
+## Check 15 — 2026-03-08T11:09:21Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 39 | 158.4 | 34 | 5 | 2.45 | 20 | 43 | 2 | +27 |
+| island-2 | 39 | 116.7 | 20 | 6 | 1.70 | 17 | 50 | 6 | +16 |
+| island-3 | 39 | 191.3 | 45 | 4 | 1.28 | 15 | 84 | 15 | +27 |
+| island-4 | 39 | 158.2 | 34 | 4 | 1.69 | 21 | 69 | 9 | +27 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 5 species, entropy=2.45 (20 patterns), network=43 genes/2 hidden, char-switching (+27 P1 HP)
+
+**island-2** [Exploring]: fitness=116.7, dealing 20 damage, 6 species, entropy=1.70 (17 patterns), network=50 genes/6 hidden, char-switching (+16 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=191.3, dealing 45 damage, 4 species, entropy=1.28 (15 patterns), network=84 genes/15 hidden, char-switching (+27 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 4 species, entropy=1.69 (21 patterns), network=69 genes/9 hidden, char-switching (+27 P1 HP)
+
+
+---
+
+## Check 16 — 2026-03-08T11:14:23Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 41 | 158.4 | 34 | 1 | 2.45 | 20 | 43 | 2 | +27 |
+| island-2 | 41 | 116.7 | 20 | 2 | 0.88 | 17 | 59 | 9 | +22 |
+| island-3 | 41 | 191.3 | 45 | 1 | 1.28 | 15 | 84 | 15 | +27 |
+| island-4 | 40 | 158.2 | 34 | 2 | 0.00 | 0 | 72 | 7 | +0 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 1 species, entropy=2.45 (20 patterns), network=43 genes/2 hidden, char-switching (+27 P1 HP)
+
+**island-2** [Plateaued]: fitness=116.7, dealing 20 damage, 2 species, entropy=0.88 (17 patterns), network=59 genes/9 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=191.3, dealing 45 damage, 1 species, entropy=1.28 (15 patterns), network=84 genes/15 hidden, char-switching (+27 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 2 species, entropy=0.00 (0 patterns), network=72 genes/7 hidden, pure offense (no char-switch)
+
+
+---
+
+## Check 17 — 2026-03-08T11:19:24Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 42 | 158.4 | 34 | 5 | 0.76 | 6 | 45 | 2 | +27 |
+| island-2 | 42 | 116.7 | 20 | 2 | 0.88 | 17 | 59 | 9 | +22 |
+| island-3 | 42 | 191.3 | 45 | 1 | 1.28 | 15 | 84 | 15 | +27 |
+| island-4 | 42 | 158.2 | 34 | 1 | 2.07 | 19 | 72 | 7 | +27 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 5 species, entropy=0.76 (6 patterns), network=45 genes/2 hidden, char-switching (+27 P1 HP)
+
+**island-2** [Plateaued]: fitness=116.7, dealing 20 damage, 2 species, entropy=0.88 (17 patterns), network=59 genes/9 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=191.3, dealing 45 damage, 1 species, entropy=1.28 (15 patterns), network=84 genes/15 hidden, char-switching (+27 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 1 species, entropy=2.07 (19 patterns), network=72 genes/7 hidden, char-switching (+27 P1 HP)
+
+
+---
+
+## Check 18 — 2026-03-08T11:24:25Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 43 | 158.4 | 34 | 6 | 0.76 | 6 | 45 | 2 | +27 |
+| island-2 | 43 | 116.7 | 20 | 1 | 0.88 | 17 | 59 | 9 | +22 |
+| island-3 | 43 | 191.3 | 45 | 4 | 1.28 | 15 | 84 | 15 | +27 |
+| island-4 | 43 | 158.2 | 34 | 1 | 1.92 | 20 | 75 | 7 | +27 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 6 species, entropy=0.76 (6 patterns), network=45 genes/2 hidden, char-switching (+27 P1 HP)
+
+**island-2** [Plateaued]: fitness=116.7, dealing 20 damage, 1 species, entropy=0.88 (17 patterns), network=59 genes/9 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=191.3, dealing 45 damage, 4 species, entropy=1.28 (15 patterns), network=84 genes/15 hidden, char-switching (+27 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 1 species, entropy=1.92 (20 patterns), network=75 genes/7 hidden, char-switching (+27 P1 HP)
+
+
+---
+
+## Check 19 — 2026-03-08T11:29:27Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 44 | 158.4 | 34 | 7 | 0.00 | 0 | 48 | 3 | +0 |
+| island-2 | 44 | 116.7 | 20 | 6 | 0.00 | 0 | 59 | 9 | +0 |
+| island-3 | 44 | 191.3 | 45 | 5 | 0.00 | 0 | 84 | 15 | +0 |
+| island-4 | 44 | 158.2 | 34 | 6 | 0.00 | 0 | 75 | 7 | +0 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 7 species, entropy=0.00 (0 patterns), network=48 genes/3 hidden, pure offense (no char-switch)
+
+**island-2** [Plateaued]: fitness=116.7, dealing 20 damage, 6 species, entropy=0.00 (0 patterns), network=59 genes/9 hidden
+
+**island-3** (LEADER) [Breakthrough]: fitness=191.3, dealing 45 damage, 5 species, entropy=0.00 (0 patterns), network=84 genes/15 hidden, pure offense (no char-switch)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 6 species, entropy=0.00 (0 patterns), network=75 genes/7 hidden, pure offense (no char-switch)
+
+
+---
+
+## Check 20 — 2026-03-08T11:34:28Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 46 | 158.4 | 34 | 1 | 2.05 | 11 | 53 | 4 | +22 |
+| island-2 | 45 | 116.7 | 20 | 1 | 0.88 | 17 | 59 | 9 | +22 |
+| island-3 | 45 | 191.3 | 45 | 1 | 1.28 | 15 | 84 | 15 | +27 |
+| island-4 | 45 | 158.2 | 34 | 1 | 1.92 | 20 | 76 | 7 | +27 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=158.4, dealing 34 damage, 1 species, entropy=2.05 (11 patterns), network=53 genes/4 hidden, char-switching (+22 P1 HP)
+
+**island-2** [Plateaued]: fitness=116.7, dealing 20 damage, 1 species, entropy=0.88 (17 patterns), network=59 genes/9 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=191.3, dealing 45 damage, 1 species, entropy=1.28 (15 patterns), network=84 genes/15 hidden, char-switching (+27 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 1 species, entropy=1.92 (20 patterns), network=76 genes/7 hidden, char-switching (+27 P1 HP)
+
+
+---
+
+## Check 21 — 2026-03-08T11:39:30Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 47 | 171.6 | 38 | 8 | 2.65 | 29 | 53 | 4 | +22 |
+| island-2 | 47 | 116.7 | 20 | 5 | 0.88 | 17 | 59 | 9 | +22 |
+| island-3 | 47 | 191.3 | 45 | 5 | 1.28 | 15 | 84 | 15 | +27 |
+| island-4 | 46 | 158.2 | 34 | 1 | 1.92 | 20 | 76 | 7 | +27 |
+
+### Breakthroughs Detected
+
+- **island-1** Gen 47: P2 damage 34→38 (fitness=171.6, entropy=2.65)
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=171.6, dealing 38 damage, 8 species, entropy=2.65 (29 patterns), network=53 genes/4 hidden, char-switching (+22 P1 HP)
+
+**island-2** [Plateaued]: fitness=116.7, dealing 20 damage, 5 species, entropy=0.88 (17 patterns), network=59 genes/9 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=191.3, dealing 45 damage, 5 species, entropy=1.28 (15 patterns), network=84 genes/15 hidden, char-switching (+27 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 1 species, entropy=1.92 (20 patterns), network=76 genes/7 hidden, char-switching (+27 P1 HP)
+
+
+---
+
+## Check 22 — 2026-03-08T11:40:01Z
+
+| Island | Gen | Fitness | P2 Dmg | Species | Entropy | Unique | Genes | Hidden | P1 Delta |
+|--------|-----|---------|--------|---------|---------|--------|-------|--------|----------|
+| island-1 | 47 | 171.6 | 38 | 8 | 2.65 | 29 | 53 | 4 | +22 |
+| island-2 | 47 | 116.7 | 20 | 5 | 0.88 | 17 | 59 | 9 | +22 |
+| island-3 | 47 | 191.3 | 45 | 5 | 1.28 | 15 | 84 | 15 | +27 |
+| island-4 | 47 | 158.2 | 34 | 5 | 1.92 | 20 | 76 | 7 | +27 |
+
+### Analysis
+
+**island-1** [Breakthrough]: fitness=171.6, dealing 38 damage, 8 species, entropy=2.65 (29 patterns), network=53 genes/4 hidden, char-switching (+22 P1 HP)
+
+**island-2** [Plateaued]: fitness=116.7, dealing 20 damage, 5 species, entropy=0.88 (17 patterns), network=59 genes/9 hidden, char-switching (+22 P1 HP)
+
+**island-3** (LEADER) [Breakthrough]: fitness=191.3, dealing 45 damage, 5 species, entropy=1.28 (15 patterns), network=84 genes/15 hidden, char-switching (+27 P1 HP)
+
+**island-4** [Breakthrough]: fitness=158.2, dealing 34 damage, 5 species, entropy=1.92 (20 patterns), network=76 genes/7 hidden, char-switching (+27 P1 HP)
+
