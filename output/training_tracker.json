@@ -138,7 +138,101 @@
           "hiddenNodes": 6
         }
       }
+    },
+    {
+      "timestamp": "2026-03-08T10:20:39Z",
+      "islands": {
+        "island-1": {
+          "generation": 28,
+          "bestFitness": 158.4,
+          "maxDamage": 34,
+          "species": 10,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 45,
+          "hiddenNodes": 5
+        },
+        "island-2": {
+          "generation": 28,
+          "bestFitness": 115.8,
+          "maxDamage": 20,
+          "species": 4,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 44,
+          "hiddenNodes": 6
+        },
+        "island-3": {
+          "generation": 28,
+          "bestFitness": 188.9,
+          "maxDamage": 35,
+          "species": 10,
+          "entropy": 0,
+          "uniquePatterns": 0,
+          "p1Delta": 0,
+          "geneCount": 59,
+          "hiddenNodes": 8
+        },
+        "island-4": {
+          "generation": 28,
+          "bestFitness": 116.2,
+          "maxDamage": 20,
+          "species": 6,
+          "entropy": 1.15,
+          "uniquePatterns": 12,
+          "p1Delta": 27,
+          "geneCount": 54,
+          "hiddenNodes": 6
+        }
+      }
     }
   ],
-  "breakthroughs": []
+  "breakthroughs": [
+    {
+      "timestamp": "2026-03-08 09:37:22",
+      "island": "island-1",
+      "generation": 18,
+      "previousDamage": 20,
+      "newDamage": 26,
+      "fitness": 133.7,
+      "entropy": 0.75,
+      "type": "damage",
+      "backfilled": true
+    },
+    {
+      "timestamp": "2026-03-08 09:57:58",
+      "island": "island-1",
+      "generation": 23,
+      "previousDamage": 26,
+      "newDamage": 34,
+      "fitness": 158.4,
+      "entropy": 1.37,
+      "type": "damage",
+      "backfilled": true
+    },
+    {
+      "timestamp": "2026-03-08 09:21:00",
+      "island": "island-3",
+      "generation": 14,
+      "previousDamage": 20,
+      "newDamage": 21,
+      "fitness": 119.4,
+      "entropy": 1.39,
+      "type": "damage",
+      "backfilled": true
+    },
+    {
+      "timestamp": "2026-03-08 09:41:40",
+      "island": "island-3",
+      "generation": 19,
+      "previousDamage": 21,
+      "newDamage": 29,
+      "fitness": 143.4,
+      "entropy": 1.42,
+      "type": "damage",
+      "backfilled": true
+    }
+  ]
 }
