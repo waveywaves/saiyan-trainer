@@ -16,6 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: NEAT Training Engine** - Complete NEAT algorithm, fitness function, training loop, visualization, multi-opponent support, and combo analysis running locally in BizHawk
 - [ ] **Phase 3: Containerization** - Package BizHawk with Xvfb into a Docker image that runs NEAT training headlessly, with noVNC web UI for live observation
 - [x] **Phase 4: Tekton Pipeline and MLOps** - Full Tekton pipeline orchestration, distributed evaluation, model versioning, retraining, observability dashboards, and documentation (completed 2026-03-05)
+- [ ] **Phase 5: Blog Post** - Document the full debugging journey from broken training (fitness=-1) to working NEAT evolution, covering GBA memory reverse engineering, fitness function design, and Tekton ML orchestration
 
 ## Phase Details
 
@@ -95,10 +96,25 @@ Plans:
 - [ ] 04-02-PLAN.md -- Distributed evaluation via Matrix fan-out and PipelineRun chaining via Tekton Triggers
 - [ ] 04-03-PLAN.md -- Observability stack (Pushgateway, Grafana dashboards, Tekton Dashboard) and README documentation
 
+### Phase 5: Blog Post
+
+**Goal:** Write a technical blog post documenting the full journey -- from broken training (all fitness=-1) to working NEAT evolution on Kubernetes. Cover the detective work of finding the correct P2 HP address via struct stride analysis, the fitness function redesign, and what it took to get a neuroevolution bot actually learning to fight in a GBA game orchestrated by Tekton.
+**Depends on:** Phase 4 (training must be working with demonstrable results)
+**Success Criteria** (what must be TRUE):
+  1. Blog post published (location TBD -- could be docs/blog/, dev.to, or project README)
+  2. Covers the P2 HP address debugging story (wrong address, struct stride derivation, cheat code correlation)
+  3. Includes training progression data (fitness curves, HP deltas, generation stats)
+  4. Explains the Tekton Loop pipeline architecture for ML workloads
+  5. Has code snippets and diagrams where useful
+**Plans:** TBD (to be planned with /gsd:plan-phase 5)
+
+Plans:
+- [ ] TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 2.1 -> 3 -> 4
+Phases execute in numeric order: 1 -> 2 -> 2.1 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -107,3 +123,4 @@ Phases execute in numeric order: 1 -> 2 -> 2.1 -> 3 -> 4
 | 2.1. On-Screen Visualization & Training Fixes | 2/2 | Complete | 2026-03-07 |
 | 3. Containerization | 1/1 | Complete | 2026-03-06 |
 | 4. Tekton Pipeline and MLOps | 3/3 | Complete   | 2026-03-05 |
+| 5. Blog Post | 0/? | Not Started |  |

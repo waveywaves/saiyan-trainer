@@ -56,12 +56,15 @@ A working, public demonstration that Tekton can orchestrate real ML workloads en
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| NEAT over Deep RL | Fits Lua/emulator constraints, proven with MarI/O, evolves topology | Pending |
-| BizHawk over mGBA | Better Lua scripting support, memory access, frame advance, TAS community | Pending |
-| Headless + required web UI | Training runs headless but MUST expose BizHawk display via noVNC web UI so user can see live training from a browser at any time | Pending |
-| Memory map over pixels | Structured data is more efficient, no vision model needed | Pending |
-| Kubernetes over OpenShift | Broader audience for open-source demo | Pending |
-| MarI/O-style Lua NEAT | Proven approach, adapt for fighting game domain | Pending |
+| NEAT over Deep RL | Fits Lua/emulator constraints, proven with MarI/O, evolves topology | Working -- Gen 0->1 showed 4x fitness improvement |
+| BizHawk over mGBA | Better Lua scripting support, memory access, frame advance, TAS community | Switched to mGBA -- sealed emu model works better for container training |
+| Headless + required web UI | Training runs headless but MUST expose BizHawk display via noVNC web UI so user can see live training from a browser at any time | Working -- VNC grid view in dashboard |
+| Memory map over pixels | Structured data is more efficient, no vision model needed | Working -- struct stride analysis found correct P2 HP |
+| Kubernetes over OpenShift | Broader audience for open-source demo | Working -- Kind cluster with Tekton Loop |
+| MarI/O-style Lua NEAT | Proven approach, adapt for fighting game domain | Working -- adapted with KO-focused fitness |
+| P2 HP via struct stride | Old VBA address (0x03004C30) read constant 72. Derived correct address (0x03002826) from P2 Ki offset: stride = 0xE8 from P1 struct | Confirmed -- P2 HP now changes during fights |
+| Fitness gradient over floor | Floor (-1) eliminated selection pressure. Survival+diversity signals provide gradient even without damage | Confirmed -- fitness differentiation across genomes |
+| Tekton Loop over Triggers | Triggers are wrong tool for training loops; native Loop feature provides iteration state | Working -- 12+ commits on tektoncd/pipeline |
 
 ---
-*Last updated: 2026-03-06 after initialization*
+*Last updated: 2026-03-08 after P2 HP fix and training confirmation*
