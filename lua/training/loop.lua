@@ -73,7 +73,7 @@ function TrainingLoop.new(options, logFn)
 
         -- Per-evaluation tracking
         frameCount = 0,
-        lastDamageFrame = 0,
+        lastDamageFrame = nil,  -- nil = no damage dealt yet
         startP1HP = 0,
         startP2HP = 0,
         prevP2HP = 0,
@@ -189,11 +189,18 @@ function TrainingLoop:tick_eval_setup()
 
     -- Reset all evaluation tracking
     self.frameCount = 0
-    self.lastDamageFrame = 0
+    self.lastDamageFrame = nil  -- nil until first damage dealt
     self.comboLogger = ComboLogger.newLogger()
     self.startP1HP = MemoryMap.read(MemoryMap.p1_health)
     self.startP2HP = MemoryMap.read(MemoryMap.p2_health)
     self.prevP2HP = self.startP2HP
+
+    -- Log HP values for the very first genome to verify P2 HP address
+    if not self.diagLogged then
+        self.log(string.format("DIAG first eval: P1_HP=%d, P2_HP=%d (addr=0x%X)",
+            self.startP1HP, self.startP2HP, MemoryMap.p2_health.addr))
+        self.diagLogged = true
+    end
 
     self.state = "evaluating"
 end
@@ -248,6 +255,9 @@ function TrainingLoop:tick_evaluating()
 
     Controller.clearController()
 
+    -- Compute combo analysis first so entropy is available for fitness
+    genome.comboAnalysis = ComboLogger.analyzeInputLog(self.comboLogger.log)
+
     genome.fitness = Fitness.calculateFitness({
         startP1HP = self.startP1HP, endP1HP = endP1HP,
         startP2HP = self.startP2HP, endP2HP = endP2HP,
@@ -255,9 +265,8 @@ function TrainingLoop:tick_evaluating()
         frameCount = self.frameCount,
         timeoutConstant = Config.TimeoutConstant,
         lastDamageFrame = self.lastDamageFrame,
+        comboEntropy = genome.comboAnalysis and genome.comboAnalysis.entropy or 0,
     })
-
-    genome.comboAnalysis = ComboLogger.analyzeInputLog(self.comboLogger.log)
 
     -- Store HP deltas for debugging
     genome.hpDelta = {
