@@ -638,6 +638,10 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><line x1="9" y1="6" x2="15" y2="6" stroke-dasharray="2"/><line x1="6" y1="9" x2="6" y2="15" stroke-dasharray="2"/><line x1="18" y1="9" x2="18" y2="15" stroke-dasharray="2"/><line x1="9" y1="18" x2="15" y2="18" stroke-dasharray="2"/></svg>
       Islands
     </a>
+    <a class="nav-item" data-page="networks" onclick="navigate('networks', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="6" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="12" cy="9" r="2"/><circle cx="12" cy="15" r="2"/><circle cx="19" cy="12" r="2"/><line x1="7" y1="6" x2="10" y2="9"/><line x1="7" y1="12" x2="10" y2="9"/><line x1="7" y1="12" x2="10" y2="15"/><line x1="7" y1="18" x2="10" y2="15"/><line x1="14" y1="9" x2="17" y2="12"/><line x1="14" y1="15" x2="17" y2="12"/></svg>
+      Networks
+    </a>
     <div class="nav-section-label">Infrastructure</div>
     <a class="nav-item" data-page="pods" onclick="navigate('pods', this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="6" cy="7.5" r="1" fill="currentColor"/><circle cx="10" cy="7.5" r="1" fill="currentColor"/></svg>
@@ -812,6 +816,43 @@ DASHBOARD_HTML = r'''<!DOCTYPE html>
     </div>
   </div>
 
+  <!-- ======================== NETWORKS PAGE ======================== -->
+  <div class="page" id="page-networks">
+    <div class="page-header">
+      <h2>Network Evolution</h2>
+    </div>
+
+    <div class="chart-panel" style="padding:16px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
+        <label style="color:var(--fg-dim);font-size:13px;">Island:
+          <select id="net-island-select" onchange="renderSelectedNetwork()" style="background:var(--card);color:var(--fg);border:1px solid var(--border);padding:4px 8px;border-radius:4px;margin-left:4px;"></select>
+        </label>
+        <label style="color:var(--fg-dim);font-size:13px;">Generation:
+          <input type="range" id="net-gen-slider" min="0" max="0" value="0" oninput="renderSelectedNetwork()" style="width:200px;vertical-align:middle;">
+          <span id="net-gen-label" style="color:var(--fg);font-weight:600;margin-left:4px;">0</span>
+        </label>
+        <span id="net-info" style="color:var(--fg-dim);font-size:12px;"></span>
+      </div>
+      <canvas id="network-canvas" width="800" height="400" style="width:100%;background:var(--bg);border-radius:8px;border:1px solid var(--border);"></canvas>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-title">Network Complexity Over Generations</div>
+      <canvas id="network-complexity-chart" height="250"></canvas>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px;">
+      <div class="chart-panel">
+        <div class="chart-title">Gene Count</div>
+        <canvas id="gene-count-chart" height="200"></canvas>
+      </div>
+      <div class="chart-panel">
+        <div class="chart-title">Hidden Nodes</div>
+        <canvas id="hidden-nodes-chart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
   <!-- ======================== METRICS PAGE ======================== -->
   <div class="page" id="page-metrics">
     <div class="page-header">
@@ -847,6 +888,7 @@ function navigate(page, el) {
   if (el) el.classList.add('active');
   if (page === 'metrics') loadMetrics();
   if (page === 'islands') loadIslands();
+  if (page === 'networks') loadNetworks();
   closeSidebar();
 }
 function toggleSidebar() {
@@ -1384,6 +1426,203 @@ function downloadIslandData() {
   a.click();
 }
 
+/* ---- Network Visualization ---- */
+let networkData = null;
+let netCharts = {};
+
+async function loadNetworks() {
+  try {
+    const res = await fetch('/api/island-networks');
+    networkData = await res.json();
+    setupNetworkControls();
+    renderSelectedNetwork();
+    renderNetworkCharts();
+  } catch (e) {
+    console.error('Failed to load networks:', e);
+  }
+}
+
+function setupNetworkControls() {
+  const select = document.getElementById('net-island-select');
+  select.textContent = '';
+  const islands = Object.keys(networkData).sort();
+  islands.forEach(id => {
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = id;
+    select.appendChild(opt);
+  });
+  if (islands.length > 0) {
+    const gens = networkData[islands[0]];
+    const slider = document.getElementById('net-gen-slider');
+    slider.max = Math.max(0, gens.length - 1);
+    slider.value = gens.length - 1;
+  }
+}
+
+function renderSelectedNetwork() {
+  const island = document.getElementById('net-island-select').value;
+  if (!networkData || !networkData[island]) return;
+  const gens = networkData[island];
+  const slider = document.getElementById('net-gen-slider');
+  slider.max = Math.max(0, gens.length - 1);
+  const idx = parseInt(slider.value);
+  const gen = gens[Math.min(idx, gens.length - 1)];
+  document.getElementById('net-gen-label').textContent = 'Gen ' + gen.generation;
+  document.getElementById('net-info').textContent =
+    'Fitness: ' + gen.fitness + ' | Genes: ' + gen.geneCount +
+    ' | Hidden: ' + gen.nodes.filter(n => n.type === 'hidden').length;
+  drawNetwork(gen);
+}
+
+function drawNetwork(gen) {
+  const canvas = document.getElementById('network-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = canvas.offsetWidth * 2;
+  const H = canvas.height = 400 * 2;
+  ctx.scale(2, 2);
+  const w = W / 2, h = H / 2;
+  ctx.clearRect(0, 0, w, h);
+
+  const inputs = gen.nodes.filter(n => n.type === 'input');
+  const outputs = gen.nodes.filter(n => n.type === 'output');
+  const hidden = gen.nodes.filter(n => n.type === 'hidden');
+
+  // Layout: inputs left, outputs right, hidden middle
+  const pad = 40;
+  const positions = {};
+  inputs.forEach((n, i) => {
+    positions[n.id] = {x: pad + 30, y: pad + i * ((h - 2*pad) / Math.max(1, inputs.length - 1))};
+  });
+  outputs.forEach((n, i) => {
+    positions[n.id] = {x: w - pad - 30, y: pad + i * ((h - 2*pad) / Math.max(1, outputs.length - 1))};
+  });
+  // Spread hidden nodes in middle columns
+  const cols = Math.max(1, Math.ceil(hidden.length / 6));
+  hidden.forEach((n, i) => {
+    const col = Math.floor(i / 6);
+    const row = i % 6;
+    const xStart = pad + 100;
+    const xEnd = w - pad - 100;
+    const x = cols === 1 ? (xStart + xEnd) / 2 : xStart + col * ((xEnd - xStart) / Math.max(1, cols - 1));
+    const rowCount = Math.min(6, hidden.length - col * 6);
+    const y = pad + 20 + row * ((h - 2*pad - 40) / Math.max(1, rowCount - 1));
+    positions[n.id] = {x, y};
+  });
+
+  // Draw connections
+  gen.connections.forEach(c => {
+    const from = positions[c.from];
+    const to = positions[c.to];
+    if (!from || !to) return;
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    if (!c.enabled) {
+      ctx.strokeStyle = 'rgba(100,100,100,0.15)';
+      ctx.lineWidth = 0.5;
+    } else if (c.weight > 0) {
+      const alpha = Math.min(1, Math.abs(c.weight) / 2);
+      ctx.strokeStyle = 'rgba(78,205,196,' + alpha + ')';
+      ctx.lineWidth = Math.min(3, Math.abs(c.weight));
+    } else {
+      const alpha = Math.min(1, Math.abs(c.weight) / 2);
+      ctx.strokeStyle = 'rgba(255,107,107,' + alpha + ')';
+      ctx.lineWidth = Math.min(3, Math.abs(c.weight));
+    }
+    ctx.stroke();
+  });
+
+  // Draw nodes
+  const colors = {input: '#4ecdc4', output: '#f9ca24', hidden: '#a29bfe'};
+  gen.nodes.forEach(n => {
+    const pos = positions[n.id];
+    if (!pos) return;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, n.type === 'hidden' ? 8 : 12, 0, Math.PI * 2);
+    ctx.fillStyle = colors[n.type];
+    ctx.fill();
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#e0e0ff';
+    ctx.font = '9px system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    if (n.type === 'input') {
+      ctx.textAlign = 'right';
+      ctx.fillText(n.label, pos.x - 16, pos.y);
+    } else if (n.type === 'output') {
+      ctx.textAlign = 'left';
+      ctx.fillText(n.label, pos.x + 16, pos.y);
+    }
+  });
+
+  // Legend
+  ctx.font = '10px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#4ecdc4'; ctx.fillText('● Input', 10, h - 30);
+  ctx.fillStyle = '#a29bfe'; ctx.fillText('● Hidden', 70, h - 30);
+  ctx.fillStyle = '#f9ca24'; ctx.fillText('● Output', 140, h - 30);
+  ctx.fillStyle = '#4ecdc4'; ctx.fillText('— positive weight', 210, h - 30);
+  ctx.fillStyle = '#ff6b6b'; ctx.fillText('— negative weight', 330, h - 30);
+}
+
+function renderNetworkCharts() {
+  const islands = Object.keys(networkData).sort();
+  if (!islands.length) return;
+
+  // Gene count chart
+  const geneCtx = document.getElementById('gene-count-chart');
+  if (netCharts.genes) netCharts.genes.destroy();
+  netCharts.genes = new Chart(geneCtx, {
+    type: 'line',
+    data: {
+      datasets: islands.map((id, i) => ({
+        label: id,
+        data: networkData[id].map(g => ({x: g.generation, y: g.geneCount})),
+        borderColor: ISLAND_COLORS[i % ISLAND_COLORS.length],
+        borderWidth: 2, tension: 0.3, pointRadius: 3,
+      }))
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {type: 'linear', title: {display: true, text: 'Generation'}},
+        y: {title: {display: true, text: 'Genes'}, beginAtZero: true}
+      },
+      plugins: {legend: {labels: {color: '#aab'}}}
+    }
+  });
+
+  // Hidden nodes chart
+  const hiddenCtx = document.getElementById('hidden-nodes-chart');
+  if (netCharts.hidden) netCharts.hidden.destroy();
+  netCharts.hidden = new Chart(hiddenCtx, {
+    type: 'line',
+    data: {
+      datasets: islands.map((id, i) => ({
+        label: id,
+        data: networkData[id].map(g => ({
+          x: g.generation,
+          y: g.nodes.filter(n => n.type === 'hidden').length
+        })),
+        borderColor: ISLAND_COLORS[i % ISLAND_COLORS.length],
+        borderWidth: 2, tension: 0.3, pointRadius: 3,
+      }))
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {type: 'linear', title: {display: true, text: 'Generation'}},
+        y: {title: {display: true, text: 'Hidden Nodes'}, beginAtZero: true}
+      },
+      plugins: {legend: {labels: {color: '#aab'}}}
+    }
+  });
+}
+
 /* ---- Init ---- */
 poll();
 pollPods();
@@ -1588,6 +1827,116 @@ def get_island_stats():
     return islands
 
 
+def get_island_networks():
+    """Read checkpoint files from all islands, extract best genome network per generation."""
+    islands = {}
+    try:
+        result = subprocess.run(
+            ["kubectl", "--context", "kind-saiyan", "get", "pods",
+             "-l", "app.kubernetes.io/managed-by=tekton-pipelines",
+             "-o", "jsonpath={range .items[?(@.status.phase=='Running')]}{.metadata.name}{' '}{end}"],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode != 0:
+            return islands
+        pods = [p for p in result.stdout.strip().split() if "train-batch" in p]
+        if not pods:
+            return islands
+        pod_name = pods[0]
+        # Find all checkpoint files
+        find_result = subprocess.run(
+            ["kubectl", "--context", "kind-saiyan", "exec", pod_name,
+             "--", "find", "/workspace/data/output", "-name", "gen_*.json", "-path", "*/checkpoints/*"],
+            capture_output=True, text=True, timeout=10
+        )
+        if find_result.returncode != 0:
+            return islands
+        for cp_path in sorted(find_result.stdout.strip().split("\n")):
+            if not cp_path:
+                continue
+            parts = cp_path.split("/")
+            island_id = "default"
+            for i, part in enumerate(parts):
+                if part == "output" and i + 1 < len(parts) and parts[i + 1] != "checkpoints":
+                    island_id = parts[i + 1]
+                    break
+            # Extract generation number from filename
+            fname = parts[-1]
+            gen_num = int(fname.replace("gen_", "").replace(".json", ""))
+
+            exec_result = subprocess.run(
+                ["kubectl", "--context", "kind-saiyan", "exec", pod_name,
+                 "--", "cat", cp_path],
+                capture_output=True, text=True, timeout=15
+            )
+            if exec_result.returncode != 0:
+                continue
+            try:
+                checkpoint = json.loads(exec_result.stdout)
+            except json.JSONDecodeError:
+                continue
+
+            # Find best genome across all species
+            best_genome = None
+            best_fitness = -1e9
+            for sp in checkpoint.get("species", []):
+                for g in sp.get("genomes", []):
+                    if g.get("fitness", 0) > best_fitness:
+                        best_fitness = g["fitness"]
+                        best_genome = g
+
+            if not best_genome:
+                continue
+
+            # Extract network topology
+            nodes = set()
+            connections = []
+            for gene in best_genome.get("genes", []):
+                nodes.add(gene["into"])
+                nodes.add(gene["out"])
+                connections.append({
+                    "from": gene["into"],
+                    "to": gene["out"],
+                    "weight": round(gene["weight"], 3),
+                    "enabled": gene.get("enabled", True),
+                })
+
+            # Classify nodes
+            max_nodes = 1000000  # Config.MaxNodes
+            num_inputs = 5
+            num_outputs = 8
+            input_labels = ["P1HP", "P2HP", "P1Ki", "P1Pwr", "Bias"]
+            output_labels = ["A", "B", "L", "R", "Up", "Down", "Left", "Right"]
+
+            classified_nodes = []
+            for n in sorted(nodes):
+                if 1 <= n <= num_inputs:
+                    classified_nodes.append({"id": n, "type": "input", "label": input_labels[n - 1]})
+                elif max_nodes < n <= max_nodes + num_outputs:
+                    idx = n - max_nodes - 1
+                    classified_nodes.append({"id": n, "type": "output", "label": output_labels[idx]})
+                else:
+                    classified_nodes.append({"id": n, "type": "hidden", "label": f"H{n}"})
+
+            if island_id not in islands:
+                islands[island_id] = []
+            islands[island_id].append({
+                "generation": gen_num,
+                "fitness": round(best_fitness, 1),
+                "maxneuron": best_genome.get("maxneuron", 0),
+                "geneCount": len(best_genome.get("genes", [])),
+                "nodes": classified_nodes,
+                "connections": connections,
+            })
+
+        # Sort each island's generations
+        for island_id in islands:
+            islands[island_id].sort(key=lambda x: x["generation"])
+    except Exception:
+        pass
+    return islands
+
+
 def format_prometheus_metrics(metrics):
     """Format metrics as Prometheus exposition format."""
     lines = [
@@ -1667,6 +2016,12 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
                     if port:
                         pod["vncUrl"] = f"http://localhost:{port}/vnc_lite.html?autoconnect=true&resize=scale"
             self.wfile.write(json.dumps(pods).encode())
+        elif self.path == '/api/island-networks':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            networks = get_island_networks()
+            self.wfile.write(json.dumps(networks).encode())
         elif self.path == '/api/island-stats':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
