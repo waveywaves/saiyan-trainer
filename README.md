@@ -354,6 +354,30 @@ Four adversarial agents independently attacked every design decision. Key challe
 - Automated memory address discovery
 - Tekton ML toolkit extraction
 
+## Training Results (March 2026)
+
+4-island neuroevolution experiment using Tekton Loop, 155 generations, ~6 hours overnight.
+
+| Island | Final Gen | Best Fitness | P2 Damage | Strategy |
+|--------|-----------|--------------|-----------|----------|
+| island-1 | 142 | 191.1 | 31 | Peaked early, regressed |
+| island-2 | 155 | 218.8 | 27 | Broke 75-gen plateau |
+| **island-3** | **155** | **2234.7** | **66/71 (93% KO)** | **Champion** |
+| island-4 | 155 | 204.3 | 49 | Steady climber |
+
+**Champion (island-3)**: 114 genes, 21 hidden nodes, 33 unique combo patterns. Evolved from button-mashing (Gen 0) to near-perfect KOs (Gen 51+). P2 HP: 71 → 5.
+
+**Key breakthroughs**:
+- Gen 14: First damage dealt (20 HP)
+- Gen 51: Full KO achieved (71 damage, fitness 2234)
+- Island-2 escaped 75-generation plateau through speciation
+
+**Bugs found and fixed**: Wrong P2 HP memory address, stale results file on PVC, corrupt checkpoint from Docker crash, pipeline-level timeout confusion.
+
+**Full results**: See [`output/FINAL_RESULTS.md`](output/FINAL_RESULTS.md)
+
+**Blog post**: [`blog/goku-trains-with-the-robocat.md`](blog/goku-trains-with-the-robocat.md)
+
 ## References
 
 1. Stanley & Miikkulainen (2002). [Evolving Neural Networks through Augmenting Topologies](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)

@@ -498,7 +498,7 @@ If you're running Tekton for CI/CD and wondering whether it can handle ML worklo
 
 ---
 
-**Acknowledgments**: Thanks to the Tekton community for building such a solid foundation, and to SethBling for the MarI/O project that inspired this experiment years ago.
+**Acknowledgments**: Thanks to the Tekton community for building such a solid foundation, to SethBling for the [MarI/O project](https://www.youtube.com/watch?v=qv6UVOQ0F44) that inspired this experiment years ago, and to Kenneth O. Stanley and Risto Miikkulainen for the [original NEAT paper](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf) (2002) that made it all possible.
 
 **Resources**:
 - **Code**: [github.com/waveywaves/saiyan-trainer](https://github.com/waveywaves/saiyan-trainer)
