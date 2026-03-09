@@ -222,6 +222,8 @@ metadata:
 spec:
   pipelineRef:
     name: saiyan-loop-training
+  timeouts:
+    pipeline: "0"    # Unlimited — maxIterations (20) is the safety limit
   params:
     - name: run-id
       value: "run-001"
@@ -233,10 +235,5 @@ spec:
       value: "20"
   workspaces:
     - name: training-data
-      volumeClaimTemplate:
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 2Gi
+      persistentVolumeClaim:
+        claimName: saiyan-training-data

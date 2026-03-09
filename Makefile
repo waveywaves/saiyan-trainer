@@ -9,7 +9,7 @@ GENS ?= 2
 DATA_DIR ?= data
 BACKUP_FILE ?= $(DATA_DIR)/pvc-backup.tar.gz
 
-.PHONY: ensure-cluster deploy-tekton deploy-pipeline ensure-infra build-image load-image ensure-image train resume status clean-runs save-data load-data delete-cluster
+.PHONY: ensure-cluster deploy-tekton deploy-pipeline ensure-infra build-image load-image ensure-image train resume status clean-runs save-data load-data delete-cluster dashboard stop-dashboard seed-pvc
 
 # Ensure Kind cluster exists, create if missing
 ensure-cluster:
@@ -86,14 +86,28 @@ ensure-pvc: ensure-cluster
 			echo "==> New PVC + local backup found. Loading training data..."; \
 			$(MAKE) load-data; \
 		fi; \
+		$(MAKE) seed-pvc; \
 	fi
+
+# Seed PVC with ROM, Lua scripts, and savestates from local repo
+seed-pvc: ensure-pvc
+	@echo "==> Seeding PVC with ROM, Lua scripts, and savestates..."
+	@kubectl run pvc-seed --image=busybox --restart=Never \
+		--overrides='{"spec":{"volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"$(PVC_NAME)"}}],"containers":[{"name":"seed","image":"busybox","command":["sh","-c","echo READY && sleep 300"],"volumeMounts":[{"name":"data","mountPath":"/workspace"}]}]}}' 2>/dev/null
+	@kubectl wait --for=condition=Ready pod/pvc-seed --timeout=60s 2>/dev/null
+	@kubectl exec pvc-seed -- mkdir -p /workspace/roms /workspace/lua /workspace/savestates 2>/dev/null
+	@kubectl cp lua/ pvc-seed:/workspace/ 2>/dev/null
+	@kubectl cp savestates/ pvc-seed:/workspace/ 2>/dev/null
+	@kubectl cp "roms/Dragon Ball Z - Supersonic Warriors (USA).gba" pvc-seed:/workspace/roms/rom.gba 2>/dev/null
+	@kubectl delete pod pvc-seed --force 2>/dev/null
+	@echo "==> PVC seeded with ROM, Lua, and savestates."
 
 # Deploy the saiyan training pipeline (only the Pipeline, not the PipelineRun template)
 deploy-pipeline: deploy-tekton
 	@kubectl apply -f <(sed '/^---$$/,$$d' k8s/tekton/pipeline-loop.yaml)
 
-# Full infrastructure: cluster + tekton + pvc + pipeline + image
-ensure-infra: deploy-pipeline ensure-pvc ensure-image
+# Full infrastructure: cluster + tekton + pvc + pipeline + image + dashboard
+ensure-infra: deploy-pipeline ensure-pvc ensure-image dashboard
 
 # Start fresh multi-island training (4 islands)
 train: ensure-infra
@@ -125,7 +139,7 @@ save-data:
 	@mkdir -p $(DATA_DIR)
 	@echo "==> Saving PVC data to $(BACKUP_FILE)..."
 	@kubectl run pvc-save --image=busybox --restart=Never \
-		--overrides='{"spec":{"volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"$(PVC_NAME)"}}],"containers":[{"name":"save","image":"busybox","command":["sh","-c","tar czf /tmp/pvc-backup.tar.gz -C /workspace output && echo DONE && sleep 120"],"volumeMounts":[{"name":"data","mountPath":"/workspace"}]}]}}' 2>/dev/null
+		--overrides='{"spec":{"volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"$(PVC_NAME)"}}],"containers":[{"name":"save","image":"busybox","command":["sh","-c","tar czf /tmp/pvc-backup.tar.gz -C /workspace . && echo DONE && sleep 120"],"volumeMounts":[{"name":"data","mountPath":"/workspace"}]}]}}' 2>/dev/null
 	@kubectl wait --for=condition=Ready pod/pvc-save --timeout=120s 2>/dev/null
 	@sleep 3
 	@kubectl cp pvc-save:/tmp/pvc-backup.tar.gz $(BACKUP_FILE) 2>/dev/null
@@ -152,6 +166,28 @@ load-data: ensure-pvc
 clean-runs:
 	@kubectl get pipelineruns --no-headers | awk '{print $$1}' | xargs -I{} kubectl delete pipelinerun {} 2>/dev/null || true
 	@echo "==> PipelineRuns cleaned up. Training data preserved on PVC."
+
+# Start the training dashboard (background, port 8081)
+DASHBOARD_PORT ?= 8081
+DASHBOARD_PID_FILE ?= .dashboard.pid
+
+dashboard:
+	@if [ -f "$(DASHBOARD_PID_FILE)" ] && kill -0 $$(cat $(DASHBOARD_PID_FILE)) 2>/dev/null; then \
+		echo "==> Dashboard already running (PID $$(cat $(DASHBOARD_PID_FILE))) at http://localhost:$(DASHBOARD_PORT)"; \
+	else \
+		echo "==> Starting dashboard on port $(DASHBOARD_PORT)..."; \
+		python3 scripts/training_dashboard.py --port $(DASHBOARD_PORT) &>/dev/null & \
+		echo $$! > $(DASHBOARD_PID_FILE); \
+		echo "==> Dashboard running at http://localhost:$(DASHBOARD_PORT) (PID $$!)"; \
+	fi
+
+stop-dashboard:
+	@if [ -f "$(DASHBOARD_PID_FILE)" ]; then \
+		kill $$(cat $(DASHBOARD_PID_FILE)) 2>/dev/null && echo "==> Dashboard stopped." || echo "==> Dashboard was not running."; \
+		rm -f $(DASHBOARD_PID_FILE); \
+	else \
+		echo "==> No dashboard PID file found."; \
+	fi
 
 # Delete the Kind cluster
 delete-cluster:
